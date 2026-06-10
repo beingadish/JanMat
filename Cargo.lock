@@ -290,6 +290,8 @@ name = "janmat-api"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "janmat-content",
+ "janmat-storage",
  "janmat-types",
  "serde",
  "serde_json",
@@ -431,6 +433,7 @@ dependencies = [
 name = "pallet-moderation"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "serde",
 ]
 

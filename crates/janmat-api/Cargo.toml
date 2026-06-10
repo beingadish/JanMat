@@ -5,6 +5,8 @@ edition = "2024"
 
 [dependencies]
 axum.workspace = true
+janmat-content = { path = "../janmat-content" }
+janmat-storage = { path = "../janmat-storage" }
 janmat-types = { path = "../janmat-types" }
 serde.workspace = true
 serde_json.workspace = true

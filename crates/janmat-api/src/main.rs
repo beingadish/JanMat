@@ -29,6 +29,7 @@ async fn main() {
         )
         // Citizen write routes (Phase 1: no ZK auth middleware yet)
         .route("/citizen/t", post(routes::namespace::create_topic))
+        .route("/citizen/o", post(routes::opinions::submit_opinion))
         .route("/citizen/v", post(routes::votes::create_vote))
         .route("/citizen/v/:id/cast", post(routes::votes::cast_vote))
         .route("/citizen/v/:id/reveal", post(routes::votes::reveal_vote));

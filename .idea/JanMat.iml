@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="EMPTY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-api/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/pallets/pallet-governance/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/pallets/pallet-identity/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/pallets/pallet-moderation/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/pallets/pallet-namespace/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/pallets/pallet-voting/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-chain/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-content/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-governance/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-identity/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-storage/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/janmat-zk/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/frontend/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
