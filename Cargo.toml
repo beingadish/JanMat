@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    "crates/janmat-types",
+    "crates/janmat-chain",
+    "crates/janmat-chain/pallets/pallet-namespace",
+    "crates/janmat-chain/pallets/pallet-voting",
+    "crates/janmat-chain/pallets/pallet-identity",
+    "crates/janmat-chain/pallets/pallet-moderation",
+    "crates/janmat-chain/pallets/pallet-governance",
+    "crates/janmat-zk",
+    "crates/janmat-identity",
+    "crates/janmat-content",
+    "crates/janmat-api",
+    "crates/janmat-governance",
+    "crates/janmat-storage",
+    "frontend",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+version = "0.1.0"
+
+[workspace.dependencies]
+axum = "0.8"
+blake3 = "1.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "signal"] }
+ulid = { version = "1.2", features = ["serde"] }

@@ -1,0 +1,12 @@
+[package]
+name = "janmat-chain"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+janmat-types = { path = "../janmat-types" }
+pallet-governance = { path = "pallets/pallet-governance" }
+pallet-identity = { path = "pallets/pallet-identity" }
+pallet-moderation = { path = "pallets/pallet-moderation" }
+pallet-namespace = { path = "pallets/pallet-namespace" }
+pallet-voting = { path = "pallets/pallet-voting" }
