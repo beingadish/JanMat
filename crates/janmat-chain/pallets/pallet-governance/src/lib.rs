@@ -1,4 +1,4 @@
-//! pallet-governance — Phase 5
+//! pallet-governance — Phase 5 + 6
 //!
 //! Implements:
 //!  1. Constitution storage — on-chain key/value rules with full version history
@@ -6,10 +6,11 @@
 //!  3. Moderator elections — max 2 per topic, 90-block terms, renewable once
 //!  4. Recall petitions — 10% of eligible voters auto-opens a recall v/
 //!  5. Citizen-initiated referenda — 5% signatures auto-opens a proposal vote
+//!  6. Validator set management — progressive decentralisation
 
 use janmat_governance::{
     ConstitutionRule, ConstitutionVersion, ProposalType,
-    met_quorum, recall_threshold, referenda_threshold,
+    met_quorum, recall_threshold, referenda_threshold, CONSTITUTIONAL_QUORUM,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
@@ -116,6 +117,15 @@ impl Petition {
     }
 }
 
+// ── Validator record ──────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ValidatorRecord {
+    pub wallet: String,
+    pub added_at_block: u64,
+    pub active: bool,
+}
+
 // ── Pallet ────────────────────────────────────────────────────────────────────
 
 pub struct GovernancePallet {
@@ -133,6 +143,9 @@ pub struct GovernancePallet {
 
     /// petition_key → Petition
     petitions: BTreeMap<String, Petition>,
+
+    /// Active + historical validators
+    validators: Vec<ValidatorRecord>,
 }
 
 impl Default for GovernancePallet {
@@ -145,6 +158,7 @@ impl Default for GovernancePallet {
             proposal_counter: 0,
             moderators: BTreeMap::new(),
             petitions: BTreeMap::new(),
+            validators: Vec::new(),
         }
     }
 }
@@ -371,6 +385,39 @@ impl GovernancePallet {
     pub fn petition_signature_count(&self, key: &str) -> usize {
         self.petitions.get(key).map(|p| p.signatories.len()).unwrap_or(0)
     }
+
+    // ── Validator set management (Phase 6) ────────────────────────────────────
+
+    /// Add a validator to the active set. Requires a passed Constitutional proposal.
+    pub fn add_validator(&mut self, proposal_id: &str, wallet: &str, at_block: u64) -> Result<ValidatorRecord, &'static str> {
+        let proposal = self.proposals.get(proposal_id).ok_or("proposal_not_found")?;
+        if proposal.status != ProposalStatus::Passed {
+            return Err("proposal_not_passed");
+        }
+        if self.validators.iter().any(|v| v.wallet == wallet && v.active) {
+            return Err("already_a_validator");
+        }
+        let rec = ValidatorRecord { wallet: wallet.to_owned(), added_at_block: at_block, active: true };
+        self.validators.push(rec.clone());
+        Ok(rec)
+    }
+
+    /// Remove a validator — requires a passed Constitutional proposal.
+    pub fn remove_validator(&mut self, proposal_id: &str, wallet: &str) -> Result<(), &'static str> {
+        let proposal = self.proposals.get(proposal_id).ok_or("proposal_not_found")?;
+        if proposal.status != ProposalStatus::Passed {
+            return Err("proposal_not_passed");
+        }
+        let rec = self.validators.iter_mut()
+            .find(|v| v.wallet == wallet && v.active)
+            .ok_or("validator_not_found")?;
+        rec.active = false;
+        Ok(())
+    }
+
+    pub fn active_validator_count(&self) -> usize {
+        self.validators.iter().filter(|v| v.active).count()
+    }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -567,5 +614,55 @@ mod tests {
             triggered = p.sign_referenda("ref:improve-water-policy", &format!("w-{i}"), 100);
         }
         assert!(triggered);
+    }
+
+    // ── Validator set ─────────────────────────────────────────────────────────
+
+    fn passed_constitutional_prop(p: &mut GovernancePallet) -> String {
+        let id = {
+            let prop = p.create_proposal(ProposalType::Constitutional, "add-validator", "d", "w", 1, 100);
+            prop.id.clone()
+        };
+        for i in 0..67u64 {
+            p.vote_on_proposal(&id, &format!("v-{i}"), true).unwrap();
+        }
+        p.close_proposal(&id).unwrap();
+        id
+    }
+
+    #[test]
+    fn add_validator_requires_passed_proposal() {
+        let mut p = make_pallet();
+        let prop_id = passed_constitutional_prop(&mut p);
+        p.add_validator(&prop_id, "validator-IIT-Bombay", 500).unwrap();
+        assert_eq!(p.active_validator_count(), 1);
+    }
+
+    #[test]
+    fn add_validator_without_passed_proposal_fails() {
+        let mut p = make_pallet();
+        let err = p.add_validator("prop-nonexistent", "wallet-X", 1).unwrap_err();
+        assert_eq!(err, "proposal_not_found");
+    }
+
+    #[test]
+    fn duplicate_validator_rejected() {
+        let mut p = make_pallet();
+        let id = passed_constitutional_prop(&mut p);
+        p.add_validator(&id, "val-A", 1).unwrap();
+        let err = p.add_validator(&id, "val-A", 2).unwrap_err();
+        assert_eq!(err, "already_a_validator");
+    }
+
+    #[test]
+    fn remove_validator_marks_inactive() {
+        let mut p = make_pallet();
+        let id = passed_constitutional_prop(&mut p);
+        p.add_validator(&id, "val-A", 1).unwrap();
+        assert_eq!(p.active_validator_count(), 1);
+
+        let id2 = passed_constitutional_prop(&mut p);
+        p.remove_validator(&id2, "val-A").unwrap();
+        assert_eq!(p.active_validator_count(), 0);
     }
 }

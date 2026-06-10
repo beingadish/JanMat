@@ -1,8 +1,8 @@
-use janmat_types::{AnchoredUlid, OpinionId, SubtopicId, TopicId};
+use janmat_types::{AnchoredUlid, OpinionId, SubtopicId, TopicId, VoteId};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-// ── Records ──────────────────────────────────────────────────────────────────
+// ── Records ───────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TopicRecord {
@@ -35,6 +35,29 @@ pub struct OpinionRecord {
     pub suppressed: bool,
 }
 
+// ── Outcomes tracker ─────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum OutcomeStatus {
+    /// Policy passed — awaiting the 180-day outcome assessment window
+    AwaitingAssessment,
+    /// Assessment vote is open
+    AssessmentOpen,
+    /// Assessment vote closed with a result
+    Assessed { result: String },
+}
+
+/// Links a policy vote's output to an outcome assessment vote.
+/// Created ~180 days after the original v/ closes.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OutcomeRecord {
+    pub output_vote_id: VoteId,
+    pub assessment_vote_id: Option<VoteId>,
+    pub status: OutcomeStatus,
+    pub evidence_cids: Vec<String>,
+    pub linked_at_block: u64,
+}
+
 // ── Errors ────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, PartialEq, Eq)]
@@ -52,6 +75,7 @@ pub struct NamespacePallet {
     topics: BTreeMap<String, TopicRecord>,
     subtopics: BTreeMap<String, SubtopicRecord>,
     opinions: BTreeMap<String, OpinionRecord>,
+    pub outcomes: BTreeMap<String, OutcomeRecord>,
 }
 
 impl NamespacePallet {
@@ -130,13 +154,61 @@ impl NamespacePallet {
             .ok_or(NamespaceError::OpinionNotFound)
     }
 
-    pub fn topic_count(&self) -> usize {
-        self.topics.len()
+    // ── Outcomes tracker ──────────────────────────────────────────────────────
+
+    /// Register a closed policy vote for outcome tracking.
+    /// Called ~180 blocks after the vote closes (governance schedule).
+    pub fn register_outcome(
+        &mut self,
+        output_vote_id: VoteId,
+        at_block: u64,
+    ) -> OutcomeRecord {
+        let record = OutcomeRecord {
+            output_vote_id: output_vote_id.clone(),
+            assessment_vote_id: None,
+            status: OutcomeStatus::AwaitingAssessment,
+            evidence_cids: Vec::new(),
+            linked_at_block: at_block,
+        };
+        self.outcomes.insert(output_vote_id.to_string(), record.clone());
+        record
     }
 
-    pub fn opinion_count(&self) -> usize {
-        self.opinions.len()
+    /// Open the assessment vote for an outcome.
+    pub fn open_assessment(
+        &mut self,
+        output_vote_id: &str,
+        assessment_vote_id: VoteId,
+    ) -> Result<(), NamespaceError> {
+        let rec = self.outcomes
+            .get_mut(output_vote_id)
+            .ok_or(NamespaceError::OpinionNotFound)?;
+        rec.assessment_vote_id = Some(assessment_vote_id);
+        rec.status = OutcomeStatus::AssessmentOpen;
+        Ok(())
     }
+
+    /// Add evidence IPFS CID to an outcome record.
+    pub fn add_evidence(&mut self, output_vote_id: &str, cid: String) -> Result<(), NamespaceError> {
+        self.outcomes
+            .get_mut(output_vote_id)
+            .ok_or(NamespaceError::OpinionNotFound)?
+            .evidence_cids
+            .push(cid);
+        Ok(())
+    }
+
+    /// Finalise the outcome assessment with a result string (e.g. "61% say NO CHANGE").
+    pub fn finalise_outcome(&mut self, output_vote_id: &str, result: String) -> Result<(), NamespaceError> {
+        let rec = self.outcomes
+            .get_mut(output_vote_id)
+            .ok_or(NamespaceError::OpinionNotFound)?;
+        rec.status = OutcomeStatus::Assessed { result };
+        Ok(())
+    }
+
+    pub fn topic_count(&self) -> usize { self.topics.len() }
+    pub fn opinion_count(&self) -> usize { self.opinions.len() }
 }
 
 #[cfg(test)]
@@ -187,5 +259,25 @@ mod tests {
         p.suppress_opinion(&op.id.to_string()).unwrap();
         // opinion still in map — only status changes
         assert_eq!(p.opinion_count(), 1);
+    }
+
+    #[test]
+    fn outcomes_lifecycle() {
+        use janmat_types::VoteId;
+        let mut p = make_pallet();
+        let vote_id = VoteId::new();
+        let key = vote_id.to_string();
+        p.register_outcome(vote_id.clone(), 1000);
+        assert_eq!(p.outcomes[&key].status, OutcomeStatus::AwaitingAssessment);
+
+        let assessment_id = VoteId::new();
+        p.open_assessment(&key, assessment_id).unwrap();
+        assert_eq!(p.outcomes[&key].status, OutcomeStatus::AssessmentOpen);
+
+        p.add_evidence(&key, "QmEvidence123".to_owned()).unwrap();
+        assert_eq!(p.outcomes[&key].evidence_cids.len(), 1);
+
+        p.finalise_outcome(&key, "61% say NO CHANGE".to_owned()).unwrap();
+        assert!(matches!(p.outcomes[&key].status, OutcomeStatus::Assessed { .. }));
     }
 }

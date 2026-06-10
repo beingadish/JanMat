@@ -1,3 +1,4 @@
+mod middleware;
 mod routes;
 
 use axum::{Json, Router, routing::get, routing::post};

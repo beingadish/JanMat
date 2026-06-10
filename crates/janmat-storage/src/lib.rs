@@ -1,3 +1,6 @@
+pub mod indexer;
+pub mod merkle;
+
 use blake3::Hasher;
 
 pub trait IpfsClient {
