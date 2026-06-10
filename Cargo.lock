@@ -323,6 +323,10 @@ version = "0.1.0"
 [[package]]
 name = "janmat-identity"
 version = "0.1.0"
+dependencies = [
+ "blake3",
+ "janmat-zk",
+]
 
 [[package]]
 name = "janmat-storage"
@@ -343,6 +347,11 @@ dependencies = [
 [[package]]
 name = "janmat-zk"
 version = "0.1.0"
+dependencies = [
+ "blake3",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "js-sys"
@@ -413,7 +422,9 @@ dependencies = [
 name = "pallet-identity"
 version = "0.1.0"
 dependencies = [
- "serde",
+ "janmat-identity",
+ "janmat-zk",
+ "serde_json",
 ]
 
 [[package]]
