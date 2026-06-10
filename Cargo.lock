@@ -293,9 +293,12 @@ dependencies = [
  "janmat-content",
  "janmat-storage",
  "janmat-types",
+ "janmat-zk",
+ "pallet-voting",
  "serde",
  "serde_json",
  "tokio",
+ "ulid",
 ]
 
 [[package]]
@@ -449,8 +452,12 @@ dependencies = [
 name = "pallet-voting"
 version = "0.1.0"
 dependencies = [
+ "blake3",
+ "janmat-identity",
  "janmat-types",
+ "janmat-zk",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

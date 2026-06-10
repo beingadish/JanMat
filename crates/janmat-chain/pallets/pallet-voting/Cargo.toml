@@ -4,5 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-janmat-types = { path = "../../../janmat-types" }
+blake3.workspace = true
+janmat-identity = { path = "../../../../crates/janmat-identity" }
+janmat-types = { path = "../../../../crates/janmat-types" }
+janmat-zk = { path = "../../../../crates/janmat-zk" }
 serde.workspace = true
+serde_json.workspace = true
