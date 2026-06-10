@@ -14,6 +14,7 @@ members = [
     "crates/janmat-governance",
     "crates/janmat-storage",
     "crates/janmat-gateway",
+    "crates/janmat-integration-tests",
     "frontend",
 ]
 resolver = "2"

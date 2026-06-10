@@ -1,25 +1,19 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum VoteVisibility {
+    #[default]
     Anonymous,
     Public,
 }
 
-impl Default for VoteVisibility {
-    fn default() -> Self {
-        Self::Anonymous
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum VoteStatus {
+    #[default]
     Open,
     Closed,
 }
 
-impl Default for VoteStatus {
-    fn default() -> Self {
-        Self::Open
-    }
-}

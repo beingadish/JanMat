@@ -1,0 +1,18 @@
+[package]
+name = "janmat-integration-tests"
+version = "0.1.0"
+edition = "2024"
+
+[dev-dependencies]
+janmat-types       = { path = "../janmat-types" }
+janmat-zk          = { path = "../janmat-zk" }
+janmat-identity    = { path = "../janmat-identity" }
+janmat-content     = { path = "../janmat-content" }
+janmat-governance  = { path = "../janmat-governance" }
+janmat-storage     = { path = "../janmat-storage" }
+janmat-gateway     = { path = "../janmat-gateway" }
+pallet-namespace   = { path = "../janmat-chain/pallets/pallet-namespace" }
+pallet-voting      = { path = "../janmat-chain/pallets/pallet-voting" }
+pallet-identity    = { path = "../janmat-chain/pallets/pallet-identity" }
+pallet-moderation  = { path = "../janmat-chain/pallets/pallet-moderation" }
+pallet-governance  = { path = "../janmat-chain/pallets/pallet-governance" }

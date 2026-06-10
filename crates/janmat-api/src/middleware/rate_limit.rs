@@ -8,6 +8,8 @@
 //! Phase 6: wire to Redis or PostgreSQL for distributed rate limit state.
 //! Phase 5 and below: InMemoryRateLimitStore for single-process dev/test.
 
+#![allow(dead_code)]
+
 use std::collections::HashMap;
 
 pub const TOPIC_LIMIT_PER_DAY: u32  = 1;

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use axum::{Json, extract::Path, http::StatusCode};
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +34,7 @@ pub struct SubmitOpinionResponse {
 /// POST /citizen/t — create a new topic
 /// Phase 1: no ZK auth yet; nullifier + wallet are mocked.
 pub async fn create_topic(
-    Json(req): Json<CreateTopicRequest>,
+    Json(_req): Json<CreateTopicRequest>,
 ) -> Result<Json<CreateTopicResponse>, StatusCode> {
     use janmat_types::AnchoredUlid;
     use janmat_types::namespace::TopicId;

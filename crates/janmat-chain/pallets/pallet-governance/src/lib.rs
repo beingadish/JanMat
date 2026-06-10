@@ -10,10 +10,10 @@
 
 use janmat_governance::{
     ConstitutionRule, ConstitutionVersion, ProposalType,
-    met_quorum, recall_threshold, referenda_threshold, CONSTITUTIONAL_QUORUM,
+    met_quorum, recall_threshold, referenda_threshold,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 // ── Proposal ──────────────────────────────────────────────────────────────────
 
@@ -128,6 +128,7 @@ pub struct ValidatorRecord {
 
 // ── Pallet ────────────────────────────────────────────────────────────────────
 
+#[derive(Default)]
 pub struct GovernancePallet {
     /// Ordered rule map: key → latest ConstitutionRule
     constitution: BTreeMap<String, ConstitutionRule>,
@@ -148,20 +149,6 @@ pub struct GovernancePallet {
     validators: Vec<ValidatorRecord>,
 }
 
-impl Default for GovernancePallet {
-    fn default() -> Self {
-        Self {
-            constitution: BTreeMap::new(),
-            constitution_versions: Vec::new(),
-            constitution_version: 0,
-            proposals: BTreeMap::new(),
-            proposal_counter: 0,
-            moderators: BTreeMap::new(),
-            petitions: BTreeMap::new(),
-            validators: Vec::new(),
-        }
-    }
-}
 
 impl GovernancePallet {
     // ── Constitution ──────────────────────────────────────────────────────────

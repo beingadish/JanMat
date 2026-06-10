@@ -345,6 +345,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "janmat-integration-tests"
+version = "0.1.0"
+dependencies = [
+ "janmat-content",
+ "janmat-gateway",
+ "janmat-governance",
+ "janmat-identity",
+ "janmat-storage",
+ "janmat-types",
+ "janmat-zk",
+ "pallet-governance",
+ "pallet-identity",
+ "pallet-moderation",
+ "pallet-namespace",
+ "pallet-voting",
+]
+
+[[package]]
 name = "janmat-storage"
 version = "0.1.0"
 dependencies = [

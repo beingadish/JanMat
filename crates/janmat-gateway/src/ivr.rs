@@ -58,7 +58,7 @@ impl IvrSession {
                 choice: choice.to_owned(),
             },
             (IvrStep::VoteConfirm { .. }, "1")     => IvrStep::Goodbye,
-            (IvrStep::VoteConfirm { vote_id, choice }, _) => IvrStep::VoteCast { vote_id: vote_id.clone() },
+            (IvrStep::VoteConfirm { vote_id, choice: _ }, _) => IvrStep::VoteCast { vote_id: vote_id.clone() },
             _                                      => IvrStep::Goodbye,
         };
         self.history.push(prev);

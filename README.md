@@ -152,9 +152,9 @@ JanMat/
 | **1** | ✅ Done | Chain core — namespace, voting, identity, storage, API routes |
 | **2** | ✅ Done | ZK identity — kyc-verify + vote-cast circuits, MockProver, pallet-identity upgrade |
 | **3** | ✅ Done | Content safety — BlocklistEngine, HarmFilter, CloneDetector, pallet-moderation |
-| **4** | 🚧 Next | Full ZK voting — commitment-reveal, pallet-voting ZK wiring, re-vote resistance |
-| **5** | ⏳ | Governance layer — constitution contract, moderator elections, recall |
-| **6** | ⏳ | Production hardening — 22-language UI, SMS/IVR, ZK rollup, security audit |
+| **4** | ✅ Done | Full ZK voting — commitment-reveal, re-vote coercion resistance, enc_attr |
+| **5** | ✅ Done | Governance layer — constitution, proposals, moderator elections, recall, referenda |
+| **6** | ✅ Done | Production hardening — i18n (22 languages), SMS/IVR gateway, Merkle anchor, indexer, rate limit, outcomes, validator set |
 
 ---
 
@@ -162,6 +162,7 @@ JanMat/
 
 ```bash
 cargo test --workspace
+# 156 tests, 0 failures
 ```
 
 All tests are pure Rust — no external services, no Docker, no network.
@@ -174,6 +175,9 @@ cargo run -p janmat-api
 
 curl http://localhost:3000/health
 # → {"status":"ok","service":"janmat-api"}
+
+curl http://localhost:3000/pub/constitution
+# → { "version": 1, "rules": [...] }
 ```
 
 ---

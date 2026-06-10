@@ -17,7 +17,7 @@ pub fn merkle_root(leaves: &[[u8; 32]]) -> [u8; 32] {
     }
     let mut level: Vec<[u8; 32]> = leaves.to_vec();
     while level.len() > 1 {
-        if level.len() % 2 != 0 {
+        if !level.len().is_multiple_of(2) {
             level.push(*level.last().unwrap()); // duplicate last
         }
         level = level
@@ -48,6 +48,7 @@ pub fn batch_votes_root(commitments: &[String]) -> [u8; 32] {
 }
 
 /// Anchor stub — in Phase 6 this submits `root` to an Ethereum/Polkadot bridge contract.
+#[derive(Default)]
 pub struct MerkleAnchor {
     pub anchored_roots: Vec<AnchorRecord>,
 }
@@ -59,9 +60,6 @@ pub struct AnchorRecord {
     pub commitment_count: usize,
 }
 
-impl Default for MerkleAnchor {
-    fn default() -> Self { Self { anchored_roots: Vec::new() } }
-}
 
 impl MerkleAnchor {
     pub fn anchor_batch(

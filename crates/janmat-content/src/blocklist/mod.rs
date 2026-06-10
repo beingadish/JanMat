@@ -22,21 +22,13 @@ pub enum BlocklistAction {
     Removed,
 }
 
+#[derive(Default)]
 pub struct BlocklistEngine {
     phrases: BTreeSet<String>,
     entries: BTreeMap<String, BlocklistEntry>,
     pub audit_log: Vec<BlocklistAuditEntry>,
 }
 
-impl Default for BlocklistEngine {
-    fn default() -> Self {
-        Self {
-            phrases: BTreeSet::new(),
-            entries: BTreeMap::new(),
-            audit_log: Vec::new(),
-        }
-    }
-}
 
 impl BlocklistEngine {
     /// Construct with pre-seeded phrases (genesis blocklist, no governance ref needed).

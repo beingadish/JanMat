@@ -99,8 +99,8 @@ impl IndexReader for InMemoryIndexStore {
 
     fn opinions_for_subtopic(&self, subtopic_id: &str) -> Vec<OpinionRow> {
         self.events.iter().filter_map(|e| {
-            if let IndexerEvent::OpinionSubmitted { opinion_id, subtopic_id: st, content_cid, block, .. } = e {
-                if st == subtopic_id {
+            if let IndexerEvent::OpinionSubmitted { opinion_id, subtopic_id: st, content_cid, block, .. } = e
+                && st == subtopic_id {
                     return Some(OpinionRow {
                         opinion_id: opinion_id.clone(),
                         subtopic_id: st.clone(),
@@ -109,16 +109,14 @@ impl IndexReader for InMemoryIndexStore {
                         created_at_block: *block,
                     });
                 }
-            }
             None
         }).collect()
     }
 
     fn vote_tally(&self, vote_id: &str) -> Option<HashMap<String, u64>> {
         self.events.iter().find_map(|e| {
-            if let IndexerEvent::VoteClosed { vote_id: vid, tally, .. } = e {
-                if vid == vote_id { return Some(tally.clone()); }
-            }
+            if let IndexerEvent::VoteClosed { vote_id: vid, tally, .. } = e
+                && vid == vote_id { return Some(tally.clone()); }
             None
         })
     }

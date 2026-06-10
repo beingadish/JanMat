@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use axum::{Json, extract::Path, http::StatusCode};
 use serde::{Deserialize, Serialize};
 
@@ -45,8 +46,8 @@ pub struct VoteResultsResponse {
 pub async fn create_vote(
     Json(req): Json<CreateVoteRequest>,
 ) -> Result<Json<CreateVoteResponse>, StatusCode> {
-    use janmat_types::namespace::{OpinionId, VoteId};
-    use ulid::Ulid;
+    use janmat_types::namespace::VoteId;
+    
     // Parse the opinion_id from the "o/ULID" string
     let vote_id = VoteId::new();
     Ok(Json(CreateVoteResponse {
@@ -98,7 +99,7 @@ pub async fn reveal_vote(Path(_vote_id): Path<String>) -> StatusCode {
 
 /// GET /pub/t/:topic_id/v/:vote_id/results — public tally (post-close only)
 pub async fn vote_results(
-    Path((topic_id, vote_id)): Path<(String, String)>,
+    Path((_topic_id, vote_id)): Path<(String, String)>,
 ) -> Json<VoteResultsResponse> {
     Json(VoteResultsResponse {
         vote_id: vote_id.clone(),

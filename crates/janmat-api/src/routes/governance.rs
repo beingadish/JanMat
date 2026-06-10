@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use axum::{Json, extract::Path, http::StatusCode};
 use serde::{Deserialize, Serialize};
 
@@ -49,7 +50,7 @@ pub struct RecallResponse {
 
 /// GET /pub/constitution — current constitution rules
 pub async fn get_constitution() -> Json<ConstitutionResponse> {
-    use janmat_governance::{ConstitutionRule, REGULAR_QUORUM, CONSTITUTIONAL_QUORUM};
+    use janmat_governance::{REGULAR_QUORUM, CONSTITUTIONAL_QUORUM};
 
     // Phase 5: return genesis seed rules; Phase 6 reads from chain indexer
     let rules = vec![
@@ -92,8 +93,8 @@ pub async fn list_proposals() -> Json<Vec<serde_json::Value>> {
 
 /// POST /citizen/recall/:topic_id — sign a recall petition
 pub async fn sign_recall(
-    Path(topic_id): Path<String>,
-    Json(req): Json<RecallRequest>,
+    Path(_topic_id): Path<String>,
+    Json(_req): Json<RecallRequest>,
 ) -> Json<RecallResponse> {
     use janmat_governance::recall_threshold;
     // Phase 5: in-memory only; Phase 6 persists via pallet-governance extrinsic
