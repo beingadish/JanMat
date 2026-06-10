@@ -20,6 +20,9 @@ async fn health() -> Json<HealthResponse> {
 async fn main() {
     let app = Router::new()
         .route("/health", get(health))
+        // Constitution
+        .route("/pub/constitution", get(routes::governance::get_constitution))
+        .route("/pub/proposals", get(routes::governance::list_proposals))
         // Public read routes
         .route("/pub/t", get(routes::namespace::list_topics))
         .route("/pub/t/:id", get(routes::namespace::get_topic))
@@ -27,12 +30,14 @@ async fn main() {
             "/pub/t/:topic_id/v/:vote_id/results",
             get(routes::votes::vote_results),
         )
-        // Citizen write routes (Phase 1: no ZK auth middleware yet)
+        // Citizen write routes
         .route("/citizen/t", post(routes::namespace::create_topic))
         .route("/citizen/o", post(routes::opinions::submit_opinion))
         .route("/citizen/v", post(routes::votes::create_vote))
         .route("/citizen/v/:id/cast", post(routes::votes::cast_vote))
-        .route("/citizen/v/:id/reveal", post(routes::votes::reveal_vote));
+        .route("/citizen/v/:id/reveal", post(routes::votes::reveal_vote))
+        .route("/citizen/proposals", post(routes::governance::create_proposal))
+        .route("/citizen/recall/:topic_id", post(routes::governance::sign_recall));
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
