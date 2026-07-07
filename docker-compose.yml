@@ -1,0 +1,75 @@
+# JanMat full stack — one command brings up the website, the API service,
+# and the database:
+#
+#     docker compose up --build
+#
+# Then open the console at http://localhost:8080
+#
+# Services:
+#   web  — Vite + React static site served by nginx, which also reverse-proxies
+#          /api/* to the backend (so the browser stays same-origin, no CORS).
+#   api  — the janmat-api Axum HTTP server.
+#   db   — PostgreSQL. NOTE: the current janmat-api handlers are in-memory / mock
+#          (no crate in the workspace talks to a DB yet). Postgres is provisioned
+#          here and wired to the API via DATABASE_URL so the persistence/indexer
+#          layer can adopt it without touching this file.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-janmat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-janmat}
+      POSTGRES_DB: ${POSTGRES_DB:-janmat}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - janmat-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-janmat} -d ${POSTGRES_DB:-janmat}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    environment:
+      JANMAT_BIND_ADDR: 0.0.0.0:3000
+      # Reserved for the future persistence layer (handlers are mock today).
+      DATABASE_URL: postgres://${POSTGRES_USER:-janmat}:${POSTGRES_PASSWORD:-janmat}@db:5432/${POSTGRES_DB:-janmat}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # Use 127.0.0.1 (not localhost): nginx listens on IPv4 only, but
+      # localhost resolves to ::1 first inside the container.
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  janmat-db:

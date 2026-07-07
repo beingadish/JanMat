@@ -146,6 +146,19 @@ impl TranslationStore {
         self.insert(Language::English, ErrorBlocked,     "This content cannot be submitted");
         self.insert(Language::English, WarnClone,        "Similar opinion exists. Acknowledge to continue.");
         self.insert(Language::English, ConstitutionTitle,"Constitution");
+        // English - KYC Upload
+        self.insert(Language::English, KycUploadTitle,         "Upload UIDAI Offline e-KYC");
+        self.insert(Language::English, KycUploadInstructions,  "Download your e-KYC ZIP from resident.uidai.gov.in");
+        self.insert(Language::English, KycSelectFile,          "Select ZIP File");
+        self.insert(Language::English, KycShareCodeLabel,      "4-Digit Share Code");
+        self.insert(Language::English, KycShareCodePlaceholder,"Enter your share code");
+        self.insert(Language::English, KycVerifyButton,        "Verify Identity");
+        self.insert(Language::English, KycVerifying,           "Verifying...");
+        self.insert(Language::English, KycSuccess,             "Identity verified successfully!");
+        self.insert(Language::English, KycErrorInvalidFile,    "Invalid ZIP file. Please download from UIDAI.");
+        self.insert(Language::English, KycErrorWrongCode,      "Wrong share code. Please try again.");
+        self.insert(Language::English, KycErrorNetwork,        "Network error. Please try again.");
+        self.insert(Language::English, KycPrivacyNote,         "Your Aadhaar number never leaves your device.");
         // Hindi
         self.insert(Language::Hindi, AppTitle,         "जनमत — लोगों की राय");
         self.insert(Language::Hindi, NavTopics,        "विषय");
@@ -160,6 +173,19 @@ impl TranslationStore {
         self.insert(Language::Hindi, ErrorBlocked,     "यह सामग्री सबमिट नहीं की जा सकती");
         self.insert(Language::Hindi, WarnClone,        "समान राय पहले से मौजूद है। जारी रखने के लिए स्वीकार करें।");
         self.insert(Language::Hindi, ConstitutionTitle,"संविधान");
+        // Hindi - KYC Upload
+        self.insert(Language::Hindi, KycUploadTitle,         "UIDAI ऑफ़लाइन e-KYC अपलोड करें");
+        self.insert(Language::Hindi, KycUploadInstructions,  "resident.uidai.gov.in से अपना e-KYC ZIP डाउनलोड करें");
+        self.insert(Language::Hindi, KycSelectFile,          "ZIP फ़ाइल चुनें");
+        self.insert(Language::Hindi, KycShareCodeLabel,      "4-अंकीय शेयर कोड");
+        self.insert(Language::Hindi, KycShareCodePlaceholder,"अपना शेयर कोड दर्ज करें");
+        self.insert(Language::Hindi, KycVerifyButton,        "पहचान सत्यापित करें");
+        self.insert(Language::Hindi, KycVerifying,           "सत्यापन हो रहा है...");
+        self.insert(Language::Hindi, KycSuccess,             "पहचान सफलतापूर्वक सत्यापित!");
+        self.insert(Language::Hindi, KycErrorInvalidFile,    "अमान्य ZIP फ़ाइल। कृपया UIDAI से डाउनलोड करें।");
+        self.insert(Language::Hindi, KycErrorWrongCode,      "गलत शेयर कोड। कृपया पुनः प्रयास करें।");
+        self.insert(Language::Hindi, KycErrorNetwork,        "नेटवर्क त्रुटि। कृपया पुनः प्रयास करें।");
+        self.insert(Language::Hindi, KycPrivacyNote,         "आपका आधार नंबर आपके डिवाइस से बाहर नहीं जाता।");
     }
 }
 

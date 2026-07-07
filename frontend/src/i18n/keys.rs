@@ -15,4 +15,17 @@ pub enum TranslationKey {
     ErrorBlocked,
     WarnClone,
     ConstitutionTitle,
+    // KYC Upload keys
+    KycUploadTitle,
+    KycUploadInstructions,
+    KycSelectFile,
+    KycShareCodeLabel,
+    KycShareCodePlaceholder,
+    KycVerifyButton,
+    KycVerifying,
+    KycSuccess,
+    KycErrorInvalidFile,
+    KycErrorWrongCode,
+    KycErrorNetwork,
+    KycPrivacyNote,
 }

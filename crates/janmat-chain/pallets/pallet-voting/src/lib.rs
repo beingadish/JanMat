@@ -107,6 +107,28 @@ impl VotingPallet {
         record
     }
 
+    /// Register a ballot under a caller-supplied id/key.
+    ///
+    /// Used when the API or indexer re-hydrates a vote that was created by a
+    /// separate request/extrinsic, so a later cast can be matched to it without
+    /// replaying the original `create_vote`. (In Phase 4 the pallet is rebuilt
+    /// per request; Phase 5 backs this with shared indexer state.)
+    pub fn open_vote(&mut self, vote_id: &str, options: Vec<String>, closes_at_block: u64) {
+        let record = VoteRecord {
+            id: VoteId::new(),
+            opinion_id: OpinionId::new(),
+            options,
+            visibility: VoteVisibility::Anonymous,
+            status: VoteStatus::Open,
+            closes_at_block,
+            casts: BTreeMap::new(),
+            tally: None,
+            attributed: None,
+            cast_seq: 0,
+        };
+        self.votes.insert(vote_id.to_string(), record);
+    }
+
     /// Cast (or re-cast) a vote backed by a ZK proof receipt.
     ///
     /// Re-voting is explicitly allowed: the latest valid cast for a given

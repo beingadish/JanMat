@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+
+# ─────────────────────────────────────────────────────────────
+# Builder — compiles the janmat-api binary from the workspace.
+# ─────────────────────────────────────────────────────────────
+FROM rust:1-slim-bookworm AS builder
+WORKDIR /build
+
+# blake3's SIMD paths and a few proc-macro crates want a C toolchain.
+# All crypto deps (rsa, sha2, x509-cert, zip/aes) are pure Rust — no OpenSSL.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
+# Copy the whole workspace (see .dockerignore for exclusions) and build
+# only the API binary and its dependency graph.
+COPY . .
+RUN --mount=type=cache,target=/build/target \
+    --mount=type=cache,target=/usr/local/cargo/registry \
+    cargo build --release -p janmat-api \
+ && cp target/release/janmat-api /usr/local/bin/janmat-api
+
+# ─────────────────────────────────────────────────────────────
+# Runtime — minimal Debian slim with just the binary.
+# debian:13-slim (trixie) trims fixable CVEs vs bookworm-slim; the
+# bookworm-built glibc binary runs fine on trixie's newer glibc.
+# ─────────────────────────────────────────────────────────────
+FROM debian:13-slim AS runtime
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd --system --uid 10001 janmat
+
+COPY --from=builder /usr/local/bin/janmat-api /usr/local/bin/janmat-api
+
+USER janmat
+# Bind on all interfaces so the container is reachable from the compose network.
+ENV JANMAT_BIND_ADDR=0.0.0.0:3000
+EXPOSE 3000
+CMD ["janmat-api"]

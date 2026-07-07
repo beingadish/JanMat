@@ -1,0 +1,19 @@
+# Rust build artifacts
+target/
+**/target/
+
+# Frontend build artifacts / deps
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Tooling / VCS / misc — not needed to build the API
+.git/
+.github/
+.idea/
+.waylog/
+.claude/
+graphify-out/
+docs/
+*.log
+.DS_Store

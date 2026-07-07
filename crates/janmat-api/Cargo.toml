@@ -4,14 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-axum.workspace = true
+axum = { workspace = true, features = ["multipart"] }
 janmat-content = { path = "../janmat-content" }
 janmat-governance = { path = "../janmat-governance" }
+janmat-identity = { path = "../janmat-identity" }
 janmat-storage = { path = "../janmat-storage" }
 janmat-types = { path = "../janmat-types" }
 janmat-zk = { path = "../janmat-zk" }
 pallet-voting = { path = "../janmat-chain/pallets/pallet-voting" }
 serde.workspace = true
 serde_json.workspace = true
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres"] }
 tokio.workspace = true
 ulid.workspace = true

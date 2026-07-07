@@ -70,14 +70,11 @@ pub async fn cast_vote(
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let mut pallet = VotingPallet::default();
-    // Phase 4: pallet is reconstructed per-request (Phase 5 will use shared state / indexer)
-    // We re-create the vote so the pallet knows about it
-    use janmat_types::namespace::OpinionId;
-    let op_id = OpinionId::new();
-    let _ = pallet.create_vote(op_id, vec!["YES".into(), "NO".into()], 99999);
+    // Phase 4: the pallet is reconstructed per-request (Phase 5 will use shared
+    // state / the indexer). Register the ballot under the id from the path so a
+    // well-formed receipt for this vote can be matched and accepted.
+    pallet.open_vote(&vote_id, vec!["YES".into(), "NO".into()], 99999);
 
-    // The in-request vote_id would normally be looked up from chain state;
-    // for now we accept any well-formed receipt for the given vote_id
     match pallet.cast_vote(&vote_id, &receipt, &MockVerifier) {
         Ok(cast) => Ok(Json(CastVoteResponse {
             accepted: true,

@@ -1,5 +1,8 @@
 use janmat_zk::circuits::kyc_verify::{self, KycVerifyInput};
 
+pub mod uidai_offline;
+pub use uidai_offline::{UidaiError, UidaiKycData, UidaiOfflineKycProvider, UidaiResult};
+
 /// A KYC credential issued by a licensed provider.
 /// The raw Aadhaar number never enters this struct.
 #[derive(Debug, Clone)]
@@ -55,4 +58,35 @@ impl KycProvider for MockKycProvider {
 pub fn nullifier_seed_commitment(cred: &KycCredential) -> [u8; 32] {
     let seed = kyc_verify::derive_nullifier_seed(&cred.credential_bytes, &cred.citizen_salt);
     *blake3::hash(&seed).as_bytes()
+}
+
+/// POC identity anchor: a deterministic commitment over PAN + DOB + Aadhaar.
+///
+/// This BYPASSES real UIDAI verification and exists only for the proof of
+/// concept (obtaining the production KYC licence takes time). The same person
+/// always maps to the same commitment — giving one citizen exactly one
+/// nullifier seed — and the raw identifiers are never stored, only this digest.
+pub fn poc_identity_commitment(pan: &str, dob: &str, aadhaar: &str) -> [u8; 32] {
+    let mut h = blake3::Hasher::new();
+    h.update(b"janmat/poc-identity/v1");
+    h.update(pan.trim().to_uppercase().as_bytes());
+    h.update(b"|");
+    h.update(dob.trim().as_bytes());
+    h.update(b"|");
+    h.update(aadhaar.trim().as_bytes());
+    *h.finalize().as_bytes()
+}
+
+/// POC unique citizen UID — a time-based hash over PAN + DOB + Aadhaar + phone
+/// plus a caller-supplied unique salt (e.g. a fresh ULID). Because the salt is
+/// time-based and random, every registration yields a distinct UID. No external
+/// verification is performed — this is strictly for the proof of concept.
+pub fn poc_uid(pan: &str, dob: &str, aadhaar: &str, phone: &str, salt: &str) -> [u8; 32] {
+    let mut h = blake3::Hasher::new();
+    h.update(b"janmat/poc-uid/v1");
+    for part in [pan.trim().to_uppercase().as_str(), dob.trim(), aadhaar.trim(), phone.trim(), salt] {
+        h.update(part.as_bytes());
+        h.update(b"|");
+    }
+    *h.finalize().as_bytes()
 }

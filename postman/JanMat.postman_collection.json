@@ -1,0 +1,1611 @@
+{
+  "info": {
+    "_postman_id": "b6f6a3c2-0f5e-4a1e-9d0a-janmat000001",
+    "name": "JanMat API",
+    "description": "HTTP API for the JanMat civic-democracy platform (janmat-api / Axum).\n\nSet `baseUrl` to one of:\n  • http://localhost:3000      — the API directly (docker compose default)\n  • http://localhost:8080/api  — through the nginx reverse proxy\n\nEvery request ships with a saved example response. 'Create topic' and 'Create vote' capture the returned ULID (namespace prefix stripped) into {{topicId}} / {{voteId}} so the path-param requests below work as-is.\n\nIdentity: register with PAN+Aadhaar+DOB+phone and a unique username (POC — no external verification); log in by username.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "demo_citizen",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "0000000000000000",
+      "type": "string"
+    },
+    {
+      "key": "topicId",
+      "value": "01J000000000000000000000TT",
+      "type": "string"
+    },
+    {
+      "key": "voteId",
+      "value": "01J000000000000000000000VV",
+      "type": "string"
+    },
+    {
+      "key": "opinionId",
+      "value": "o/01J000000000000000000000OO",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "API health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Liveness probe."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                },
+                "description": "Liveness probe."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ok\",\n  \"service\": \"janmat-api\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "KYC health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/kyc/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "kyc",
+                "health"
+              ]
+            },
+            "description": "Health of the KYC subsystem."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/kyc/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "kyc",
+                    "health"
+                  ]
+                },
+                "description": "Health of the KYC subsystem."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"service\": \"janmat-kyc\",\n  \"status\": \"ok\",\n  \"uidai_cert_loaded\": false\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Identity (POC)",
+      "item": [
+        {
+          "name": "Check username availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/username/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "username",
+                "{{username}}"
+              ]
+            },
+            "description": "Call before registering — returns whether the username is free."
+          },
+          "response": [
+            {
+              "name": "200 available",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/username/{{username}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "username",
+                    "{{username}}"
+                  ]
+                },
+                "description": "Call before registering — returns whether the username is free."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"username\": \"demo_citizen\",\n  \"available\": true,\n  \"reason\": null\n}"
+            },
+            {
+              "name": "200 taken",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/username/{{username}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "username",
+                    "{{username}}"
+                  ]
+                },
+                "description": "Call before registering — returns whether the username is free."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"username\": \"demo_citizen\",\n  \"available\": false,\n  \"reason\": \"Already taken\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "register"
+              ]
+            },
+            "description": "POC registration (no verification). Returns a 16-char login password (valid 24h) that binds all four fields. Captures username + password into variables.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\",\n  \"phone\": \"9876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "register"
+                  ]
+                },
+                "description": "POC registration (no verification). Returns a 16-char login password (valid 24h) that binds all four fields. Captures username + password into variables.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\",\n  \"phone\": \"9876543210\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"username\": \"pm_demo_805\",\n  \"uid\": \"2aca572058530cc5ba1e575f90af02bb0615223334325e3a1776aab830760fe0\",\n  \"nullifier_seed_commitment\": \"2aca572058530cc5ba1e575f90af02bb0615223334325e3a1776aab830760fe0\",\n  \"password\": \"N7mlwO1OynbxdT51\",\n  \"password_expires_at_ms\": 1783521063000,\n  \"login_count\": 0,\n  \"citizenship_country\": \"India\",\n  \"masked_aadhaar\": \"XXXX-XXXX-9012\",\n  \"masked_pan\": \"XXXXXX234F\",\n  \"masked_phone\": \"XXXXXX3210\",\n  \"phone_verified\": false\n}"
+            },
+            {
+              "name": "409 username taken",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "register"
+                  ]
+                },
+                "description": "POC registration (no verification). Returns a 16-char login password (valid 24h) that binds all four fields. Captures username + password into variables.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\",\n  \"phone\": \"9876543210\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"That username is already taken. Please choose another.\",\n  \"field\": \"username\"\n}"
+            },
+            {
+              "name": "400 invalid PAN",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "register"
+                  ]
+                },
+                "description": "POC registration (no verification). Returns a 16-char login password (valid 24h) that binds all four fields. Captures username + password into variables.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\",\n  \"phone\": \"9876543210\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"PAN must look like ABCDE1234F.\",\n  \"field\": \"pan\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const j = pm.response.json();",
+                  "  pm.collectionVariables.set('username', j.username);",
+                  "  pm.collectionVariables.set('password', j.password);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (by password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "login"
+              ]
+            },
+            "description": "Login with the 16-char password only. The server reverses it to (userId, creationTime, fingerprint), verifies the fingerprint against the four registered fields, checks 24h expiry, and rotates the Citizen-UID seed (uid changes every login). Infinite logins allowed while valid.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "login"
+                  ]
+                },
+                "description": "Login with the 16-char password only. The server reverses it to (userId, creationTime, fingerprint), verifies the fingerprint against the four registered fields, checks 24h expiry, and rotates the Citizen-UID seed (uid changes every login). Infinite logins allowed while valid.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"username\": \"pm_demo_805\",\n  \"uid\": \"861f6666d0297baaa467731b8427312cd02d06ac1048d976f9bb0a1f7127b616\",\n  \"prev_uid\": \"2aca572058530cc5ba1e575f90af02bb0615223334325e3a1776aab830760fe0\",\n  \"login_count\": 1,\n  \"expires_at_ms\": 1783521063000,\n  \"citizenship_country\": \"India\"\n}"
+            },
+            {
+              "name": "401 invalid/expired",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "login"
+                  ]
+                },
+                "description": "Login with the 16-char password only. The server reverses it to (userId, creationTime, fingerprint), verifies the fingerprint against the four registered fields, checks 24h expiry, and rotates the Citizen-UID seed (uid changes every login). Infinite logins allowed while valid.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Invalid password.\",\n  \"field\": \"password\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Regenerate password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "password"
+              ]
+            },
+            "description": "After a password expires, re-enter the four fields to mint a fresh 24h password. Blocked (409) while the current password is still valid.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "password"
+                  ]
+                },
+                "description": "After a password expires, re-enter the four fields to mint a fresh 24h password. Blocked (409) while the current password is still valid.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"password\": \"N7mlwO1OynbxdT51\",\n  \"password_expires_at_ms\": 1783521063000\n}"
+            },
+            {
+              "name": "409 still valid",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "password"
+                  ]
+                },
+                "description": "After a password expires, re-enter the four fields to mint a fresh 24h password. Blocked (409) while the current password is still valid.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Your current password is still valid. A new one can be generated only after it expires.\",\n  \"field\": \"active\"\n}"
+            },
+            {
+              "name": "401 details mismatch",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "password"
+                  ]
+                },
+                "description": "After a password expires, re-enter the four fields to mint a fresh 24h password. Blocked (409) while the current password is still valid.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{username}}\",\n  \"pan\": \"ABCDE1234F\",\n  \"aadhaar\": \"123456789012\",\n  \"dob\": \"1998-04-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Those details don't match our records.\",\n  \"field\": \"info\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Governance (public)",
+      "item": [
+        {
+          "name": "Get constitution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pub/constitution",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pub",
+                "constitution"
+              ]
+            },
+            "description": "Current constitution rules (genesis seed)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pub/constitution",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pub",
+                    "constitution"
+                  ]
+                },
+                "description": "Current constitution rules (genesis seed)."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"version\": 1,\n  \"rules\": [\n    {\n      \"key\": \"quorum.regular\",\n      \"value\": \"0.501\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    },\n    {\n      \"key\": \"quorum.constitutional\",\n      \"value\": \"0.67\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    },\n    {\n      \"key\": \"moderator.max_per_topic\",\n      \"value\": \"2\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    },\n    {\n      \"key\": \"moderator.term_blocks\",\n      \"value\": \"90\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    },\n    {\n      \"key\": \"recall.petition_ratio\",\n      \"value\": \"0.10\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    },\n    {\n      \"key\": \"referenda.support_ratio\",\n      \"value\": \"0.05\",\n      \"enacted_at_block\": 0,\n      \"enacted_by_proposal\": \"genesis\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "List proposals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pub/proposals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pub",
+                "proposals"
+              ]
+            },
+            "description": "Active proposals (stub — [] until indexer)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pub/proposals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pub",
+                    "proposals"
+                  ]
+                },
+                "description": "Active proposals (stub — [] until indexer)."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Topics",
+      "item": [
+        {
+          "name": "Create topic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/t",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "t"
+              ]
+            },
+            "description": "Create a topic. Captures the ULID into {{topicId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"water-supply-ward-12\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/t",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "t"
+                  ]
+                },
+                "description": "Create a topic. Captures the ULID into {{topicId}}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slug\": \"water-supply-ward-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"topic_id\": \"t/01KWY81A1GDZVMSG0K5MC8N20K\",\n  \"anchor_hex\": \"1ff078000688e65907c10074986d56ed5cbe1457b412c8e05abff8c2867df766\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const j = pm.response.json();",
+                  "  if (j.topic_id) pm.collectionVariables.set('topicId', j.topic_id.split('/').pop());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pub/t",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pub",
+                "t"
+              ]
+            },
+            "description": "List topics (stub — [] until indexer)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pub/t",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pub",
+                    "t"
+                  ]
+                },
+                "description": "List topics (stub — [] until indexer)."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[]"
+            }
+          ]
+        },
+        {
+          "name": "Get topic",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pub/t/{{topicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pub",
+                "t",
+                "{{topicId}}"
+              ]
+            },
+            "description": "Fetch a topic by its ULID."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pub/t/{{topicId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pub",
+                    "t",
+                    "{{topicId}}"
+                  ]
+                },
+                "description": "Fetch a topic by its ULID."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"topic_id\": \"01KWY81A1GDZVMSG0K5MC8N20K\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Opinions",
+      "item": [
+        {
+          "name": "Submit opinion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/o",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "o"
+              ]
+            },
+            "description": "Runs the content-safety pipeline. 200 Clean · 202 NeedsReview · 409 CloneWarning (resend with clone_acknowledged=true) · 422 Blocked.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subtopic_id\": \"st/roads\",\n  \"content\": \"Repave the market road before Diwali.\",\n  \"creator_nullifier\": \"{{username}}\",\n  \"clone_acknowledged\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/o",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "o"
+                  ]
+                },
+                "description": "Runs the content-safety pipeline. 200 Clean · 202 NeedsReview · 409 CloneWarning (resend with clone_acknowledged=true) · 422 Blocked.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"subtopic_id\": \"st/roads\",\n  \"content\": \"Repave the market road before Diwali.\",\n  \"creator_nullifier\": \"{{username}}\",\n  \"clone_acknowledged\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"opinion_id\": \"o/01KWYAZ1KVVFGKJDCEDFP7QNW6\",\n  \"content_cid\": \"QmMock00000001\",\n  \"content_hash\": \"8021aeed284589fea7d96ee084bb7cf817ac07821097d22732270c8b1784444c\",\n  \"verdict\": \"Clean\",\n  \"clone_candidates\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Votes",
+      "item": [
+        {
+          "name": "Create vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/v",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "v"
+              ]
+            },
+            "description": "Open a vote on an opinion. Captures the ULID into {{voteId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opinion_id\": \"{{opinionId}}\",\n  \"options\": [\n    \"Yes\",\n    \"No\",\n    \"Abstain\"\n  ],\n  \"closes_at_block\": 99999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/v",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "v"
+                  ]
+                },
+                "description": "Open a vote on an opinion. Captures the ULID into {{voteId}}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"opinion_id\": \"{{opinionId}}\",\n  \"options\": [\n    \"Yes\",\n    \"No\",\n    \"Abstain\"\n  ],\n  \"closes_at_block\": 99999\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"vote_id\": \"v/01KWYAKKQZYPPBWSJPGXAPP31Q\",\n  \"options\": [\n    \"Yes\",\n    \"No\",\n    \"Abstain\"\n  ],\n  \"closes_at_block\": 99999\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const j = pm.response.json();",
+                  "  if (j.vote_id) pm.collectionVariables.set('voteId', j.vote_id.split('/').pop());",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cast vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/v/{{voteId}}/cast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "v",
+                "{{voteId}}",
+                "cast"
+              ]
+            },
+            "description": "Cast a ZK-proved vote. public_outputs must be the UTF-8 JSON bytes of VoteCastOutput { nullifier[32], commitment[32], vote_id } whose vote_id equals the path ULID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zk_receipt\": {\n    \"circuit_id\": \"janmat/vote-cast/v1\",\n    \"proof_bytes\": [\n      1,\n      2,\n      3,\n      4\n    ],\n    \"public_outputs\": [\n      123,\n      34,\n      110,\n      117,\n      108,\n      108,\n      105,\n      102,\n      105,\n      101,\n      114,\n      34,\n      58,\n      91,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      93,\n      44,\n      34,\n      99,\n      111,\n      109,\n      109,\n      105,\n      116,\n      109,\n      101,\n      110,\n      116,\n      34,\n      58,\n      91,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      93,\n      44,\n      34,\n      118,\n      111,\n      116,\n      101,\n      95,\n      105,\n      100,\n      34,\n      58,\n      34,\n      123,\n      123,\n      118,\n      111,\n      116,\n      101,\n      73,\n      100,\n      125,\n      125,\n      34,\n      125\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/v/{{voteId}}/cast",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "v",
+                    "{{voteId}}",
+                    "cast"
+                  ]
+                },
+                "description": "Cast a ZK-proved vote. public_outputs must be the UTF-8 JSON bytes of VoteCastOutput { nullifier[32], commitment[32], vote_id } whose vote_id equals the path ULID.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"zk_receipt\": {\n    \"circuit_id\": \"janmat/vote-cast/v1\",\n    \"proof_bytes\": [\n      1,\n      2,\n      3,\n      4\n    ],\n    \"public_outputs\": [\n      123,\n      34,\n      110,\n      117,\n      108,\n      108,\n      105,\n      102,\n      105,\n      101,\n      114,\n      34,\n      58,\n      91,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      44,\n      49,\n      93,\n      44,\n      34,\n      99,\n      111,\n      109,\n      109,\n      105,\n      116,\n      109,\n      101,\n      110,\n      116,\n      34,\n      58,\n      91,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      44,\n      50,\n      93,\n      44,\n      34,\n      118,\n      111,\n      116,\n      101,\n      95,\n      105,\n      100,\n      34,\n      58,\n      34,\n      123,\n      123,\n      118,\n      111,\n      116,\n      101,\n      73,\n      100,\n      125,\n      125,\n      34,\n      125\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"accepted\": true,\n  \"nullifier_hex\": \"0101010101010101010101010101010101010101010101010101010101010101\",\n  \"commitment_hex\": \"0202020202020202020202020202020202020202020202020202020202020202\",\n  \"seq\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reveal vote",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/v/{{voteId}}/reveal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "v",
+                "{{voteId}}",
+                "reveal"
+              ]
+            },
+            "description": "One-way creator-only visibility toggle → 202 Accepted."
+          },
+          "response": [
+            {
+              "name": "202 Accepted",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/v/{{voteId}}/reveal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "v",
+                    "{{voteId}}",
+                    "reveal"
+                  ]
+                },
+                "description": "One-way creator-only visibility toggle → 202 Accepted."
+              },
+              "status": "Accepted",
+              "code": 202,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Vote results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pub/t/{{topicId}}/v/{{voteId}}/results",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pub",
+                "t",
+                "{{topicId}}",
+                "v",
+                "{{voteId}}",
+                "results"
+              ]
+            },
+            "description": "Public tally for a vote (post-close)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pub/t/{{topicId}}/v/{{voteId}}/results",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pub",
+                    "t",
+                    "{{topicId}}",
+                    "v",
+                    "{{voteId}}",
+                    "results"
+                  ]
+                },
+                "description": "Public tally for a vote (post-close)."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"vote_id\": \"01KWYAKKQZYPPBWSJPGXAPP31Q\",\n  \"status\": \"open\",\n  \"tally\": null,\n  \"attributed\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Governance (citizen)",
+      "item": [
+        {
+          "name": "Create proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/proposals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "proposals"
+              ]
+            },
+            "description": "proposal_type is 'regular' or 'constitutional' (else 400).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proposal_type\": \"regular\",\n  \"title\": \"Fund ward-12 drainage upgrade\",\n  \"description\": \"Pre-monsoon budget.\",\n  \"proposer_wallet\": \"{{username}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/proposals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "proposals"
+                  ]
+                },
+                "description": "proposal_type is 'regular' or 'constitutional' (else 400).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"proposal_type\": \"regular\",\n  \"title\": \"Fund ward-12 drainage upgrade\",\n  \"description\": \"Pre-monsoon budget.\",\n  \"proposer_wallet\": \"{{username}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"proposal_id\": \"prop-api-01KWYAZ1MB9J54MQ3FTD7XA42Z\",\n  \"closes_at_block\": 100,\n  \"required_quorum\": 0.501\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sign recall",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/recall/{{topicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "recall",
+                "{{topicId}}"
+              ]
+            },
+            "description": "Sign a moderator recall petition for a topic.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moderator_wallet\": \"wallet-moderator-1\",\n  \"signer_wallet\": \"wallet-signer-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/recall/{{topicId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "recall",
+                    "{{topicId}}"
+                  ]
+                },
+                "description": "Sign a moderator recall petition for a topic.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"moderator_wallet\": \"wallet-moderator-1\",\n  \"signer_wallet\": \"wallet-signer-1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"signatures\": 1,\n  \"threshold\": 100,\n  \"recall_vote_opened\": false\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "KYC (real UIDAI flow)",
+      "item": [
+        {
+          "name": "Upload e-KYC ZIP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizen/kyc/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "citizen",
+                "kyc",
+                "upload"
+              ]
+            },
+            "description": "Multipart upload of a UIDAI offline e-KYC ZIP + share code. (Superseded by the POC register flow.)",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "UIDAI offline e-KYC ZIP"
+                },
+                {
+                  "key": "share_code",
+                  "value": "1234",
+                  "type": "text",
+                  "description": "4-digit share code"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "400 missing file",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/citizen/kyc/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "citizen",
+                    "kyc",
+                    "upload"
+                  ]
+                },
+                "description": "Multipart upload of a UIDAI offline e-KYC ZIP + share code. (Superseded by the POC register flow.)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": [],
+                      "description": "UIDAI offline e-KYC ZIP"
+                    },
+                    {
+                      "key": "share_code",
+                      "value": "1234",
+                      "type": "text",
+                      "description": "4-digit share code"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Missing ZIP file. Upload with field name 'file' or 'zip'.\",\n  \"error_code\": \"MISSING_FILE\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
