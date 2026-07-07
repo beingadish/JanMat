@@ -158,11 +158,7 @@ impl NamespacePallet {
 
     /// Register a closed policy vote for outcome tracking.
     /// Called ~180 blocks after the vote closes (governance schedule).
-    pub fn register_outcome(
-        &mut self,
-        output_vote_id: VoteId,
-        at_block: u64,
-    ) -> OutcomeRecord {
+    pub fn register_outcome(&mut self, output_vote_id: VoteId, at_block: u64) -> OutcomeRecord {
         let record = OutcomeRecord {
             output_vote_id: output_vote_id.clone(),
             assessment_vote_id: None,
@@ -170,7 +166,8 @@ impl NamespacePallet {
             evidence_cids: Vec::new(),
             linked_at_block: at_block,
         };
-        self.outcomes.insert(output_vote_id.to_string(), record.clone());
+        self.outcomes
+            .insert(output_vote_id.to_string(), record.clone());
         record
     }
 
@@ -180,7 +177,8 @@ impl NamespacePallet {
         output_vote_id: &str,
         assessment_vote_id: VoteId,
     ) -> Result<(), NamespaceError> {
-        let rec = self.outcomes
+        let rec = self
+            .outcomes
             .get_mut(output_vote_id)
             .ok_or(NamespaceError::OpinionNotFound)?;
         rec.assessment_vote_id = Some(assessment_vote_id);
@@ -189,7 +187,11 @@ impl NamespacePallet {
     }
 
     /// Add evidence IPFS CID to an outcome record.
-    pub fn add_evidence(&mut self, output_vote_id: &str, cid: String) -> Result<(), NamespaceError> {
+    pub fn add_evidence(
+        &mut self,
+        output_vote_id: &str,
+        cid: String,
+    ) -> Result<(), NamespaceError> {
         self.outcomes
             .get_mut(output_vote_id)
             .ok_or(NamespaceError::OpinionNotFound)?
@@ -199,16 +201,25 @@ impl NamespacePallet {
     }
 
     /// Finalise the outcome assessment with a result string (e.g. "61% say NO CHANGE").
-    pub fn finalise_outcome(&mut self, output_vote_id: &str, result: String) -> Result<(), NamespaceError> {
-        let rec = self.outcomes
+    pub fn finalise_outcome(
+        &mut self,
+        output_vote_id: &str,
+        result: String,
+    ) -> Result<(), NamespaceError> {
+        let rec = self
+            .outcomes
             .get_mut(output_vote_id)
             .ok_or(NamespaceError::OpinionNotFound)?;
         rec.status = OutcomeStatus::Assessed { result };
         Ok(())
     }
 
-    pub fn topic_count(&self) -> usize { self.topics.len() }
-    pub fn opinion_count(&self) -> usize { self.opinions.len() }
+    pub fn topic_count(&self) -> usize {
+        self.topics.len()
+    }
+    pub fn opinion_count(&self) -> usize {
+        self.opinions.len()
+    }
 }
 
 #[cfg(test)]
@@ -244,7 +255,9 @@ mod tests {
     fn subtopic_requires_valid_parent() {
         let mut p = make_pallet();
         let fake_topic_id = TopicId::new();
-        let err = p.create_subtopic("orphan", fake_topic_id, b"b").unwrap_err();
+        let err = p
+            .create_subtopic("orphan", fake_topic_id, b"b")
+            .unwrap_err();
         assert_eq!(err, NamespaceError::TopicNotFound);
     }
 
@@ -254,7 +267,14 @@ mod tests {
         let topic = p.create_topic("test-topic", b"b1").unwrap();
         let st = p.create_subtopic("st", topic.id.clone(), b"b2").unwrap();
         let op = p
-            .submit_opinion(st.id.clone(), "cid".to_owned(), "h".to_owned(), "n".to_owned(), None, b"b3")
+            .submit_opinion(
+                st.id.clone(),
+                "cid".to_owned(),
+                "h".to_owned(),
+                "n".to_owned(),
+                None,
+                b"b3",
+            )
             .unwrap();
         p.suppress_opinion(&op.id.to_string()).unwrap();
         // opinion still in map — only status changes
@@ -277,7 +297,11 @@ mod tests {
         p.add_evidence(&key, "QmEvidence123".to_owned()).unwrap();
         assert_eq!(p.outcomes[&key].evidence_cids.len(), 1);
 
-        p.finalise_outcome(&key, "61% say NO CHANGE".to_owned()).unwrap();
-        assert!(matches!(p.outcomes[&key].status, OutcomeStatus::Assessed { .. }));
+        p.finalise_outcome(&key, "61% say NO CHANGE".to_owned())
+            .unwrap();
+        assert!(matches!(
+            p.outcomes[&key].status,
+            OutcomeStatus::Assessed { .. }
+        ));
     }
 }

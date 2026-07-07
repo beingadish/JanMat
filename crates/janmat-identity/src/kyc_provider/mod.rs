@@ -40,9 +40,9 @@ impl KycProvider for MockKycProvider {
     fn issue_credential(&self, subject_ref: &str) -> KycCredential {
         // Derive a stable, reproducible salt so the same subject always
         // gets the same nullifier_seed_commitment — mirroring real UIDAI behaviour.
-        let salt = blake3::hash(
-            format!("mock-salt:{subject_ref}").as_bytes()
-        ).as_bytes().to_vec();
+        let salt = blake3::hash(format!("mock-salt:{subject_ref}").as_bytes())
+            .as_bytes()
+            .to_vec();
 
         KycCredential {
             citizenship_country: "India".to_owned(),
@@ -84,7 +84,13 @@ pub fn poc_identity_commitment(pan: &str, dob: &str, aadhaar: &str) -> [u8; 32] 
 pub fn poc_uid(pan: &str, dob: &str, aadhaar: &str, phone: &str, salt: &str) -> [u8; 32] {
     let mut h = blake3::Hasher::new();
     h.update(b"janmat/poc-uid/v1");
-    for part in [pan.trim().to_uppercase().as_str(), dob.trim(), aadhaar.trim(), phone.trim(), salt] {
+    for part in [
+        pan.trim().to_uppercase().as_str(),
+        dob.trim(),
+        aadhaar.trim(),
+        phone.trim(),
+        salt,
+    ] {
         h.update(part.as_bytes());
         h.update(b"|");
     }

@@ -1,0 +1,219 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]*"
+
+env:
+  CARGO_TERM_COLOR: always
+  REGISTRY: ghcr.io
+  IMAGE_API: ghcr.io/${{ github.repository_owner }}/janmat-api
+  IMAGE_WEB: ghcr.io/${{ github.repository_owner }}/janmat-web
+
+permissions:
+  contents: write        # create GitHub Release
+  packages: write        # push to GHCR
+  id-token: write        # OIDC (future signing)
+
+jobs:
+  # ── 1. Gate: CI must be green before any release artifact is produced ──────
+  ci:
+    name: CI gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (deny warnings)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Tests
+        run: cargo test --workspace
+
+      - name: Security audit
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit --ignore RUSTSEC-2023-0071
+
+  # ── 2. Build and push Docker images to GHCR ────────────────────────────────
+  docker:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    needs: ci
+    outputs:
+      api-digest: ${{ steps.push-api.outputs.digest }}
+      web-digest: ${{ steps.push-web.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract tag version
+        id: meta
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # ── API image ──
+      - name: Build and push janmat-api
+        id: push-api
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          tags: |
+            ${{ env.IMAGE_API }}:${{ steps.meta.outputs.version }}
+            ${{ env.IMAGE_API }}:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+          labels: |
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      # ── Web image ──
+      - name: Build and push janmat-web
+        id: push-web
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web
+          file: web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_WEB }}:${{ steps.meta.outputs.version }}
+            ${{ env.IMAGE_WEB }}:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          labels: |
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+  # ── 3. Build Linux binary for the API (x86-64) ─────────────────────────────
+  binary:
+    name: Build Linux binary
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Build release binary
+        run: cargo build --release -p janmat-api
+
+      - name: Package binary
+        run: |
+          cp target/release/janmat-api janmat-api-linux-x86_64
+          tar czf janmat-api-linux-x86_64.tar.gz janmat-api-linux-x86_64
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: janmat-api-linux-x86_64
+          path: janmat-api-linux-x86_64.tar.gz
+          retention-days: 7
+
+  # ── 4. Create GitHub Release ────────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [docker, binary]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # full history for changelog
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: janmat-api-linux-x86_64
+
+      - name: Extract version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV=$(git tag --sort=-creatordate | grep -E '^v[0-9]' | sed -n '2p')
+          if [ -n "$PREV" ]; then
+            LOG=$(git log "${PREV}..HEAD" --pretty="format:- %s (%h)" --no-merges)
+          else
+            LOG=$(git log --pretty="format:- %s (%h)" --no-merges | head -30)
+          fi
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "JanMat v${{ steps.ver.outputs.version }}"
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## JanMat v${{ steps.ver.outputs.version }}
+
+            ### What changed
+            ${{ steps.changelog.outputs.log }}
+
+            ### Docker images (GHCR)
+            ```
+            docker pull ${{ env.IMAGE_API }}:${{ steps.ver.outputs.version }}
+            docker pull ${{ env.IMAGE_WEB }}:${{ steps.ver.outputs.version }}
+            ```
+
+            ### Run the full stack
+            ```bash
+            # Create a docker-compose.override.yml or use environment variables:
+            API_IMAGE=${{ env.IMAGE_API }}:${{ steps.ver.outputs.version }} \
+            WEB_IMAGE=${{ env.IMAGE_WEB }}:${{ steps.ver.outputs.version }} \
+            docker compose up
+            ```
+
+            ### Checksums
+            API digest: `${{ needs.docker.outputs.api-digest }}`
+            Web digest: `${{ needs.docker.outputs.web-digest }}`
+          files: janmat-api-linux-x86_64.tar.gz
+          generate_release_notes: false
+          make_latest: true

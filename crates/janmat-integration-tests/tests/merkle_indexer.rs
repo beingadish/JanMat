@@ -1,17 +1,15 @@
 //! Integration: Merkle anchor + indexer pipeline.
 
 use janmat_storage::{
-    merkle::{batch_votes_root, merkle_root, MerkleAnchor},
-    indexer::{IndexerEvent, IndexReader, InMemoryIndexStore},
+    indexer::{InMemoryIndexStore, IndexReader, IndexerEvent},
+    merkle::{MerkleAnchor, batch_votes_root, merkle_root},
 };
 use std::collections::HashMap;
 
 #[test]
 fn merkle_root_anchors_batch_of_votes() {
     let mut anchor = MerkleAnchor::default();
-    let commits: Vec<String> = (0..100)
-        .map(|i| format!("{i:064x}"))
-        .collect();
+    let commits: Vec<String> = (0..100).map(|i| format!("{i:064x}")).collect();
     let record = anchor.anchor_batch(&commits, 1000);
 
     assert_eq!(record.commitment_count, 100);
@@ -31,21 +29,30 @@ fn indexer_full_vote_lifecycle_query() {
 
     // Ingest events in order
     store.ingest(IndexerEvent::TopicCreated {
-        topic_id: "t/nep".into(), slug: "education-nep".into(), block: 100,
+        topic_id: "t/nep".into(),
+        slug: "education-nep".into(),
+        block: 100,
     });
     store.ingest(IndexerEvent::OpinionSubmitted {
-        opinion_id: "o/op1".into(), subtopic_id: "st/rural".into(),
-        creator_nullifier: "null-alice".into(), content_cid: "QmABC".into(), block: 200,
+        opinion_id: "o/op1".into(),
+        subtopic_id: "st/rural".into(),
+        creator_nullifier: "null-alice".into(),
+        content_cid: "QmABC".into(),
+        block: 200,
     });
     let mut tally = HashMap::new();
     tally.insert("YES".to_owned(), 73u64);
     tally.insert("NO".to_owned(), 27u64);
     store.ingest(IndexerEvent::VoteClosed {
-        vote_id: "v/vote1".into(), tally, block: 9000,
+        vote_id: "v/vote1".into(),
+        tally,
+        block: 9000,
     });
     store.ingest(IndexerEvent::OpinionFlagged {
-        opinion_id: "o/op1".into(), reason_code: "review".into(),
-        moderator: "mod-A".into(), block: 400,
+        opinion_id: "o/op1".into(),
+        reason_code: "review".into(),
+        moderator: "mod-A".into(),
+        block: 400,
     });
 
     // Queries

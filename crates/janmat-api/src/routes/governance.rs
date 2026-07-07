@@ -20,7 +20,7 @@ pub struct RuleEntry {
 
 #[derive(Deserialize)]
 pub struct CreateProposalRequest {
-    pub proposal_type: String,  // "regular" | "constitutional"
+    pub proposal_type: String, // "regular" | "constitutional"
     pub title: String,
     pub description: String,
     pub proposer_wallet: String,
@@ -50,16 +50,46 @@ pub struct RecallResponse {
 
 /// GET /pub/constitution — current constitution rules
 pub async fn get_constitution() -> Json<ConstitutionResponse> {
-    use janmat_governance::{REGULAR_QUORUM, CONSTITUTIONAL_QUORUM};
+    use janmat_governance::{CONSTITUTIONAL_QUORUM, REGULAR_QUORUM};
 
     // Phase 5: return genesis seed rules; Phase 6 reads from chain indexer
     let rules = vec![
-        RuleEntry { key: "quorum.regular".into(),           value: format!("{REGULAR_QUORUM}"),        enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
-        RuleEntry { key: "quorum.constitutional".into(),    value: format!("{CONSTITUTIONAL_QUORUM}"),  enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
-        RuleEntry { key: "moderator.max_per_topic".into(),  value: "2".into(),                         enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
-        RuleEntry { key: "moderator.term_blocks".into(),    value: "90".into(),                        enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
-        RuleEntry { key: "recall.petition_ratio".into(),    value: "0.10".into(),                      enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
-        RuleEntry { key: "referenda.support_ratio".into(),  value: "0.05".into(),                      enacted_at_block: 0, enacted_by_proposal: "genesis".into() },
+        RuleEntry {
+            key: "quorum.regular".into(),
+            value: format!("{REGULAR_QUORUM}"),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
+        RuleEntry {
+            key: "quorum.constitutional".into(),
+            value: format!("{CONSTITUTIONAL_QUORUM}"),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
+        RuleEntry {
+            key: "moderator.max_per_topic".into(),
+            value: "2".into(),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
+        RuleEntry {
+            key: "moderator.term_blocks".into(),
+            value: "90".into(),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
+        RuleEntry {
+            key: "recall.petition_ratio".into(),
+            value: "0.10".into(),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
+        RuleEntry {
+            key: "referenda.support_ratio".into(),
+            value: "0.05".into(),
+            enacted_at_block: 0,
+            enacted_by_proposal: "genesis".into(),
+        },
     ];
     Json(ConstitutionResponse { version: 1, rules })
 }
@@ -68,15 +98,19 @@ pub async fn get_constitution() -> Json<ConstitutionResponse> {
 pub async fn create_proposal(
     Json(req): Json<CreateProposalRequest>,
 ) -> Result<Json<CreateProposalResponse>, StatusCode> {
-    use janmat_governance::{ProposalType, REGULAR_QUORUM, CONSTITUTIONAL_QUORUM};
+    use janmat_governance::{CONSTITUTIONAL_QUORUM, ProposalType, REGULAR_QUORUM};
 
     let (proposal_type, quorum) = match req.proposal_type.as_str() {
         "constitutional" => (ProposalType::Constitutional, CONSTITUTIONAL_QUORUM),
-        "regular"        => (ProposalType::Regular, REGULAR_QUORUM),
-        _                => return Err(StatusCode::BAD_REQUEST),
+        "regular" => (ProposalType::Regular, REGULAR_QUORUM),
+        _ => return Err(StatusCode::BAD_REQUEST),
     };
 
-    let duration = if proposal_type.is_constitutional() { 200u64 } else { 100u64 };
+    let duration = if proposal_type.is_constitutional() {
+        200u64
+    } else {
+        100u64
+    };
     let proposal_id = format!("prop-api-{}", ulid::Ulid::new());
 
     Ok(Json(CreateProposalResponse {

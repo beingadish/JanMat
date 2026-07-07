@@ -11,13 +11,10 @@
 //!     replace with threshold ElGamal keyed to the validator set.
 
 use janmat_types::{
-    vote::{VoteStatus, VoteVisibility},
     OpinionId, VoteId,
+    vote::{VoteStatus, VoteVisibility},
 };
-use janmat_zk::{
-    CIRCUIT_VOTE_CAST, ZkReceipt, ZkVerifier,
-    circuits::vote_cast::VoteCastOutput,
-};
+use janmat_zk::{CIRCUIT_VOTE_CAST, ZkReceipt, ZkVerifier, circuits::vote_cast::VoteCastOutput};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
@@ -146,9 +143,8 @@ impl VotingPallet {
             return Err(VoteError::InvalidProof);
         }
         // 2. Deserialise public outputs
-        let output: VoteCastOutput =
-            serde_json::from_slice(&receipt.public_outputs)
-                .map_err(|_| VoteError::InvalidPublicOutputs)?;
+        let output: VoteCastOutput = serde_json::from_slice(&receipt.public_outputs)
+            .map_err(|_| VoteError::InvalidPublicOutputs)?;
         // 3. Ensure the proof is for THIS vote
         if output.vote_id != vote_id {
             return Err(VoteError::VoteMismatch);
@@ -242,21 +238,23 @@ fn hex_bytes(b: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use janmat_types::namespace::OpinionId;
-    use janmat_zk::{MockVerifier, prover::MockProver, circuits::vote_cast::VoteCastInput};
     use janmat_identity::nullifier::derive_nullifier_seed;
+    use janmat_types::namespace::OpinionId;
+    use janmat_zk::{MockVerifier, circuits::vote_cast::VoteCastInput, prover::MockProver};
 
     fn make_seed() -> Vec<u8> {
         derive_nullifier_seed(b"mock-credential", b"mock-salt").to_vec()
     }
 
     fn prove_vote(vote_id: &str, choice: &str, seed: &[u8]) -> ZkReceipt {
-        MockProver.prove_vote(&VoteCastInput {
-            nullifier_seed: seed.to_vec(),
-            vote_id: vote_id.to_owned(),
-            vote_choice: choice.to_owned(),
-            nonce: b"nonce-32-bytes-padded-padd-here!".to_vec(),
-        }).unwrap()
+        MockProver
+            .prove_vote(&VoteCastInput {
+                nullifier_seed: seed.to_vec(),
+                vote_id: vote_id.to_owned(),
+                vote_choice: choice.to_owned(),
+                nonce: b"nonce-32-bytes-padded-padd-here!".to_vec(),
+            })
+            .unwrap()
     }
 
     fn make_vote(p: &mut VotingPallet) -> String {
@@ -296,8 +294,10 @@ mod tests {
         let vid = make_vote(&mut p);
         let seed_a = derive_nullifier_seed(b"cred-A", b"salt-A").to_vec();
         let seed_b = derive_nullifier_seed(b"cred-B", b"salt-B").to_vec();
-        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed_a), &MockVerifier).unwrap();
-        p.cast_vote(&vid, &prove_vote(&vid, "NO", &seed_b), &MockVerifier).unwrap();
+        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed_a), &MockVerifier)
+            .unwrap();
+        p.cast_vote(&vid, &prove_vote(&vid, "NO", &seed_b), &MockVerifier)
+            .unwrap();
         assert_eq!(p.votes[&vid].casts.len(), 2);
     }
 
@@ -307,7 +307,8 @@ mod tests {
         let vid = make_vote(&mut p);
         p.close_tally(&vid).unwrap();
         let seed = make_seed();
-        let err = p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier)
+        let err = p
+            .cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier)
             .unwrap_err();
         assert_eq!(err, VoteError::VoteAlreadyClosed);
     }
@@ -329,8 +330,10 @@ mod tests {
         let vid = make_vote(&mut p);
         let seed = make_seed();
         // Citizen votes YES then changes to NO
-        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier).unwrap();
-        p.cast_vote(&vid, &prove_vote(&vid, "NO", &seed), &MockVerifier).unwrap();
+        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier)
+            .unwrap();
+        p.cast_vote(&vid, &prove_vote(&vid, "NO", &seed), &MockVerifier)
+            .unwrap();
         let tally = p.close_tally(&vid).unwrap();
         // Only 1 commitment total (the re-vote replaced the first)
         assert_eq!(tally.values().sum::<u64>(), 1);
@@ -356,7 +359,8 @@ mod tests {
         let mut p = VotingPallet::default();
         let vid = make_vote(&mut p);
         let seed = make_seed();
-        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier).unwrap();
+        p.cast_vote(&vid, &prove_vote(&vid, "YES", &seed), &MockVerifier)
+            .unwrap();
         p.close_tally(&vid).unwrap();
         p.reveal_toggle(&vid).unwrap();
         let attributed = p.votes[&vid].attributed.as_ref().unwrap();

@@ -1,15 +1,13 @@
 //! Integration: content safety pipeline + moderation jury flow.
 
-use janmat_content::{
-    blocklist::BlocklistEngine, ContentPipeline, SubmitRequest, Verdict,
-};
+use janmat_content::{ContentPipeline, SubmitRequest, Verdict, blocklist::BlocklistEngine};
 use pallet_moderation::{JuryVerdict, ModerationPallet};
 
 #[test]
 fn blocked_phrase_rejected_end_to_end() {
-    let pipeline = ContentPipeline::new(
-        BlocklistEngine::with_phrases(vec!["banned-content".to_owned()]),
-    );
+    let pipeline = ContentPipeline::new(BlocklistEngine::with_phrases(vec![
+        "banned-content".to_owned(),
+    ]));
     let report = pipeline.check(&SubmitRequest {
         subtopic_id: "st/1",
         text: "This is banned-content and should not pass",
@@ -33,7 +31,14 @@ fn moderation_full_jury_flow_suppress() {
     let pool: Vec<String> = (0..10).map(|i| format!("voter-{i:03}")).collect();
 
     moderation
-        .flag_opinion("o/test-001", "coordinating_harm", "mod-A", &pool, b"blockhash", 500)
+        .flag_opinion(
+            "o/test-001",
+            "coordinating_harm",
+            "mod-A",
+            &pool,
+            b"blockhash",
+            500,
+        )
         .unwrap();
 
     let jurors = moderation
@@ -62,7 +67,10 @@ fn moderation_full_jury_flow_suppress() {
     }
 
     let log = moderation.audit_entries_for("o/test-001");
-    assert!(log.iter().any(|e| e.action == pallet_moderation::ModerationAction::Suppressed));
+    assert!(
+        log.iter()
+            .any(|e| e.action == pallet_moderation::ModerationAction::Suppressed)
+    );
 }
 
 #[test]
@@ -79,7 +87,8 @@ fn moderation_3_of_7_keeps_opinion() {
             .into_iter()
             .find(|e| e.action == pallet_moderation::ModerationAction::JuryConvened)
             .unwrap();
-        entry.reason_code
+        entry
+            .reason_code
             .trim_start_matches("jurors:")
             .split(',')
             .map(|s| s.to_owned())
@@ -99,5 +108,8 @@ fn moderation_3_of_7_keeps_opinion() {
     }
 
     let log = moderation.audit_entries_for("o/keep-001");
-    assert!(log.iter().any(|e| e.action == pallet_moderation::ModerationAction::Kept));
+    assert!(
+        log.iter()
+            .any(|e| e.action == pallet_moderation::ModerationAction::Kept)
+    );
 }

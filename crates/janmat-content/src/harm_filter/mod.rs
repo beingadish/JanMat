@@ -22,9 +22,9 @@ pub struct HarmReport {
 impl HarmReport {
     pub fn disposition(&self) -> HarmDisposition {
         match self.overall.0 {
-            0..=39  => HarmDisposition::Pass,
+            0..=39 => HarmDisposition::Pass,
             40..=79 => HarmDisposition::Review,
-            _       => HarmDisposition::Block,
+            _ => HarmDisposition::Block,
         }
     }
 }
@@ -59,19 +59,22 @@ impl HarmModel {
 pub struct HarmFilter;
 
 impl HarmFilter {
-    const HATE_KEYWORDS: &'static [&'static str] =
-        &["[test-hate]", "[slur]", "[incite-hate]"];
-    const VIOLENCE_KEYWORDS: &'static [&'static str] =
-        &["[test-violence]", "[attack]", "[bomb]"];
+    const HATE_KEYWORDS: &'static [&'static str] = &["[test-hate]", "[slur]", "[incite-hate]"];
+    const VIOLENCE_KEYWORDS: &'static [&'static str] = &["[test-violence]", "[attack]", "[bomb]"];
     const COORD_KEYWORDS: &'static [&'static str] =
         &["[test-coord]", "[meet-at]", "[coordinate-attack]"];
 
     pub fn score(&self, text: &str) -> HarmReport {
-        let hate       = HarmScore(HarmModel::score_raw(text, Self::HATE_KEYWORDS));
-        let violence   = HarmScore(HarmModel::score_raw(text, Self::VIOLENCE_KEYWORDS));
-        let coord      = HarmScore(HarmModel::score_raw(text, Self::COORD_KEYWORDS));
-        let overall    = HarmScore(hate.0.max(violence.0).max(coord.0));
-        HarmReport { overall, hate_speech: hate, violence, coordination: coord }
+        let hate = HarmScore(HarmModel::score_raw(text, Self::HATE_KEYWORDS));
+        let violence = HarmScore(HarmModel::score_raw(text, Self::VIOLENCE_KEYWORDS));
+        let coord = HarmScore(HarmModel::score_raw(text, Self::COORD_KEYWORDS));
+        let overall = HarmScore(hate.0.max(violence.0).max(coord.0));
+        HarmReport {
+            overall,
+            hate_speech: hate,
+            violence,
+            coordination: coord,
+        }
     }
 }
 

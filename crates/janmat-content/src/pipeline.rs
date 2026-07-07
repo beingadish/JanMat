@@ -108,14 +108,20 @@ mod tests {
     #[test]
     fn clean_text_passes() {
         let p = pipeline(&[]);
-        let r = p.check(&SubmitRequest { subtopic_id: "st/1", text: "NEP reform is important" });
+        let r = p.check(&SubmitRequest {
+            subtopic_id: "st/1",
+            text: "NEP reform is important",
+        });
         assert_eq!(r.verdict, Verdict::Clean);
     }
 
     #[test]
     fn blocked_phrase_stops_pipeline() {
         let p = pipeline(&["banned-word"]);
-        let r = p.check(&SubmitRequest { subtopic_id: "st/1", text: "contains banned-word here" });
+        let r = p.check(&SubmitRequest {
+            subtopic_id: "st/1",
+            text: "contains banned-word here",
+        });
         assert_eq!(r.verdict, Verdict::Blocked);
         assert!(r.blocked_by_phrase.is_some());
     }
@@ -136,7 +142,10 @@ mod tests {
         let mut p = pipeline(&[]);
         let original = "nep policy reform rural india students need help";
         p.clone.index_opinion("st/1", "o/original", original);
-        let r = p.check(&SubmitRequest { subtopic_id: "st/1", text: original });
+        let r = p.check(&SubmitRequest {
+            subtopic_id: "st/1",
+            text: original,
+        });
         assert_eq!(r.verdict, Verdict::CloneWarning);
         assert!(!r.clone_candidates.is_empty());
     }

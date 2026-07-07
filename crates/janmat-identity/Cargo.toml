@@ -8,14 +8,13 @@ blake3.workspace = true
 janmat-zk = { path = "../janmat-zk" }
 
 # UIDAI Offline e-KYC dependencies
-quick-xml = { version = "0.37", features = ["serialize"] }
+quick-xml = { version = "0.41", features = ["serialize"] }
 zip = { version = "4.0", default-features = false, features = ["deflate", "aes-crypto"] }
 base64 = "0.22"
 thiserror = "2.0"
 serde = { workspace = true }
 
 # Cryptographic signature verification (UIDAI uses RSA-2048 + SHA-256)
-rsa = "0.9"
 sha2 = "0.10"
 x509-cert = { version = "0.2", features = ["pem"] }
 

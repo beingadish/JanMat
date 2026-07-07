@@ -11,7 +11,11 @@
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use axum::{Json, extract::{Path, State}, http::StatusCode};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 use janmat_identity::token;
 use serde::{Deserialize, Serialize};
 
@@ -25,7 +29,10 @@ fn token_key() -> Vec<u8> {
         .into_bytes()
 }
 fn now_secs() -> i64 {
-    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64
 }
 fn fp_from_root_hex(h: &str) -> Option<[u8; 6]> {
     if h.len() < 12 {
@@ -114,7 +121,14 @@ pub struct ApiError {
 
 type Fail = (StatusCode, Json<ApiError>);
 fn fail(status: StatusCode, field: &str, msg: &str) -> Fail {
-    (status, Json(ApiError { success: false, error: msg.to_string(), field: field.to_string() }))
+    (
+        status,
+        Json(ApiError {
+            success: false,
+            error: msg.to_string(),
+            field: field.to_string(),
+        }),
+    )
 }
 
 // ── Validation ──────────────────────────────────────────────────────────────────
@@ -163,10 +177,24 @@ pub async fn username_available(
 ) -> Result<Json<UsernameAvailability>, Fail> {
     let name = name.trim().to_string();
     if !valid_username(&name) {
-        return Ok(Json(UsernameAvailability { username: name, available: false, reason: Some("Invalid format".into()) }));
+        return Ok(Json(UsernameAvailability {
+            username: name,
+            available: false,
+            reason: Some("Invalid format".into()),
+        }));
     }
-    let taken = reg.is_taken(&name).await.map_err(|_| fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "registry error"))?;
-    Ok(Json(UsernameAvailability { available: !taken, reason: taken.then(|| "Already taken".into()), username: name }))
+    let taken = reg.is_taken(&name).await.map_err(|_| {
+        fail(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "server",
+            "registry error",
+        )
+    })?;
+    Ok(Json(UsernameAvailability {
+        available: !taken,
+        reason: taken.then(|| "Already taken".into()),
+        username: name,
+    }))
 }
 
 /// POST /citizen/register
@@ -176,21 +204,41 @@ pub async fn register(
 ) -> Result<Json<RegisterResponse>, Fail> {
     let username = req.username.trim().to_string();
     if !valid_username(&username) {
-        return Err(fail(StatusCode::BAD_REQUEST, "username", "Username must be 3–20 chars, start with a letter, letters/digits/_ only."));
+        return Err(fail(
+            StatusCode::BAD_REQUEST,
+            "username",
+            "Username must be 3–20 chars, start with a letter, letters/digits/_ only.",
+        ));
     }
     let pan = req.pan.trim().to_uppercase();
     if !valid_pan(&pan) {
-        return Err(fail(StatusCode::BAD_REQUEST, "pan", "PAN must look like ABCDE1234F."));
+        return Err(fail(
+            StatusCode::BAD_REQUEST,
+            "pan",
+            "PAN must look like ABCDE1234F.",
+        ));
     }
     let aadhaar = digits_only(&req.aadhaar);
     if aadhaar.len() != 12 {
-        return Err(fail(StatusCode::BAD_REQUEST, "aadhaar", "Aadhaar must be 12 digits."));
+        return Err(fail(
+            StatusCode::BAD_REQUEST,
+            "aadhaar",
+            "Aadhaar must be 12 digits.",
+        ));
     }
     if !valid_dob(&req.dob) {
-        return Err(fail(StatusCode::BAD_REQUEST, "dob", "Date of birth must be YYYY-MM-DD."));
+        return Err(fail(
+            StatusCode::BAD_REQUEST,
+            "dob",
+            "Date of birth must be YYYY-MM-DD.",
+        ));
     }
     let Some(phone) = normalize_phone(&req.phone) else {
-        return Err(fail(StatusCode::BAD_REQUEST, "phone", "Enter a valid 10-digit Indian mobile number."));
+        return Err(fail(
+            StatusCode::BAD_REQUEST,
+            "phone",
+            "Enter a valid 10-digit Indian mobile number.",
+        ));
     };
 
     let root = token::identity_root(&pan, &aadhaar, &req.dob, &username);
@@ -199,7 +247,10 @@ pub async fn register(
     let now = now_secs();
     let masked_phone = format!("XXXXXX{}", &phone[6..]);
 
-    match reg.register(&username, &root_hex, &masked_phone, now, &seed0).await {
+    match reg
+        .register(&username, &root_hex, &masked_phone, now, &seed0)
+        .await
+    {
         Ok(Some(id)) => {
             let fp = token::fingerprint6(&root);
             let password = token::encode_password(id, now as u32, &fp, &token_key());
@@ -218,8 +269,16 @@ pub async fn register(
                 phone_verified: false,
             }))
         }
-        Ok(None) => Err(fail(StatusCode::CONFLICT, "username", "That username is already taken. Please choose another.")),
-        Err(_) => Err(fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "Could not register — registry error.")),
+        Ok(None) => Err(fail(
+            StatusCode::CONFLICT,
+            "username",
+            "That username is already taken. Please choose another.",
+        )),
+        Err(_) => Err(fail(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "server",
+            "Could not register — registry error.",
+        )),
     }
 }
 
@@ -229,17 +288,28 @@ pub async fn login(
     Json(req): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, Fail> {
     let bad = || fail(StatusCode::UNAUTHORIZED, "password", "Invalid password.");
-    let (id, secs, fp) = token::decode_password(req.password.trim(), &token_key()).ok_or_else(bad)?;
+    let (id, secs, fp) =
+        token::decode_password(req.password.trim(), &token_key()).ok_or_else(bad)?;
 
     let citizen = reg
         .by_id(id)
         .await
-        .map_err(|_| fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "registry error"))?
+        .map_err(|_| {
+            fail(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "server",
+                "registry error",
+            )
+        })?
         .ok_or_else(bad)?;
 
     // The password must match the currently-active one (creation time) …
     if secs as i64 != citizen.pwd_created {
-        return Err(fail(StatusCode::UNAUTHORIZED, "password", "This password is no longer valid."));
+        return Err(fail(
+            StatusCode::UNAUTHORIZED,
+            "password",
+            "This password is no longer valid.",
+        ));
     }
     // … and its embedded fingerprint must match all four registered fields.
     if fp_from_root_hex(&citizen.root) != Some(fp) {
@@ -248,7 +318,11 @@ pub async fn login(
     // … and it must not have expired.
     let now = now_secs();
     if now >= citizen.pwd_created + DAY_SECS {
-        return Err(fail(StatusCode::UNAUTHORIZED, "password", "Password expired — regenerate it with your details."));
+        return Err(fail(
+            StatusCode::UNAUTHORIZED,
+            "password",
+            "Password expired — regenerate it with your details.",
+        ));
     }
 
     // Rotate the Citizen-UID seed chain (seed changes every login).
@@ -256,7 +330,13 @@ pub async fn login(
     let new_seed = token::seed_next(&citizen.current_seed, n as u64);
     reg.rotate_seed(&citizen.username, n, &new_seed)
         .await
-        .map_err(|_| fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "registry error"))?;
+        .map_err(|_| {
+            fail(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "server",
+                "registry error",
+            )
+        })?;
 
     Ok(Json(LoginResponse {
         success: true,
@@ -278,14 +358,30 @@ pub async fn regenerate(
     let citizen = reg
         .by_username(&username)
         .await
-        .map_err(|_| fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "registry error"))?
-        .ok_or_else(|| fail(StatusCode::NOT_FOUND, "username", "No citizen registered with that username."))?;
+        .map_err(|_| {
+            fail(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "server",
+                "registry error",
+            )
+        })?
+        .ok_or_else(|| {
+            fail(
+                StatusCode::NOT_FOUND,
+                "username",
+                "No citizen registered with that username.",
+            )
+        })?;
 
     let pan = req.pan.trim().to_uppercase();
     let aadhaar = digits_only(&req.aadhaar);
     let root = token::root_hex(&token::identity_root(&pan, &aadhaar, &req.dob, &username));
     if root != citizen.root {
-        return Err(fail(StatusCode::UNAUTHORIZED, "info", "Those details don't match our records."));
+        return Err(fail(
+            StatusCode::UNAUTHORIZED,
+            "info",
+            "Those details don't match our records.",
+        ));
     }
 
     let now = now_secs();
@@ -297,9 +393,13 @@ pub async fn regenerate(
         ));
     }
 
-    reg.set_pwd_created(&username, now)
-        .await
-        .map_err(|_| fail(StatusCode::INTERNAL_SERVER_ERROR, "server", "registry error"))?;
+    reg.set_pwd_created(&username, now).await.map_err(|_| {
+        fail(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "server",
+            "registry error",
+        )
+    })?;
     let fp = token::fingerprint6(&token::identity_root(&pan, &aadhaar, &req.dob, &username));
     let password = token::encode_password(citizen.id, now as u32, &fp, &token_key());
 

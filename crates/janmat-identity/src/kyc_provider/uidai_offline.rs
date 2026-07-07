@@ -153,18 +153,21 @@ struct PoaXml {
 struct SignatureXml {
     #[serde(rename = "SignatureValue")]
     signature_value: String,
+    #[allow(dead_code)]
     #[serde(rename = "SignedInfo")]
     signed_info: SignedInfoXml,
 }
 
 #[derive(Debug, Deserialize)]
 struct SignedInfoXml {
+    #[allow(dead_code)]
     #[serde(rename = "Reference")]
     reference: ReferenceXml,
 }
 
 #[derive(Debug, Deserialize)]
 struct ReferenceXml {
+    #[allow(dead_code)]
     #[serde(rename = "DigestValue")]
     digest_value: String,
 }
@@ -291,7 +294,7 @@ impl UidaiOfflineKycProvider {
             let mut file = match archive.by_index_decrypt(i, share_code.as_bytes()) {
                 Ok(f) => f,
                 Err(zip::result::ZipError::InvalidPassword) => {
-                    return Err(UidaiError::DecryptionFailed)
+                    return Err(UidaiError::DecryptionFailed);
                 }
                 Err(e) => return Err(UidaiError::ZipOpen(e)),
             };
@@ -311,11 +314,11 @@ impl UidaiOfflineKycProvider {
     fn extract_signed_data(&self, xml_content: &str) -> Vec<u8> {
         // The signed data is the UidData element content
         // For simplicity, we hash the entire XML minus the Signature element
-        if let Some(start) = xml_content.find("<UidData") {
-            if let Some(end) = xml_content.find("</UidData>") {
-                let signed_portion = &xml_content[start..end + 10];
-                return signed_portion.as_bytes().to_vec();
-            }
+        if let Some(start) = xml_content.find("<UidData")
+            && let Some(end) = xml_content.find("</UidData>")
+        {
+            let signed_portion = &xml_content[start..end + 10];
+            return signed_portion.as_bytes().to_vec();
         }
         xml_content.as_bytes().to_vec()
     }
@@ -365,13 +368,8 @@ impl UidaiOfflineKycProvider {
     fn kyc_data_to_credential(&self, data: &UidaiKycData) -> KycCredential {
         // Create a deterministic credential body that doesn't contain raw Aadhaar
         // but uniquely identifies this person
-        let credential_body = format!(
-            "uidai/v1:{}:{}:{}",
-            data.reference_id, data.name, data.dob
-        );
-        let credential_bytes = blake3::hash(credential_body.as_bytes())
-            .as_bytes()
-            .to_vec();
+        let credential_body = format!("uidai/v1:{}:{}:{}", data.reference_id, data.name, data.dob);
+        let credential_bytes = blake3::hash(credential_body.as_bytes()).as_bytes().to_vec();
 
         // Derive a stable salt from the reference_id + name
         // This ensures the same person always gets the same nullifier_seed_commitment
@@ -497,7 +495,9 @@ mod tests {
         let provider = UidaiOfflineKycProvider::without_signature_check();
         let zip_data = create_test_zip("1234");
 
-        let credential = provider.issue_credential_from_zip(&zip_data, "1234").unwrap();
+        let credential = provider
+            .issue_credential_from_zip(&zip_data, "1234")
+            .unwrap();
 
         assert_eq!(credential.citizenship_country, "India");
         assert!(!credential.credential_bytes.is_empty());
@@ -509,8 +509,12 @@ mod tests {
         let provider = UidaiOfflineKycProvider::without_signature_check();
         let zip_data = create_test_zip("1234");
 
-        let cred1 = provider.issue_credential_from_zip(&zip_data, "1234").unwrap();
-        let cred2 = provider.issue_credential_from_zip(&zip_data, "1234").unwrap();
+        let cred1 = provider
+            .issue_credential_from_zip(&zip_data, "1234")
+            .unwrap();
+        let cred2 = provider
+            .issue_credential_from_zip(&zip_data, "1234")
+            .unwrap();
 
         // Same person should get same salt (deterministic)
         assert_eq!(cred1.citizen_salt, cred2.citizen_salt);

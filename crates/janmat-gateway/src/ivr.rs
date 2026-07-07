@@ -44,22 +44,28 @@ impl IvrSession {
     pub fn advance(&mut self, dtmf: &str) -> &IvrStep {
         let prev = self.current_step.clone();
         self.current_step = match (&self.current_step, dtmf) {
-            (IvrStep::LanguageSelect, _)           => IvrStep::OtpChallenge,
+            (IvrStep::LanguageSelect, _) => IvrStep::OtpChallenge,
             (IvrStep::OtpChallenge, otp) if otp.len() == 6 => {
                 self.wallet = Some(format!("wallet-otp-{otp}"));
                 IvrStep::MainMenu
             }
-            (IvrStep::OtpChallenge, _)             => IvrStep::OtpChallenge,
-            (IvrStep::MainMenu, "1")               => IvrStep::TopicSummary { topic_id: "t/latest".into() },
-            (IvrStep::MainMenu, "2")               => IvrStep::VoteCast { vote_id: "v/latest".into() },
-            (IvrStep::MainMenu, "9")               => IvrStep::Goodbye,
+            (IvrStep::OtpChallenge, _) => IvrStep::OtpChallenge,
+            (IvrStep::MainMenu, "1") => IvrStep::TopicSummary {
+                topic_id: "t/latest".into(),
+            },
+            (IvrStep::MainMenu, "2") => IvrStep::VoteCast {
+                vote_id: "v/latest".into(),
+            },
+            (IvrStep::MainMenu, "9") => IvrStep::Goodbye,
             (IvrStep::VoteCast { vote_id }, choice) => IvrStep::VoteConfirm {
                 vote_id: vote_id.clone(),
                 choice: choice.to_owned(),
             },
-            (IvrStep::VoteConfirm { .. }, "1")     => IvrStep::Goodbye,
-            (IvrStep::VoteConfirm { vote_id, choice: _ }, _) => IvrStep::VoteCast { vote_id: vote_id.clone() },
-            _                                      => IvrStep::Goodbye,
+            (IvrStep::VoteConfirm { .. }, "1") => IvrStep::Goodbye,
+            (IvrStep::VoteConfirm { vote_id, choice: _ }, _) => IvrStep::VoteCast {
+                vote_id: vote_id.clone(),
+            },
+            _ => IvrStep::Goodbye,
         };
         self.history.push(prev);
         &self.current_step
@@ -77,13 +83,13 @@ mod tests {
     #[test]
     fn full_vote_flow() {
         let mut s = IvrSession::new("+911234567890");
-        s.advance("1");  // select language
-        s.advance("123456");  // OTP
+        s.advance("1"); // select language
+        s.advance("123456"); // OTP
         assert!(s.is_authenticated());
-        s.advance("2");  // main menu → vote
-        let step = s.advance("1");  // choose option 1 (YES)
+        s.advance("2"); // main menu → vote
+        let step = s.advance("1"); // choose option 1 (YES)
         assert!(matches!(step, IvrStep::VoteConfirm { .. }));
-        let final_step = s.advance("1");  // confirm
+        let final_step = s.advance("1"); // confirm
         assert_eq!(*final_step, IvrStep::Goodbye);
     }
 
@@ -91,7 +97,7 @@ mod tests {
     fn wrong_otp_stays_at_challenge() {
         let mut s = IvrSession::new("+91x");
         s.advance("1");
-        let step = s.advance("123");  // too short — not 6 digits
+        let step = s.advance("123"); // too short — not 6 digits
         assert_eq!(*step, IvrStep::OtpChallenge);
         assert!(!s.is_authenticated());
     }

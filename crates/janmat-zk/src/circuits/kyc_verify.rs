@@ -114,6 +114,9 @@ mod tests {
     fn same_credential_same_nullifier_seed_commitment() {
         let out1 = execute(&valid_input()).unwrap();
         let out2 = execute(&valid_input()).unwrap();
-        assert_eq!(out1.nullifier_seed_commitment, out2.nullifier_seed_commitment);
+        assert_eq!(
+            out1.nullifier_seed_commitment,
+            out2.nullifier_seed_commitment
+        );
     }
 }

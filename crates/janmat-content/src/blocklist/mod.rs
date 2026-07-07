@@ -29,7 +29,6 @@ pub struct BlocklistEngine {
     pub audit_log: Vec<BlocklistAuditEntry>,
 }
 
-
 impl BlocklistEngine {
     /// Construct with pre-seeded phrases (genesis blocklist, no governance ref needed).
     pub fn with_phrases(phrases: Vec<String>) -> Self {
@@ -41,12 +40,7 @@ impl BlocklistEngine {
     }
 
     /// Add a phrase, authorized by an on-chain governance ref (vote ULID).
-    pub fn add_phrase(
-        &mut self,
-        phrase: &str,
-        at_block: u64,
-        governance_ref: &str,
-    ) -> bool {
+    pub fn add_phrase(&mut self, phrase: &str, at_block: u64, governance_ref: &str) -> bool {
         let normalised = phrase.to_lowercase();
         if self.phrases.contains(&normalised) {
             return false; // already present
@@ -70,12 +64,7 @@ impl BlocklistEngine {
     }
 
     /// Remove a phrase, authorized by an on-chain governance ref.
-    pub fn remove_phrase(
-        &mut self,
-        phrase: &str,
-        at_block: u64,
-        governance_ref: &str,
-    ) -> bool {
+    pub fn remove_phrase(&mut self, phrase: &str, at_block: u64, governance_ref: &str) -> bool {
         let normalised = phrase.to_lowercase();
         if !self.phrases.remove(&normalised) {
             return false; // not present
@@ -111,13 +100,21 @@ mod tests {
     #[test]
     fn detects_blocked_phrase_case_insensitive() {
         let engine = BlocklistEngine::with_phrases(vec!["kill all".to_owned()]);
-        assert!(engine.contains_blocked_phrase("You should KILL ALL of them").is_some());
+        assert!(
+            engine
+                .contains_blocked_phrase("You should KILL ALL of them")
+                .is_some()
+        );
     }
 
     #[test]
     fn clean_text_passes() {
         let engine = BlocklistEngine::with_phrases(vec!["banned".to_owned()]);
-        assert!(engine.contains_blocked_phrase("This is fine content").is_none());
+        assert!(
+            engine
+                .contains_blocked_phrase("This is fine content")
+                .is_none()
+        );
     }
 
     #[test]

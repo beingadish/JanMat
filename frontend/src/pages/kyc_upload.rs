@@ -79,7 +79,7 @@ pub fn get_error_translation<'a>(
 /// In a full Leptos app, this would be a reactive component.
 pub fn render_kyc_upload_form(store: &TranslationStore, props: &KycUploadProps) -> String {
     let lang = props.language;
-    
+
     format!(
         r#"<div class="kyc-upload-container">
     <h2 class="kyc-title">{title}</h2>
@@ -426,7 +426,7 @@ mod tests {
         let store = TranslationStore::with_seeds();
         let props = KycUploadProps::default();
         let html = render_kyc_upload_form(&store, &props);
-        
+
         assert!(html.contains("Upload UIDAI Offline e-KYC"));
         assert!(html.contains("Select ZIP File"));
         assert!(html.contains("4-Digit Share Code"));
@@ -441,7 +441,7 @@ mod tests {
             ..Default::default()
         };
         let html = render_kyc_upload_form(&store, &props);
-        
+
         assert!(html.contains("UIDAI ऑफ़लाइन e-KYC अपलोड करें"));
         assert!(html.contains("ZIP फ़ाइल चुनें"));
     }
@@ -449,10 +449,10 @@ mod tests {
     #[test]
     fn error_translation_mapping() {
         let store = TranslationStore::with_seeds();
-        
+
         let invalid_file = get_error_translation(&store, Language::English, "INVALID_ZIP");
         assert!(invalid_file.contains("Invalid ZIP"));
-        
+
         let wrong_code = get_error_translation(&store, Language::English, "WRONG_SHARE_CODE");
         assert!(wrong_code.contains("Wrong share code"));
     }

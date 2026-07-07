@@ -18,7 +18,11 @@ pub struct CloneMatch {
 
 fn tokenise(text: &str) -> Vec<String> {
     text.split_whitespace()
-        .map(|w| w.to_lowercase().trim_matches(|c: char| !c.is_alphanumeric()).to_owned())
+        .map(|w| {
+            w.to_lowercase()
+                .trim_matches(|c: char| !c.is_alphanumeric())
+                .to_owned()
+        })
         .filter(|w| !w.is_empty())
         .collect()
 }
@@ -123,9 +127,16 @@ mod tests {
     #[test]
     fn slightly_reworded_text_crosses_threshold() {
         let mut d = CloneDetector::default();
-        d.index_opinion("st/1", "o/orig", "nep policy reform rural india students need help");
+        d.index_opinion(
+            "st/1",
+            "o/orig",
+            "nep policy reform rural india students need help",
+        );
         // Near-identical reordering — should still be ≥ 0.85
-        let hits = d.scan("st/1", "nep policy reform rural india students need help today");
+        let hits = d.scan(
+            "st/1",
+            "nep policy reform rural india students need help today",
+        );
         assert!(!hits.is_empty());
     }
 }

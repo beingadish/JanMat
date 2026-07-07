@@ -30,7 +30,10 @@ async fn main() {
     let app: Router = Router::new()
         .route("/health", get(health))
         // Constitution
-        .route("/pub/constitution", get(routes::governance::get_constitution))
+        .route(
+            "/pub/constitution",
+            get(routes::governance::get_constitution),
+        )
         .route("/pub/proposals", get(routes::governance::list_proposals))
         // Public read routes
         .route("/pub/t", get(routes::namespace::list_topics))
@@ -56,8 +59,14 @@ async fn main() {
         .route("/citizen/v", post(routes::votes::create_vote))
         .route("/citizen/v/{id}/cast", post(routes::votes::cast_vote))
         .route("/citizen/v/{id}/reveal", post(routes::votes::reveal_vote))
-        .route("/citizen/proposals", post(routes::governance::create_proposal))
-        .route("/citizen/recall/{topic_id}", post(routes::governance::sign_recall))
+        .route(
+            "/citizen/proposals",
+            post(routes::governance::create_proposal),
+        )
+        .route(
+            "/citizen/recall/{topic_id}",
+            post(routes::governance::sign_recall),
+        )
         .with_state(registry);
 
     // Bind address is configurable so the same binary works locally

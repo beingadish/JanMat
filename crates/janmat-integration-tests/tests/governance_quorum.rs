@@ -5,10 +5,13 @@ use pallet_governance::{GovernancePallet, ProposalStatus};
 
 fn seeded() -> GovernancePallet {
     let mut p = GovernancePallet::default();
-    p.seed_constitution(vec![
-        ("quorum.regular", "0.501"),
-        ("quorum.constitutional", "0.67"),
-    ], 0);
+    p.seed_constitution(
+        vec![
+            ("quorum.regular", "0.501"),
+            ("quorum.constitutional", "0.67"),
+        ],
+        0,
+    );
     p
 }
 
@@ -40,7 +43,10 @@ fn constitutional_amendment_full_flow() {
         let prop = p.create_proposal(
             ProposalType::Constitutional,
             "Extend moderator term to 180 blocks v2",
-            "d", "w", 200, 200,
+            "d",
+            "w",
+            200,
+            200,
         );
         prop.id.clone()
     };
@@ -52,7 +58,10 @@ fn constitutional_amendment_full_flow() {
     // Enact the rule change
     p.enact_rule("moderator.term_blocks", "180", &id2, 300);
     assert_eq!(p.get_rule("moderator.term_blocks").unwrap().value, "180");
-    assert_eq!(p.get_rule("moderator.term_blocks").unwrap().previous_value, None); // was not seeded
+    assert_eq!(
+        p.get_rule("moderator.term_blocks").unwrap().previous_value,
+        None
+    ); // was not seeded
     assert_eq!(p.constitution_versions.len(), 2); // genesis + this change
 }
 
@@ -101,7 +110,14 @@ fn validator_set_progressive_decentralisation() {
 
     // Pass a constitutional proposal to add validators
     let id = {
-        let prop = p.create_proposal(ProposalType::Constitutional, "Add IIT validators", "d", "w", 1, 100);
+        let prop = p.create_proposal(
+            ProposalType::Constitutional,
+            "Add IIT validators",
+            "d",
+            "w",
+            1,
+            100,
+        );
         prop.id.clone()
     };
     for i in 0..67u64 {
@@ -110,13 +126,20 @@ fn validator_set_progressive_decentralisation() {
     p.close_proposal(&id).unwrap();
 
     p.add_validator(&id, "validator-IIT-Bombay", 500).unwrap();
-    p.add_validator(&id, "validator-IIT-Delhi",  500).unwrap();
-    p.add_validator(&id, "validator-IISc",       500).unwrap();
+    p.add_validator(&id, "validator-IIT-Delhi", 500).unwrap();
+    p.add_validator(&id, "validator-IISc", 500).unwrap();
     assert_eq!(p.active_validator_count(), 3);
 
     // Pass another proposal to remove one
     let id2 = {
-        let prop = p.create_proposal(ProposalType::Constitutional, "Remove IISc validator", "d", "w2", 2, 100);
+        let prop = p.create_proposal(
+            ProposalType::Constitutional,
+            "Remove IISc validator",
+            "d",
+            "w2",
+            2,
+            100,
+        );
         prop.id.clone()
     };
     for i in 0..67u64 {

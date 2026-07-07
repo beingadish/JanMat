@@ -47,7 +47,7 @@ pub async fn create_vote(
     Json(req): Json<CreateVoteRequest>,
 ) -> Result<Json<CreateVoteResponse>, StatusCode> {
     use janmat_types::namespace::VoteId;
-    
+
     // Parse the opinion_id from the "o/ULID" string
     let vote_id = VoteId::new();
     Ok(Json(CreateVoteResponse {
@@ -62,12 +62,12 @@ pub async fn cast_vote(
     Path(vote_id): Path<String>,
     Json(req): Json<CastVoteRequest>,
 ) -> Result<Json<CastVoteResponse>, StatusCode> {
-    use janmat_zk::{ZkReceipt, MockVerifier};
+    use janmat_zk::{MockVerifier, ZkReceipt};
     use pallet_voting::VotingPallet;
 
     // Deserialise the receipt from the request body
-    let receipt: ZkReceipt = serde_json::from_value(req.zk_receipt)
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+    let receipt: ZkReceipt =
+        serde_json::from_value(req.zk_receipt).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let mut pallet = VotingPallet::default();
     // Phase 4: the pallet is reconstructed per-request (Phase 5 will use shared

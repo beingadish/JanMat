@@ -25,11 +25,8 @@ pub struct SubmitOpinionResponse {
 pub async fn submit_opinion(
     Json(req): Json<SubmitOpinionRequest>,
 ) -> Result<Json<SubmitOpinionResponse>, StatusCode> {
-    use janmat_content::{
-        ContentPipeline, SubmitRequest, Verdict,
-        blocklist::BlocklistEngine,
-    };
-    use janmat_storage::{MockIpfsClient, IpfsClient};
+    use janmat_content::{ContentPipeline, SubmitRequest, Verdict, blocklist::BlocklistEngine};
+    use janmat_storage::{IpfsClient, MockIpfsClient};
     use janmat_types::namespace::OpinionId;
 
     let pipeline = ContentPipeline::new(BlocklistEngine::default());

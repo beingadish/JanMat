@@ -9,8 +9,8 @@
 //!  6. Validator set management — progressive decentralisation
 
 use janmat_governance::{
-    ConstitutionRule, ConstitutionVersion, ProposalType,
-    met_quorum, recall_threshold, referenda_threshold,
+    ConstitutionRule, ConstitutionVersion, ProposalType, met_quorum, recall_threshold,
+    referenda_threshold,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -27,7 +27,7 @@ pub struct Proposal {
     pub proposed_at_block: u64,
     pub closes_at_block: u64,
     pub status: ProposalStatus,
-    yes_votes: BTreeSet<String>,  // wallet addresses
+    yes_votes: BTreeSet<String>, // wallet addresses
     no_votes: BTreeSet<String>,
     pub total_eligible: u64,
 }
@@ -56,9 +56,15 @@ impl Proposal {
         Ok(())
     }
 
-    pub fn yes_count(&self) -> u64 { self.yes_votes.len() as u64 }
-    pub fn no_count(&self)  -> u64 { self.no_votes.len() as u64 }
-    pub fn total_cast(&self) -> u64 { self.yes_count() + self.no_count() }
+    pub fn yes_count(&self) -> u64 {
+        self.yes_votes.len() as u64
+    }
+    pub fn no_count(&self) -> u64 {
+        self.no_votes.len() as u64
+    }
+    pub fn total_cast(&self) -> u64 {
+        self.yes_count() + self.no_count()
+    }
 
     /// Tally against total_eligible, applying the proposal's required quorum.
     pub fn tally(&mut self) -> ProposalStatus {
@@ -76,7 +82,7 @@ impl Proposal {
 // ── Moderator record ──────────────────────────────────────────────────────────
 
 const MAX_MODERATORS_PER_TOPIC: usize = 2;
-const TERM_LENGTH_BLOCKS: u64 = 90;   // ~90 days at 1 block/day
+const TERM_LENGTH_BLOCKS: u64 = 90; // ~90 days at 1 block/day
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModeratorRecord {
@@ -84,7 +90,7 @@ pub struct ModeratorRecord {
     pub topic_id: String,
     pub term_start: u64,
     pub term_end: u64,
-    pub renewal_count: u8,  // max 1 renewal
+    pub renewal_count: u8, // max 1 renewal
     pub active: bool,
 }
 
@@ -102,7 +108,7 @@ impl ModeratorRecord {
 
 #[derive(Debug, Clone)]
 pub struct Petition {
-    pub subject: String,  // e.g. "recall:wallet-A:topic-t/1" or "referenda:title"
+    pub subject: String, // e.g. "recall:wallet-A:topic-t/1" or "referenda:title"
     pub signatories: BTreeSet<String>,
     pub threshold: u64,
     pub triggered: bool,
@@ -149,40 +155,39 @@ pub struct GovernancePallet {
     validators: Vec<ValidatorRecord>,
 }
 
-
 impl GovernancePallet {
     // ── Constitution ──────────────────────────────────────────────────────────
 
     /// Seed genesis constitution rules. Called once at chain initialisation.
     pub fn seed_constitution(&mut self, rules: Vec<(&str, &str)>, at_block: u64) {
         for (key, value) in rules {
-            self.constitution.insert(key.to_owned(), ConstitutionRule {
-                key: key.to_owned(),
-                value: value.to_owned(),
-                enacted_at_block: at_block,
-                enacted_by_proposal: "genesis".to_owned(),
-                previous_value: None,
-            });
+            self.constitution.insert(
+                key.to_owned(),
+                ConstitutionRule {
+                    key: key.to_owned(),
+                    value: value.to_owned(),
+                    enacted_at_block: at_block,
+                    enacted_by_proposal: "genesis".to_owned(),
+                    previous_value: None,
+                },
+            );
         }
         self.snapshot_constitution(at_block, "genesis");
     }
 
     /// Enact a rule change after a constitutional proposal passes.
-    pub fn enact_rule(
-        &mut self,
-        key: &str,
-        value: &str,
-        proposal_id: &str,
-        at_block: u64,
-    ) {
+    pub fn enact_rule(&mut self, key: &str, value: &str, proposal_id: &str, at_block: u64) {
         let prev = self.constitution.get(key).map(|r| r.value.clone());
-        self.constitution.insert(key.to_owned(), ConstitutionRule {
-            key: key.to_owned(),
-            value: value.to_owned(),
-            enacted_at_block: at_block,
-            enacted_by_proposal: proposal_id.to_owned(),
-            previous_value: prev,
-        });
+        self.constitution.insert(
+            key.to_owned(),
+            ConstitutionRule {
+                key: key.to_owned(),
+                value: value.to_owned(),
+                enacted_at_block: at_block,
+                enacted_by_proposal: proposal_id.to_owned(),
+                previous_value: prev,
+            },
+        );
         self.snapshot_constitution(at_block, proposal_id);
     }
 
@@ -213,7 +218,11 @@ impl GovernancePallet {
     ) -> &Proposal {
         self.proposal_counter += 1;
         let id = format!("prop-{:06}", self.proposal_counter);
-        let duration = if proposal_type.is_constitutional() { 200u64 } else { 100u64 };
+        let duration = if proposal_type.is_constitutional() {
+            200u64
+        } else {
+            100u64
+        };
         let proposal = Proposal {
             id: id.clone(),
             proposal_type,
@@ -245,7 +254,10 @@ impl GovernancePallet {
 
     /// Close a proposal and apply quorum check. Returns the final status.
     pub fn close_proposal(&mut self, proposal_id: &str) -> Result<ProposalStatus, &'static str> {
-        let p = self.proposals.get_mut(proposal_id).ok_or("proposal_not_found")?;
+        let p = self
+            .proposals
+            .get_mut(proposal_id)
+            .ok_or("proposal_not_found")?;
         Ok(p.tally())
     }
 
@@ -263,7 +275,10 @@ impl GovernancePallet {
         at_block: u64,
     ) -> Result<ModeratorRecord, &'static str> {
         let entries = self.moderators.entry(topic_id.to_owned()).or_default();
-        let active_count = entries.iter().filter(|m| m.is_term_active(at_block)).count();
+        let active_count = entries
+            .iter()
+            .filter(|m| m.is_term_active(at_block))
+            .count();
         if active_count >= MAX_MODERATORS_PER_TOPIC {
             return Err("max_moderators_reached");
         }
@@ -330,12 +345,15 @@ impl GovernancePallet {
     ) -> bool {
         let key = format!("recall:{moderator_wallet}:{topic_id}");
         let threshold = recall_threshold(eligible_voters);
-        let petition = self.petitions.entry(key.clone()).or_insert_with(|| Petition {
-            subject: key.clone(),
-            signatories: BTreeSet::new(),
-            threshold,
-            triggered: false,
-        });
+        let petition = self
+            .petitions
+            .entry(key.clone())
+            .or_insert_with(|| Petition {
+                subject: key.clone(),
+                signatories: BTreeSet::new(),
+                threshold,
+                triggered: false,
+            });
         petition.sign(signer);
         if petition.met_threshold() && !petition.triggered {
             petition.triggered = true;
@@ -355,12 +373,15 @@ impl GovernancePallet {
         eligible_voters: u64,
     ) -> bool {
         let threshold = referenda_threshold(eligible_voters);
-        let petition = self.petitions.entry(referenda_key.to_owned()).or_insert_with(|| Petition {
-            subject: referenda_key.to_owned(),
-            signatories: BTreeSet::new(),
-            threshold,
-            triggered: false,
-        });
+        let petition = self
+            .petitions
+            .entry(referenda_key.to_owned())
+            .or_insert_with(|| Petition {
+                subject: referenda_key.to_owned(),
+                signatories: BTreeSet::new(),
+                threshold,
+                triggered: false,
+            });
         petition.sign(signer);
         if petition.met_threshold() && !petition.triggered {
             petition.triggered = true;
@@ -370,32 +391,60 @@ impl GovernancePallet {
     }
 
     pub fn petition_signature_count(&self, key: &str) -> usize {
-        self.petitions.get(key).map(|p| p.signatories.len()).unwrap_or(0)
+        self.petitions
+            .get(key)
+            .map(|p| p.signatories.len())
+            .unwrap_or(0)
     }
 
     // ── Validator set management (Phase 6) ────────────────────────────────────
 
     /// Add a validator to the active set. Requires a passed Constitutional proposal.
-    pub fn add_validator(&mut self, proposal_id: &str, wallet: &str, at_block: u64) -> Result<ValidatorRecord, &'static str> {
-        let proposal = self.proposals.get(proposal_id).ok_or("proposal_not_found")?;
+    pub fn add_validator(
+        &mut self,
+        proposal_id: &str,
+        wallet: &str,
+        at_block: u64,
+    ) -> Result<ValidatorRecord, &'static str> {
+        let proposal = self
+            .proposals
+            .get(proposal_id)
+            .ok_or("proposal_not_found")?;
         if proposal.status != ProposalStatus::Passed {
             return Err("proposal_not_passed");
         }
-        if self.validators.iter().any(|v| v.wallet == wallet && v.active) {
+        if self
+            .validators
+            .iter()
+            .any(|v| v.wallet == wallet && v.active)
+        {
             return Err("already_a_validator");
         }
-        let rec = ValidatorRecord { wallet: wallet.to_owned(), added_at_block: at_block, active: true };
+        let rec = ValidatorRecord {
+            wallet: wallet.to_owned(),
+            added_at_block: at_block,
+            active: true,
+        };
         self.validators.push(rec.clone());
         Ok(rec)
     }
 
     /// Remove a validator — requires a passed Constitutional proposal.
-    pub fn remove_validator(&mut self, proposal_id: &str, wallet: &str) -> Result<(), &'static str> {
-        let proposal = self.proposals.get(proposal_id).ok_or("proposal_not_found")?;
+    pub fn remove_validator(
+        &mut self,
+        proposal_id: &str,
+        wallet: &str,
+    ) -> Result<(), &'static str> {
+        let proposal = self
+            .proposals
+            .get(proposal_id)
+            .ok_or("proposal_not_found")?;
         if proposal.status != ProposalStatus::Passed {
             return Err("proposal_not_passed");
         }
-        let rec = self.validators.iter_mut()
+        let rec = self
+            .validators
+            .iter_mut()
             .find(|v| v.wallet == wallet && v.active)
             .ok_or("validator_not_found")?;
         rec.active = false;
@@ -415,12 +464,15 @@ mod tests {
 
     fn make_pallet() -> GovernancePallet {
         let mut p = GovernancePallet::default();
-        p.seed_constitution(vec![
-            ("quorum.regular", "0.501"),
-            ("quorum.constitutional", "0.67"),
-            ("moderator.max_per_topic", "2"),
-            ("moderator.term_blocks", "90"),
-        ], 0);
+        p.seed_constitution(
+            vec![
+                ("quorum.regular", "0.501"),
+                ("quorum.constitutional", "0.67"),
+                ("moderator.max_per_topic", "2"),
+                ("moderator.term_blocks", "90"),
+            ],
+            0,
+        );
         p
     }
 
@@ -453,7 +505,9 @@ mod tests {
                 ProposalType::Regular,
                 "Add rural NEP subtopic",
                 "Creates st/nep-rural",
-                "wallet-A", 1, 100,
+                "wallet-A",
+                1,
+                100,
             );
             prop.id.clone()
         };
@@ -607,7 +661,14 @@ mod tests {
 
     fn passed_constitutional_prop(p: &mut GovernancePallet) -> String {
         let id = {
-            let prop = p.create_proposal(ProposalType::Constitutional, "add-validator", "d", "w", 1, 100);
+            let prop = p.create_proposal(
+                ProposalType::Constitutional,
+                "add-validator",
+                "d",
+                "w",
+                1,
+                100,
+            );
             prop.id.clone()
         };
         for i in 0..67u64 {
@@ -621,14 +682,17 @@ mod tests {
     fn add_validator_requires_passed_proposal() {
         let mut p = make_pallet();
         let prop_id = passed_constitutional_prop(&mut p);
-        p.add_validator(&prop_id, "validator-IIT-Bombay", 500).unwrap();
+        p.add_validator(&prop_id, "validator-IIT-Bombay", 500)
+            .unwrap();
         assert_eq!(p.active_validator_count(), 1);
     }
 
     #[test]
     fn add_validator_without_passed_proposal_fails() {
         let mut p = make_pallet();
-        let err = p.add_validator("prop-nonexistent", "wallet-X", 1).unwrap_err();
+        let err = p
+            .add_validator("prop-nonexistent", "wallet-X", 1)
+            .unwrap_err();
         assert_eq!(err, "proposal_not_found");
     }
 

@@ -5,14 +5,9 @@
 //! 2. Backend extracts and verifies XML
 //! 3. Returns credential for ZK proof generation
 
-use axum::{
-    Json,
-    extract::Multipart,
-    http::StatusCode,
-    response::IntoResponse,
-};
+use axum::{Json, extract::Multipart, http::StatusCode, response::IntoResponse};
 use janmat_identity::kyc_provider::{
-    nullifier_seed_commitment, UidaiError, UidaiOfflineKycProvider,
+    UidaiError, UidaiOfflineKycProvider, nullifier_seed_commitment,
 };
 use serde::Serialize;
 
@@ -49,9 +44,7 @@ impl KycErrorResponse {
             UidaiError::ZipOpen(_) | UidaiError::ZipRead(_) => {
                 (StatusCode::BAD_REQUEST, "ZIP_ERROR")
             }
-            UidaiError::CertificateError(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "CERT_ERROR")
-            }
+            UidaiError::CertificateError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "CERT_ERROR"),
         };
 
         (
@@ -84,38 +77,34 @@ pub async fn upload_kyc(mut multipart: Multipart) -> impl IntoResponse {
         let name = field.name().unwrap_or("").to_string();
 
         match name.as_str() {
-            "file" | "zip" | "kyc_zip" => {
-                match field.bytes().await {
-                    Ok(bytes) => zip_data = Some(bytes.to_vec()),
-                    Err(e) => {
-                        return (
-                            StatusCode::BAD_REQUEST,
-                            Json(KycErrorResponse {
-                                success: false,
-                                error: format!("Failed to read file: {e}"),
-                                error_code: "FILE_READ_ERROR".to_string(),
-                            }),
-                        )
-                            .into_response();
-                    }
+            "file" | "zip" | "kyc_zip" => match field.bytes().await {
+                Ok(bytes) => zip_data = Some(bytes.to_vec()),
+                Err(e) => {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        Json(KycErrorResponse {
+                            success: false,
+                            error: format!("Failed to read file: {e}"),
+                            error_code: "FILE_READ_ERROR".to_string(),
+                        }),
+                    )
+                        .into_response();
                 }
-            }
-            "share_code" | "shareCode" | "pin" => {
-                match field.text().await {
-                    Ok(text) => share_code = Some(text),
-                    Err(e) => {
-                        return (
-                            StatusCode::BAD_REQUEST,
-                            Json(KycErrorResponse {
-                                success: false,
-                                error: format!("Failed to read share code: {e}"),
-                                error_code: "SHARE_CODE_READ_ERROR".to_string(),
-                            }),
-                        )
-                            .into_response();
-                    }
+            },
+            "share_code" | "shareCode" | "pin" => match field.text().await {
+                Ok(text) => share_code = Some(text),
+                Err(e) => {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        Json(KycErrorResponse {
+                            success: false,
+                            error: format!("Failed to read share code: {e}"),
+                            error_code: "SHARE_CODE_READ_ERROR".to_string(),
+                        }),
+                    )
+                        .into_response();
                 }
-            }
+            },
             _ => {
                 // Ignore unknown fields
             }

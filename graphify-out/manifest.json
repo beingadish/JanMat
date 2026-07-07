@@ -5,9 +5,9 @@
     "semantic_hash": "e1073342e958ac9f00716938c8f165e3"
   },
   "crates/janmat-api/src/main.rs": {
-    "mtime": 1783429039.770721,
-    "ast_hash": "5bab77c5fbed967de6897c0f3c29e3c5",
-    "semantic_hash": ""
+    "mtime": 1783436057.2235844,
+    "ast_hash": "bbc34009ada81a7dd0f4a9f6313281c1",
+    "semantic_hash": "bbc34009ada81a7dd0f4a9f6313281c1"
   },
   "crates/janmat-api/src/middleware/mod.rs": {
     "mtime": 1781115352.3123012,
@@ -15,24 +15,24 @@
     "semantic_hash": "61666c5d85c1f5f61f016f4664cb6bc8"
   },
   "crates/janmat-api/src/middleware/rate_limit.rs": {
-    "mtime": 1781115380.9031203,
-    "ast_hash": "5a9b52e59edc4cc5e0be40ac47af3def",
-    "semantic_hash": "5a9b52e59edc4cc5e0be40ac47af3def"
+    "mtime": 1783436057.2242413,
+    "ast_hash": "7e9fe96e75950ac5d66014f9a26a0f31",
+    "semantic_hash": "7e9fe96e75950ac5d66014f9a26a0f31"
   },
   "crates/janmat-api/src/routes/governance.rs": {
-    "mtime": 1781115390.3005588,
-    "ast_hash": "ea94f6913354a88349a8aedfe2e53863",
-    "semantic_hash": "ea94f6913354a88349a8aedfe2e53863"
+    "mtime": 1783436057.224658,
+    "ast_hash": "10548beb6cf6e8c1f2ffc2dc09053bb1",
+    "semantic_hash": "10548beb6cf6e8c1f2ffc2dc09053bb1"
   },
   "crates/janmat-api/src/routes/kyc.rs": {
-    "mtime": 1781555312.703328,
-    "ast_hash": "e3e08f22f8e2e9f21774b19cbebf16d6",
-    "semantic_hash": "e3e08f22f8e2e9f21774b19cbebf16d6"
+    "mtime": 1783436057.2256622,
+    "ast_hash": "6092dbfb9645b0e54231c47ecad51f9a",
+    "semantic_hash": "6092dbfb9645b0e54231c47ecad51f9a"
   },
   "crates/janmat-api/src/routes/mod.rs": {
     "mtime": 1783429010.4310708,
     "ast_hash": "deb23f57e36edfbdb36416f658f8900c",
-    "semantic_hash": ""
+    "semantic_hash": "deb23f57e36edfbdb36416f658f8900c"
   },
   "crates/janmat-api/src/routes/namespace.rs": {
     "mtime": 1781115390.2711432,
@@ -40,39 +40,39 @@
     "semantic_hash": "1cfbb1de620523d7ec3baa7fec72f932"
   },
   "crates/janmat-api/src/routes/opinions.rs": {
-    "mtime": 1781115390.2849116,
-    "ast_hash": "3935d65b96b094f535e35928bf50378d",
-    "semantic_hash": "3935d65b96b094f535e35928bf50378d"
+    "mtime": 1783436057.2264514,
+    "ast_hash": "38cb61f4f32e37b8b4b92bffd46fe139",
+    "semantic_hash": "38cb61f4f32e37b8b4b92bffd46fe139"
   },
   "crates/janmat-api/src/routes/votes.rs": {
-    "mtime": 1783428707.2831979,
-    "ast_hash": "74ef6650f855f8f079f06427e9656135",
-    "semantic_hash": ""
+    "mtime": 1783436057.2284026,
+    "ast_hash": "fd048cd2e1f7cf15a3e90d41c9f5fd0c",
+    "semantic_hash": "fd048cd2e1f7cf15a3e90d41c9f5fd0c"
   },
   "crates/janmat-chain/pallets/pallet-governance/src/lib.rs": {
-    "mtime": 1781115351.7735639,
-    "ast_hash": "d9563d8c7c07a2f5e6372a80e7887106",
-    "semantic_hash": "d9563d8c7c07a2f5e6372a80e7887106"
+    "mtime": 1783436057.2319388,
+    "ast_hash": "92c10f7898afbc40a3991ea95b5d95d1",
+    "semantic_hash": "92c10f7898afbc40a3991ea95b5d95d1"
   },
   "crates/janmat-chain/pallets/pallet-identity/src/lib.rs": {
-    "mtime": 1781113306.1295867,
-    "ast_hash": "9e0398272af8ca92d8ba380241938284",
-    "semantic_hash": "9e0398272af8ca92d8ba380241938284"
+    "mtime": 1783436057.2329557,
+    "ast_hash": "cd2e6bb539566c0855c5c98a37349bfd",
+    "semantic_hash": "cd2e6bb539566c0855c5c98a37349bfd"
   },
   "crates/janmat-chain/pallets/pallet-moderation/src/lib.rs": {
-    "mtime": 1781113621.0123947,
-    "ast_hash": "f0d224d338814111c78bfd7224cf9085",
-    "semantic_hash": "f0d224d338814111c78bfd7224cf9085"
+    "mtime": 1783436057.2344584,
+    "ast_hash": "7f83b6faa8a414a27b5e8179b7d96c02",
+    "semantic_hash": "7f83b6faa8a414a27b5e8179b7d96c02"
   },
   "crates/janmat-chain/pallets/pallet-namespace/src/lib.rs": {
-    "mtime": 1781115069.5515473,
-    "ast_hash": "871093a517a2f8b284cd243376648975",
-    "semantic_hash": "871093a517a2f8b284cd243376648975"
+    "mtime": 1783436057.2357852,
+    "ast_hash": "d35efe8d12b357d780703585f9fa4b9c",
+    "semantic_hash": "d35efe8d12b357d780703585f9fa4b9c"
   },
   "crates/janmat-chain/pallets/pallet-voting/src/lib.rs": {
-    "mtime": 1783428649.1979635,
-    "ast_hash": "988be5ac7b46ba6fc0baaa3baa82e3de",
-    "semantic_hash": ""
+    "mtime": 1783436057.2376058,
+    "ast_hash": "72f90830f2556f74e46642bfdd1ae682",
+    "semantic_hash": "72f90830f2556f74e46642bfdd1ae682"
   },
   "crates/janmat-chain/src/lib.rs": {
     "mtime": 1781112067.5813463,
@@ -80,19 +80,19 @@
     "semantic_hash": "2868a86098efb2ae105e1e1de51d62d1"
   },
   "crates/janmat-content/src/blocklist/mod.rs": {
-    "mtime": 1781115351.599503,
-    "ast_hash": "35db8aeb601048ba7cc732bab9afddfe",
-    "semantic_hash": "35db8aeb601048ba7cc732bab9afddfe"
+    "mtime": 1783436057.2396765,
+    "ast_hash": "9f425aef1dd94eb375233aeadeac6155",
+    "semantic_hash": "9f425aef1dd94eb375233aeadeac6155"
   },
   "crates/janmat-content/src/clone_detector/mod.rs": {
-    "mtime": 1781113523.5052729,
-    "ast_hash": "27c037f51c11c6c976b4da5754bbd033",
-    "semantic_hash": "27c037f51c11c6c976b4da5754bbd033"
+    "mtime": 1783436057.2402294,
+    "ast_hash": "a6552890da1a2b264d82206d7f1daaf3",
+    "semantic_hash": "a6552890da1a2b264d82206d7f1daaf3"
   },
   "crates/janmat-content/src/harm_filter/mod.rs": {
-    "mtime": 1781113692.9761283,
-    "ast_hash": "f68cb06cca9ebf4c02b9154217b64b8c",
-    "semantic_hash": "f68cb06cca9ebf4c02b9154217b64b8c"
+    "mtime": 1783436057.2408278,
+    "ast_hash": "754d6c1d3e15f4759886394546387334",
+    "semantic_hash": "754d6c1d3e15f4759886394546387334"
   },
   "crates/janmat-content/src/lib.rs": {
     "mtime": 1781113572.6358032,
@@ -100,14 +100,14 @@
     "semantic_hash": "1a7e4933600cc9b210038d9c93b8cf22"
   },
   "crates/janmat-content/src/pipeline.rs": {
-    "mtime": 1781113563.4790633,
-    "ast_hash": "0b59eae1b054e8143c044bf022445c6f",
-    "semantic_hash": "0b59eae1b054e8143c044bf022445c6f"
+    "mtime": 1783436057.2416842,
+    "ast_hash": "6a498f56a64cf41da873b79c25baa3e6",
+    "semantic_hash": "6a498f56a64cf41da873b79c25baa3e6"
   },
   "crates/janmat-gateway/src/ivr.rs": {
-    "mtime": 1781115351.507776,
-    "ast_hash": "d4be8dd261d87a3182f2ae8036e344e1",
-    "semantic_hash": "d4be8dd261d87a3182f2ae8036e344e1"
+    "mtime": 1783436057.2431126,
+    "ast_hash": "f1a6ee56bebccef64c65137d74fd93d7",
+    "semantic_hash": "f1a6ee56bebccef64c65137d74fd93d7"
   },
   "crates/janmat-gateway/src/lib.rs": {
     "mtime": 1781114789.1479943,
@@ -115,29 +115,29 @@
     "semantic_hash": "53e15be8ddceb66e43a8fb74c4f8ff61"
   },
   "crates/janmat-gateway/src/sms.rs": {
-    "mtime": 1781114805.4471712,
-    "ast_hash": "ad5969a3a0a2c2ad0357df3b4a16d0b0",
-    "semantic_hash": "ad5969a3a0a2c2ad0357df3b4a16d0b0"
+    "mtime": 1783436057.243509,
+    "ast_hash": "0f929ccfaedd6123ea30dea0d2e6c27e",
+    "semantic_hash": "0f929ccfaedd6123ea30dea0d2e6c27e"
   },
   "crates/janmat-governance/src/lib.rs": {
-    "mtime": 1781114311.9746385,
-    "ast_hash": "4f6700f3cfebc44de30d60f21a7e6684",
-    "semantic_hash": "4f6700f3cfebc44de30d60f21a7e6684"
+    "mtime": 1783436057.2442453,
+    "ast_hash": "5ba49376cda96223c6afea4d98d1fe60",
+    "semantic_hash": "5ba49376cda96223c6afea4d98d1fe60"
   },
   "crates/janmat-identity/src/kyc_provider/mod.rs": {
-    "mtime": 1783428948.3912182,
-    "ast_hash": "85e600231c95f65e46cc4c05e56d2620",
-    "semantic_hash": ""
+    "mtime": 1783436057.246505,
+    "ast_hash": "6c2d1eae788f93b787c3affdee750be5",
+    "semantic_hash": "6c2d1eae788f93b787c3affdee750be5"
   },
   "crates/janmat-identity/src/kyc_provider/uidai_offline.rs": {
-    "mtime": 1781555225.165186,
-    "ast_hash": "ce638572f46617bd50ce4ace4cb0a52c",
-    "semantic_hash": "ce638572f46617bd50ce4ace4cb0a52c"
+    "mtime": 1783436125.9668517,
+    "ast_hash": "fa54427eac37c11d70b51844573419d4",
+    "semantic_hash": "fa54427eac37c11d70b51844573419d4"
   },
   "crates/janmat-identity/src/lib.rs": {
-    "mtime": 1781113256.3140693,
-    "ast_hash": "f6d72d4cf74127fe1215288b03dd371e",
-    "semantic_hash": "f6d72d4cf74127fe1215288b03dd371e"
+    "mtime": 1783433775.6815343,
+    "ast_hash": "e6b95e5060311ad7eb354bebde7ca10c",
+    "semantic_hash": "e6b95e5060311ad7eb354bebde7ca10c"
   },
   "crates/janmat-identity/src/nullifier.rs": {
     "mtime": 1781113270.5540712,
@@ -150,39 +150,39 @@
     "semantic_hash": "9d2ce939bd7884c7501e70739e948e1b"
   },
   "crates/janmat-integration-tests/tests/citizen_lifecycle.rs": {
-    "mtime": 1781116436.6462064,
-    "ast_hash": "5a05c1a61a1f4127759a12485b4d935e",
-    "semantic_hash": "5a05c1a61a1f4127759a12485b4d935e"
+    "mtime": 1783436057.2502828,
+    "ast_hash": "1c84ad36a03b048148c0c41616941ed1",
+    "semantic_hash": "1c84ad36a03b048148c0c41616941ed1"
   },
   "crates/janmat-integration-tests/tests/content_moderation.rs": {
-    "mtime": 1781116463.1249914,
-    "ast_hash": "f9b2fa1aa902b333d4bb972f0662189f",
-    "semantic_hash": "f9b2fa1aa902b333d4bb972f0662189f"
+    "mtime": 1783436057.251463,
+    "ast_hash": "2b320cb53b88c44fd78298362ce6ffa3",
+    "semantic_hash": "2b320cb53b88c44fd78298362ce6ffa3"
   },
   "crates/janmat-integration-tests/tests/governance_quorum.rs": {
-    "mtime": 1781116494.8794596,
-    "ast_hash": "25be6734488093b61e796d3a9bdce09f",
-    "semantic_hash": "25be6734488093b61e796d3a9bdce09f"
+    "mtime": 1783436057.252332,
+    "ast_hash": "8b1b9e40e315ed2a67d491c538d80f27",
+    "semantic_hash": "8b1b9e40e315ed2a67d491c538d80f27"
   },
   "crates/janmat-integration-tests/tests/merkle_indexer.rs": {
-    "mtime": 1781116518.7030616,
-    "ast_hash": "50da48b90143add6092d4348b0d0047d",
-    "semantic_hash": "50da48b90143add6092d4348b0d0047d"
+    "mtime": 1783436057.253185,
+    "ast_hash": "725bd2f59030ea62c3d8ac9ccdb6e95a",
+    "semantic_hash": "725bd2f59030ea62c3d8ac9ccdb6e95a"
   },
   "crates/janmat-storage/src/indexer.rs": {
-    "mtime": 1781115351.0819678,
-    "ast_hash": "076f57568946593fbefb20aa364cf26b",
-    "semantic_hash": "076f57568946593fbefb20aa364cf26b"
+    "mtime": 1783436057.2548678,
+    "ast_hash": "16d3169088a0865f65bcdc40692d6707",
+    "semantic_hash": "16d3169088a0865f65bcdc40692d6707"
   },
   "crates/janmat-storage/src/lib.rs": {
-    "mtime": 1781114925.6884031,
-    "ast_hash": "e1c51f68cbae533434876c9afc361866",
-    "semantic_hash": "e1c51f68cbae533434876c9afc361866"
+    "mtime": 1783436057.2551718,
+    "ast_hash": "fa1b4311fbe8fa7375a8c617ad4db01c",
+    "semantic_hash": "fa1b4311fbe8fa7375a8c617ad4db01c"
   },
   "crates/janmat-storage/src/merkle.rs": {
-    "mtime": 1781115351.0818686,
-    "ast_hash": "47218d802be3102b1b1dc01c3277ef8b",
-    "semantic_hash": "47218d802be3102b1b1dc01c3277ef8b"
+    "mtime": 1783436057.2554512,
+    "ast_hash": "19ab4a037a3af32b539dce664ec7f3ce",
+    "semantic_hash": "19ab4a037a3af32b539dce664ec7f3ce"
   },
   "crates/janmat-types/src/lib.rs": {
     "mtime": 1781112320.9375327,
@@ -200,14 +200,14 @@
     "semantic_hash": "f9e4fc424c42bd9d246fab99da68a1b1"
   },
   "crates/janmat-types/src/vote.rs": {
-    "mtime": 1781115351.389112,
-    "ast_hash": "bf2c4444ab9c36af63d32008cee1464d",
-    "semantic_hash": "bf2c4444ab9c36af63d32008cee1464d"
+    "mtime": 1783436057.2567933,
+    "ast_hash": "ec1cb8ff56966eca99ea9f568cf32c07",
+    "semantic_hash": "ec1cb8ff56966eca99ea9f568cf32c07"
   },
   "crates/janmat-zk/src/circuits/kyc_verify.rs": {
-    "mtime": 1781113365.57043,
-    "ast_hash": "28ff9e4794773aa2b43595369b38c3e2",
-    "semantic_hash": "28ff9e4794773aa2b43595369b38c3e2"
+    "mtime": 1783436057.258634,
+    "ast_hash": "db23660659789614670349ed27816eb9",
+    "semantic_hash": "db23660659789614670349ed27816eb9"
   },
   "crates/janmat-zk/src/circuits/mod.rs": {
     "mtime": 1781113152.5441308,
@@ -225,9 +225,9 @@
     "semantic_hash": "f116ef2cccddc05892cf96475bd7314e"
   },
   "crates/janmat-zk/src/prover/mock.rs": {
-    "mtime": 1781113219.6766112,
-    "ast_hash": "a244560617ae66e2b369b375497ab524",
-    "semantic_hash": "a244560617ae66e2b369b375497ab524"
+    "mtime": 1783436057.2594638,
+    "ast_hash": "bf04047b21799f8b45dc6cf543208e6a",
+    "semantic_hash": "bf04047b21799f8b45dc6cf543208e6a"
   },
   "crates/janmat-zk/src/prover/mod.rs": {
     "mtime": 1781113202.6437187,
@@ -240,9 +240,9 @@
     "semantic_hash": "3e45af5f3a341257dee88e9d6f9cc06c"
   },
   "frontend/src/i18n/mod.rs": {
-    "mtime": 1781555376.0327117,
-    "ast_hash": "f3b5055ca2681e07043dedb6633505fa",
-    "semantic_hash": "f3b5055ca2681e07043dedb6633505fa"
+    "mtime": 1783436057.262193,
+    "ast_hash": "08004afaa1286040662eaf495c0b7441",
+    "semantic_hash": "08004afaa1286040662eaf495c0b7441"
   },
   "frontend/src/lib.rs": {
     "mtime": 1781114772.5218127,
@@ -250,9 +250,9 @@
     "semantic_hash": "484c1fdd826e256b2b0eccee005d3927"
   },
   "frontend/src/pages/kyc_upload.rs": {
-    "mtime": 1781555454.2109804,
-    "ast_hash": "407a810a407e7bea1e0a0fee607d57c1",
-    "semantic_hash": "407a810a407e7bea1e0a0fee607d57c1"
+    "mtime": 1783436057.2627566,
+    "ast_hash": "02064a82b251c514b2b9ca13fb42afea",
+    "semantic_hash": "02064a82b251c514b2b9ca13fb42afea"
   },
   "frontend/src/pages/mod.rs": {
     "mtime": 1781555442.8082168,
@@ -315,9 +315,9 @@
     "semantic_hash": "c698309979460d0f02ba616417844399"
   },
   ".github/workflows/ci.yml": {
-    "mtime": 1781116277.0994802,
-    "ast_hash": "5a5a436bdfb3b951945876f3117e22ae",
-    "semantic_hash": "5a5a436bdfb3b951945876f3117e22ae"
+    "mtime": 1783436213.6881678,
+    "ast_hash": "bff155b9c175735b5e3742c1f9298fde",
+    "semantic_hash": "bff155b9c175735b5e3742c1f9298fde"
   },
   "CLAUDE.md": {
     "mtime": 1782559931.469177,
@@ -340,148 +340,163 @@
     "semantic_hash": "a5742670fbdb35b32c2b1a4824cd14b8"
   },
   ".claude/settings.local.json": {
-    "mtime": 1783429923.8282042,
-    "ast_hash": "a3b074068ce7126918c2b9e0b4fbf128",
-    "semantic_hash": ""
+    "mtime": 1783436093.7715247,
+    "ast_hash": "e50031edcd1b2697021456718c3129c7",
+    "semantic_hash": "e50031edcd1b2697021456718c3129c7"
   },
   "crates/janmat-api/src/db.rs": {
-    "mtime": 1783428968.9935308,
-    "ast_hash": "16075e6ad5f74c6ed8f1fd946bc85720",
-    "semantic_hash": ""
+    "mtime": 1783436140.4256303,
+    "ast_hash": "7ecf48ef3c8fb7722fe98da798c39572",
+    "semantic_hash": "7ecf48ef3c8fb7722fe98da798c39572"
   },
   "crates/janmat-api/src/routes/register.rs": {
-    "mtime": 1783429004.7988493,
-    "ast_hash": "fd90aaee0dce32f9e948a7c08432cd05",
-    "semantic_hash": ""
+    "mtime": 1783436057.2276964,
+    "ast_hash": "d7d9d1227bbdb381744f6fffb54f62a2",
+    "semantic_hash": "d7d9d1227bbdb381744f6fffb54f62a2"
   },
   "postman/JanMat.postman_collection.json": {
-    "mtime": 1783429651.4817045,
-    "ast_hash": "5fd1586293f39ac7fa0554c359ddabc8",
-    "semantic_hash": ""
+    "mtime": 1783434711.4850686,
+    "ast_hash": "3e34488f6278d5515a11ff86dee2ba9e",
+    "semantic_hash": "3e34488f6278d5515a11ff86dee2ba9e"
   },
   "postman/JanMat.postman_environment.json": {
     "mtime": 1783426938.15787,
     "ast_hash": "224da40fd7e2b0710ef4b43dd0811dcd",
-    "semantic_hash": ""
+    "semantic_hash": "224da40fd7e2b0710ef4b43dd0811dcd"
   },
   "web/package.json": {
-    "mtime": 1783431263.031321,
-    "ast_hash": "b091ce346532f63902f35fa22e8c1ae7",
-    "semantic_hash": ""
+    "mtime": 1783434574.7750347,
+    "ast_hash": "22358673e72940d47c6362ee7bfc257d",
+    "semantic_hash": "22358673e72940d47c6362ee7bfc257d"
   },
   "web/src/App.tsx": {
-    "mtime": 1783430855.5764055,
-    "ast_hash": "d5c232e0016eb1dfd06cc59ca0429a85",
-    "semantic_hash": ""
+    "mtime": 1783434298.4248464,
+    "ast_hash": "208337a079e971da99acb5ecea533e50",
+    "semantic_hash": "208337a079e971da99acb5ecea533e50"
   },
   "web/src/api/client.ts": {
-    "mtime": 1783429255.721419,
-    "ast_hash": "99e6a438ef967bb9f443c4fcadc474be",
-    "semantic_hash": ""
+    "mtime": 1783434124.0240598,
+    "ast_hash": "880fb478b02f4a9261f809d29d78c607",
+    "semantic_hash": "880fb478b02f4a9261f809d29d78c607"
   },
   "web/src/api/types.ts": {
     "mtime": 1783426546.9576979,
     "ast_hash": "bcc5a87f639a404df3b3e1ef76c6547f",
-    "semantic_hash": ""
-  },
-  "web/src/components/Composer.tsx": {
-    "mtime": 1783430847.2120533,
-    "ast_hash": "5522ac299507773317953d3465e9c36c",
-    "semantic_hash": ""
+    "semantic_hash": "bcc5a87f639a404df3b3e1ef76c6547f"
   },
   "web/src/components/Poll.tsx": {
-    "mtime": 1783427876.5677316,
-    "ast_hash": "3a75836e403a3825c232eea060365084",
-    "semantic_hash": ""
+    "mtime": 1783432051.9706025,
+    "ast_hash": "05f7bafebd92f4bda244203996f342f8",
+    "semantic_hash": "05f7bafebd92f4bda244203996f342f8"
   },
   "web/src/components/PostCard.tsx": {
-    "mtime": 1783427881.348949,
-    "ast_hash": "b49c0513af4cd177fa5dbe54d988e7c0",
-    "semantic_hash": ""
-  },
-  "web/src/components/RightRail.tsx": {
-    "mtime": 1783427925.2447412,
-    "ast_hash": "6e14a7cb14e0132c552925ff9e9df1b9",
-    "semantic_hash": ""
-  },
-  "web/src/components/Sidebar.tsx": {
-    "mtime": 1783427916.277324,
-    "ast_hash": "3c469d3f562f08f142000f9cee12ae61",
-    "semantic_hash": ""
+    "mtime": 1783432043.2694793,
+    "ast_hash": "e3bfd91262a7f49901cc022205c75f6e",
+    "semantic_hash": "e3bfd91262a7f49901cc022205c75f6e"
   },
   "web/src/components/Toasts.tsx": {
     "mtime": 1783427928.6933181,
     "ast_hash": "17a963b239a13a8d5f960045325bb6f3",
-    "semantic_hash": ""
+    "semantic_hash": "17a963b239a13a8d5f960045325bb6f3"
   },
   "web/src/components/ui.tsx": {
-    "mtime": 1783427844.924051,
-    "ast_hash": "113332edf2209b41bc2c0cdc08e8b5cd",
-    "semantic_hash": ""
+    "mtime": 1783434328.1974907,
+    "ast_hash": "5ce618f056160eb06d50c19f03d8cd71",
+    "semantic_hash": "5ce618f056160eb06d50c19f03d8cd71"
   },
   "web/src/lib/civic.ts": {
     "mtime": 1783429221.9143045,
     "ast_hash": "45dff5cfb74428da0249b3526cacc2bc",
-    "semantic_hash": ""
+    "semantic_hash": "45dff5cfb74428da0249b3526cacc2bc"
   },
   "web/src/main.tsx": {
-    "mtime": 1783426727.6275487,
-    "ast_hash": "43a9be975bb92bdfe2d5247386679ebd",
-    "semantic_hash": ""
+    "mtime": 1783432660.8330884,
+    "ast_hash": "bf1449ced57d8db7d510044b53ae03b0",
+    "semantic_hash": "bf1449ced57d8db7d510044b53ae03b0"
   },
   "web/src/store/store.tsx": {
-    "mtime": 1783429321.8231878,
-    "ast_hash": "d4ebe639db5f8f3f1ed4432a3316851c",
-    "semantic_hash": ""
-  },
-  "web/src/views/Explore.tsx": {
-    "mtime": 1783427946.1624458,
-    "ast_hash": "0f04177d6e6db156fcaf2f9404ef1a9e",
-    "semantic_hash": ""
+    "mtime": 1783434285.0265176,
+    "ast_hash": "e359bf5617f8962bcb79abe7bb27cc01",
+    "semantic_hash": "e359bf5617f8962bcb79abe7bb27cc01"
   },
   "web/src/views/Feed.tsx": {
-    "mtime": 1783427939.7065525,
-    "ast_hash": "9cd9376732ca4febc0fd6794f4372af5",
-    "semantic_hash": ""
+    "mtime": 1783432102.1013474,
+    "ast_hash": "a8ceb32c09379fe19dc5b12690ec7602",
+    "semantic_hash": "a8ceb32c09379fe19dc5b12690ec7602"
   },
   "web/src/views/Governance.tsx": {
-    "mtime": 1783427982.4856803,
-    "ast_hash": "fdd4da14037cefb97073adced0c43f01",
-    "semantic_hash": ""
+    "mtime": 1783433615.704459,
+    "ast_hash": "ea937b3cdc13999fb9f1478231f5c706",
+    "semantic_hash": "ea937b3cdc13999fb9f1478231f5c706"
   },
   "web/src/views/Identity.tsx": {
-    "mtime": 1783429354.9109364,
-    "ast_hash": "edeab7c86ba41fbe0d6a1825fe845458",
-    "semantic_hash": ""
+    "mtime": 1783434366.9474275,
+    "ast_hash": "6b1b2ca0c257b358b9bb622732d055db",
+    "semantic_hash": "6b1b2ca0c257b358b9bb622732d055db"
   },
   "web/src/vite-env.d.ts": {
     "mtime": 1783426966.0390167,
     "ast_hash": "9d4f5a75f439c52d44df7f23616b5ead",
-    "semantic_hash": ""
+    "semantic_hash": "9d4f5a75f439c52d44df7f23616b5ead"
   },
   "web/tsconfig.json": {
     "mtime": 1783427043.753593,
     "ast_hash": "2e4931794a03f07dcf0ad39195ba8cc3",
-    "semantic_hash": ""
+    "semantic_hash": "2e4931794a03f07dcf0ad39195ba8cc3"
   },
   "web/vite.config.ts": {
     "mtime": 1783426522.618985,
     "ast_hash": "b882a13cb4bd434707d44b57f9767280",
-    "semantic_hash": ""
+    "semantic_hash": "b882a13cb4bd434707d44b57f9767280"
   },
   "QUICKSTART.md": {
-    "mtime": 1783431338.3547592,
-    "ast_hash": "b237cd0f2ea50427f105f5883bf44bd2",
-    "semantic_hash": ""
+    "mtime": 1783434750.2158868,
+    "ast_hash": "add4e4f75914050ca0c1fada6b27fb5c",
+    "semantic_hash": "add4e4f75914050ca0c1fada6b27fb5c"
   },
   "docker-compose.yml": {
     "mtime": 1783427489.1541822,
     "ast_hash": "bfa8135299f330ab9630f1e54351c9f5",
-    "semantic_hash": ""
+    "semantic_hash": "bfa8135299f330ab9630f1e54351c9f5"
   },
   "web/index.html": {
     "mtime": 1783426529.513764,
     "ast_hash": "9a994a944b0397576e75fc32652d2e51",
-    "semantic_hash": ""
+    "semantic_hash": "9a994a944b0397576e75fc32652d2e51"
+  },
+  "web/src/components/AboutRail.tsx": {
+    "mtime": 1783432714.7875679,
+    "ast_hash": "128e559751fc11972a9dd2fca3f44405",
+    "semantic_hash": "128e559751fc11972a9dd2fca3f44405"
+  },
+  "web/src/components/CommunityNav.tsx": {
+    "mtime": 1783434376.8289723,
+    "ast_hash": "7efdf042c6564c39170b05f14e43c8e9",
+    "semantic_hash": "7efdf042c6564c39170b05f14e43c8e9"
+  },
+  "web/src/components/PostComposer.tsx": {
+    "mtime": 1783432027.6285558,
+    "ast_hash": "f314219ab3754b8b0ac61c845eefd480",
+    "semantic_hash": "f314219ab3754b8b0ac61c845eefd480"
+  },
+  "web/src/components/TopBar.tsx": {
+    "mtime": 1783434315.053227,
+    "ast_hash": "6b86f3478a7973d48bc425a39a919348",
+    "semantic_hash": "6b86f3478a7973d48bc425a39a919348"
+  },
+  "web/src/lib/constitution.ts": {
+    "mtime": 1783432700.521274,
+    "ast_hash": "4df5b8a08f5e270f6484d48100780b70",
+    "semantic_hash": "4df5b8a08f5e270f6484d48100780b70"
+  },
+  "web/src/lib/time.ts": {
+    "mtime": 1783434263.4250531,
+    "ast_hash": "28a099876012ea349f03ed643f0a7c0f",
+    "semantic_hash": "28a099876012ea349f03ed643f0a7c0f"
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1783436353.7545173,
+    "ast_hash": "725f80ce923f8414d72be9aab5fe292a",
+    "semantic_hash": "725f80ce923f8414d72be9aab5fe292a"
   }
 }

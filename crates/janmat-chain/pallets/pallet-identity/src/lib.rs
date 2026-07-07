@@ -1,7 +1,4 @@
-use janmat_zk::{
-    CIRCUIT_KYC_VERIFY, ZkReceipt, ZkVerifier,
-    circuits::kyc_verify::KycVerifyOutput,
-};
+use janmat_zk::{CIRCUIT_KYC_VERIFY, ZkReceipt, ZkVerifier, circuits::kyc_verify::KycVerifyOutput};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone)]
@@ -44,9 +41,8 @@ impl IdentityPallet {
             return Err(IdentityError::InvalidProof);
         }
         // 2. Deserialise public outputs to extract nullifier_seed_commitment
-        let output: KycVerifyOutput =
-            serde_json::from_slice(&kyc_receipt.public_outputs)
-                .map_err(|_| IdentityError::InvalidPublicOutputs)?;
+        let output: KycVerifyOutput = serde_json::from_slice(&kyc_receipt.public_outputs)
+            .map_err(|_| IdentityError::InvalidPublicOutputs)?;
         let nsc_hex: String = output
             .nullifier_seed_commitment
             .iter()
@@ -81,8 +77,8 @@ impl IdentityPallet {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use janmat_zk::{MockVerifier, prover::MockProver};
     use janmat_identity::kyc_provider::{KycProvider, MockKycProvider};
+    use janmat_zk::{MockVerifier, prover::MockProver};
 
     fn register(
         pallet: &mut IdentityPallet,

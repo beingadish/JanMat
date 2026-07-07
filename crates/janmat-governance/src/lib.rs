@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 
 // ── Quorum constants ──────────────────────────────────────────────────────────
 
-pub const REGULAR_QUORUM: f64       = 0.501; // simple majority
-pub const CONSTITUTIONAL_QUORUM: f64 = 0.67;  // two-thirds supermajority
-pub const RECALL_PETITION_RATIO: f64 = 0.10;  // 10% of eligible voters
+pub const REGULAR_QUORUM: f64 = 0.501; // simple majority
+pub const CONSTITUTIONAL_QUORUM: f64 = 0.67; // two-thirds supermajority
+pub const RECALL_PETITION_RATIO: f64 = 0.10; // 10% of eligible voters
 pub const REFERENDA_SUPPORT_RATIO: f64 = 0.05; // 5% to open a citizen referenda
 
 // ── Quorum math ───────────────────────────────────────────────────────────────
@@ -17,7 +17,11 @@ pub fn met_quorum(yes_votes: u64, total_votes: u64, constitutional: bool) -> boo
     if total_votes == 0 {
         return false;
     }
-    let target = if constitutional { CONSTITUTIONAL_QUORUM } else { REGULAR_QUORUM };
+    let target = if constitutional {
+        CONSTITUTIONAL_QUORUM
+    } else {
+        REGULAR_QUORUM
+    };
     (yes_votes as f64 / total_votes as f64) >= target
 }
 
@@ -40,7 +44,10 @@ pub enum ProposalType {
     /// Moderator election within a topic — regular quorum
     ModeratorElection { topic_id: String },
     /// Moderator recall — triggered automatically at 10% petition threshold
-    ModeratorRecall { topic_id: String, moderator_wallet: String },
+    ModeratorRecall {
+        topic_id: String,
+        moderator_wallet: String,
+    },
     /// Citizen-initiated referenda — auto-opened at 5% signatures
     CitizenReferenda { initiator_wallet: String },
 }
@@ -115,9 +122,15 @@ mod tests {
     #[test]
     fn proposal_type_quorum() {
         assert_eq!(ProposalType::Regular.required_quorum(), REGULAR_QUORUM);
-        assert_eq!(ProposalType::Constitutional.required_quorum(), CONSTITUTIONAL_QUORUM);
         assert_eq!(
-            ProposalType::ModeratorElection { topic_id: "t/1".into() }.required_quorum(),
+            ProposalType::Constitutional.required_quorum(),
+            CONSTITUTIONAL_QUORUM
+        );
+        assert_eq!(
+            ProposalType::ModeratorElection {
+                topic_id: "t/1".into()
+            }
+            .required_quorum(),
             REGULAR_QUORUM
         );
     }

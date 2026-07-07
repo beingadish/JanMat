@@ -87,7 +87,12 @@ fn hex(bytes: &[u8]) -> String {
 pub fn identity_root(pan: &str, aadhaar: &str, dob: &str, username: &str) -> [u8; 32] {
     let mut h = blake3::Hasher::new();
     h.update(b"janmat/identity-root/v1");
-    for part in [pan.trim().to_uppercase().as_str(), aadhaar.trim(), dob.trim(), username.trim()] {
+    for part in [
+        pan.trim().to_uppercase().as_str(),
+        aadhaar.trim(),
+        dob.trim(),
+        username.trim(),
+    ] {
         h.update(part.as_bytes());
         h.update(b"|");
     }
@@ -156,7 +161,12 @@ mod tests {
 
     #[test]
     fn seed_chain_advances() {
-        let root = root_hex(&identity_root("ABCDE1234F", "123456789012", "1998-04-12", "rohan_k"));
+        let root = root_hex(&identity_root(
+            "ABCDE1234F",
+            "123456789012",
+            "1998-04-12",
+            "rohan_k",
+        ));
         let s0 = seed_genesis(&root);
         let s1 = seed_next(&s0, 1);
         assert_ne!(s0, s1);

@@ -20,8 +20,7 @@ impl MockProver {
     /// Prove a KYC credential. Returns `Ok(ZkReceipt)` on success.
     pub fn prove_kyc(&self, input: &KycVerifyInput) -> Result<ZkReceipt, String> {
         let output = kyc_verify::execute(input).map_err(|e| e.to_owned())?;
-        let public_bytes =
-            serde_json::to_vec(&output).expect("serialise KycVerifyOutput");
+        let public_bytes = serde_json::to_vec(&output).expect("serialise KycVerifyOutput");
         let proof_bytes = blake3::hash(&public_bytes).as_bytes().to_vec();
         Ok(ZkReceipt {
             circuit_id: CIRCUIT_KYC_VERIFY.to_owned(),
@@ -33,8 +32,7 @@ impl MockProver {
     /// Prove a vote cast. Returns `Ok(ZkReceipt)` on success.
     pub fn prove_vote(&self, input: &VoteCastInput) -> Result<ZkReceipt, String> {
         let output = vote_cast::execute(input).map_err(|e| e.to_owned())?;
-        let public_bytes =
-            serde_json::to_vec(&output).expect("serialise VoteCastOutput");
+        let public_bytes = serde_json::to_vec(&output).expect("serialise VoteCastOutput");
         let proof_bytes = blake3::hash(&public_bytes).as_bytes().to_vec();
         Ok(ZkReceipt {
             circuit_id: CIRCUIT_VOTE_CAST.to_owned(),

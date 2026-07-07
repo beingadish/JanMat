@@ -42,7 +42,10 @@ impl IpfsClient for MockIpfsClient {
         let mut ctr = self.counter.lock().unwrap();
         *ctr += 1;
         let cid = format!("QmMock{ctr:08}");
-        self.store.lock().unwrap().insert(cid.clone(), content.to_vec());
+        self.store
+            .lock()
+            .unwrap()
+            .insert(cid.clone(), content.to_vec());
         IpfsObjectRef {
             cid,
             content_hash: hash,

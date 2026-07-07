@@ -17,14 +17,15 @@ pub type Db = Pool<Postgres>;
 pub struct Citizen {
     pub id: u16,
     pub username: String,
-    pub root: String,          // identity_root fingerprint (hex)
+    pub root: String, // identity_root fingerprint (hex)
+    #[allow(dead_code)]
     pub phone_masked: String,
-    pub pwd_created: i64,       // unix seconds of the active password
-    pub login_count: i64,      // length of the seed chain
-    pub current_seed: String,  // current Citizen UID (hex)
+    pub pwd_created: i64,     // unix seconds of the active password
+    pub login_count: i64,     // length of the seed chain
+    pub current_seed: String, // current Citizen UID (hex)
 }
 
-struct MemState {
+pub(crate) struct MemState {
     next_id: u16,
     by_name: HashMap<String, Citizen>,
 }
@@ -166,9 +167,13 @@ impl Registry {
                     .await?;
                 Ok(row.map(to_citizen))
             }
-            Registry::Memory(m) => {
-                Ok(m.lock().unwrap().by_name.values().find(|c| c.id == id).cloned())
-            }
+            Registry::Memory(m) => Ok(m
+                .lock()
+                .unwrap()
+                .by_name
+                .values()
+                .find(|c| c.id == id)
+                .cloned()),
         }
     }
 
@@ -185,12 +190,14 @@ impl Registry {
     ) -> Result<(), sqlx::Error> {
         match self {
             Registry::Postgres(pool) => {
-                sqlx::query("UPDATE citizens SET login_count = $2, current_seed = $3 WHERE username = $1")
-                    .bind(username)
-                    .bind(login_count)
-                    .bind(current_seed)
-                    .execute(pool)
-                    .await?;
+                sqlx::query(
+                    "UPDATE citizens SET login_count = $2, current_seed = $3 WHERE username = $1",
+                )
+                .bind(username)
+                .bind(login_count)
+                .bind(current_seed)
+                .execute(pool)
+                .await?;
                 Ok(())
             }
             Registry::Memory(m) => {
@@ -204,7 +211,11 @@ impl Registry {
     }
 
     /// Set a new active password creation time (regeneration after expiry).
-    pub async fn set_pwd_created(&self, username: &str, pwd_created: i64) -> Result<(), sqlx::Error> {
+    pub async fn set_pwd_created(
+        &self,
+        username: &str,
+        pwd_created: i64,
+    ) -> Result<(), sqlx::Error> {
         match self {
             Registry::Postgres(pool) => {
                 sqlx::query("UPDATE citizens SET pwd_created = $2 WHERE username = $1")

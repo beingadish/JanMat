@@ -60,13 +60,8 @@ pub struct AnchorRecord {
     pub commitment_count: usize,
 }
 
-
 impl MerkleAnchor {
-    pub fn anchor_batch(
-        &mut self,
-        commitments: &[String],
-        batch_block: u64,
-    ) -> AnchorRecord {
+    pub fn anchor_batch(&mut self, commitments: &[String], batch_block: u64) -> AnchorRecord {
         let root = batch_votes_root(commitments);
         let root_hex: String = root.iter().map(|b| format!("{b:02x}")).collect();
         let record = AnchorRecord {

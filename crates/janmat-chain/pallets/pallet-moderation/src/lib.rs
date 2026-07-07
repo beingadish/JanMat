@@ -29,7 +29,7 @@ const SUPPRESS_THRESHOLD: usize = 4; // 4-of-7
 #[derive(Debug, Clone)]
 pub struct JurySession {
     pub opinion_id: String,
-    pub jurors: Vec<String>,  // wallet addresses (pseudonymous, on-chain)
+    pub jurors: Vec<String>, // wallet addresses (pseudonymous, on-chain)
     pub votes: BTreeMap<String, bool>, // juror wallet → true = suppress
     pub resolved: bool,
 }
@@ -37,11 +37,7 @@ pub struct JurySession {
 impl JurySession {
     /// Sample `JURY_SIZE` jurors deterministically from a voter pool using
     /// block_hash as the entropy source. Deterministic = publicly verifiable.
-    pub fn new(
-        opinion_id: &str,
-        voter_pool: &[String],
-        block_hash: &[u8],
-    ) -> Option<Self> {
+    pub fn new(opinion_id: &str, voter_pool: &[String], block_hash: &[u8]) -> Option<Self> {
         if voter_pool.len() < JURY_SIZE {
             return None;
         }
@@ -133,8 +129,8 @@ impl ModerationPallet {
             actor_wallet: moderator_wallet.to_owned(),
             at_block,
         });
-        let jury = JurySession::new(opinion_id, voter_pool, block_hash)
-            .ok_or("voter_pool_too_small")?;
+        let jury =
+            JurySession::new(opinion_id, voter_pool, block_hash).ok_or("voter_pool_too_small")?;
         self.audit_log.push(ModerationAuditEntry {
             opinion_id: opinion_id.to_owned(),
             action: ModerationAction::JuryConvened,
@@ -159,12 +155,7 @@ impl ModerationPallet {
     }
 
     /// Finalise the jury verdict (called after tally() returns Some).
-    pub fn finalise_verdict(
-        &mut self,
-        opinion_id: &str,
-        verdict: JuryVerdict,
-        at_block: u64,
-    ) {
+    pub fn finalise_verdict(&mut self, opinion_id: &str, verdict: JuryVerdict, at_block: u64) {
         let action = match verdict {
             JuryVerdict::Suppress => ModerationAction::Suppressed,
             JuryVerdict::Keep => ModerationAction::Kept,
@@ -205,22 +196,32 @@ mod tests {
             .unwrap();
         assert_eq!(p.juries.len(), 1);
         let entries = p.audit_entries_for("o/001");
-        assert!(entries.iter().any(|e| e.action == ModerationAction::Flagged));
-        assert!(entries.iter().any(|e| e.action == ModerationAction::JuryConvened));
+        assert!(
+            entries
+                .iter()
+                .any(|e| e.action == ModerationAction::Flagged)
+        );
+        assert!(
+            entries
+                .iter()
+                .any(|e| e.action == ModerationAction::JuryConvened)
+        );
     }
 
     #[test]
     fn jury_suppress_4_of_7_suppresses() {
         let mut p = ModerationPallet::default();
         let pool = make_pool(10);
-        p.flag_opinion("o/002", "harm", "mod-A", &pool, b"hash", 100).unwrap();
+        p.flag_opinion("o/002", "harm", "mod-A", &pool, b"hash", 100)
+            .unwrap();
         let jurors = p.juries["o/002"].jurors.clone();
         // 4 vote suppress, 3 vote keep
         for (i, j) in jurors.iter().enumerate() {
             let suppress = i < 4;
             p.jury_vote("o/002", j, suppress).unwrap();
         }
-        let verdict = p.jury_vote("o/002", &jurors[6], false)
+        let verdict = p
+            .jury_vote("o/002", &jurors[6], false)
             .unwrap_or(None)
             .unwrap_or_else(|| p.juries["o/002"].tally().unwrap());
         assert_eq!(verdict, JuryVerdict::Suppress);
@@ -246,7 +247,8 @@ mod tests {
     fn voter_pool_too_small_returns_error() {
         let mut p = ModerationPallet::default();
         let small_pool = make_pool(3);
-        let err = p.flag_opinion("o/003", "reason", "mod", &small_pool, b"h", 1)
+        let err = p
+            .flag_opinion("o/003", "reason", "mod", &small_pool, b"h", 1)
             .unwrap_err();
         assert_eq!(err, "voter_pool_too_small");
     }

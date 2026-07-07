@@ -12,7 +12,7 @@
 
 use std::collections::HashMap;
 
-pub const TOPIC_LIMIT_PER_DAY: u32  = 1;
+pub const TOPIC_LIMIT_PER_DAY: u32 = 1;
 pub const OPINION_LIMIT_PER_DAY: u32 = 5;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -40,11 +40,12 @@ pub struct InMemoryRateLimitStore {
 impl RateLimitStore for InMemoryRateLimitStore {
     fn check_and_increment(&mut self, wallet: &str, action: RateLimitAction) -> bool {
         let limit = match action {
-            RateLimitAction::CreateTopic    => TOPIC_LIMIT_PER_DAY,
-            RateLimitAction::SubmitOpinion  => OPINION_LIMIT_PER_DAY,
-            RateLimitAction::CastVote       => u32::MAX, // unlimited
+            RateLimitAction::CreateTopic => TOPIC_LIMIT_PER_DAY,
+            RateLimitAction::SubmitOpinion => OPINION_LIMIT_PER_DAY,
+            RateLimitAction::CastVote => u32::MAX, // unlimited
         };
-        let entry = self.counts
+        let entry = self
+            .counts
             .entry(wallet.to_owned())
             .or_default()
             .entry(action)
