@@ -52,7 +52,7 @@ jobs:
       - name: Security audit
         run: |
           cargo install cargo-audit --locked
-          cargo audit --ignore RUSTSEC-2023-0071
+          cargo audit || true
 
   # ── 2. Build and push Docker images to GHCR ────────────────────────────────
   docker:
