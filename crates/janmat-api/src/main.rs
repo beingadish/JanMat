@@ -29,7 +29,7 @@ async fn health() -> Json<HealthResponse> {
         status: "ok",
         service: "janmat-api",
         version: "0.2.0",
-        network: "precinct-42-active",
+        network: "janmat-consensus-active",
     })
 }
 

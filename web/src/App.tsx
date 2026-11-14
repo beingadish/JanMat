@@ -72,20 +72,38 @@ function Shell() {
       {/* Main Content Area */}
       <main className="w-full pt-24 pb-16 px-4 lg:px-8 max-w-7xl mx-auto flex-1">
         {view === "identity" ? (
-          <div className="max-w-2xl mx-auto bg-[#131A29] p-6 sm:p-8 rounded-2xl border border-[#222D42] shadow-xl">
-            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#222D42]">
-              <h2 className="text-[20px] font-bold text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#4F46E5]">fingerprint</span>
-                Citizen Identity & Verification
-              </h2>
-              <button
-                onClick={() => setView("feed")}
-                className="px-4 py-1.5 rounded-full bg-[#1C263A] hover:bg-[#262A34] text-[#94A3B8] text-[13px] font-semibold transition-colors"
-              >
-                Back to Feed
-              </button>
+          <div className="max-w-2xl mx-auto flex flex-col gap-6">
+            {!identity && (
+              <div className="bg-[#131A29] p-6 sm:p-7 rounded-2xl border border-[#222D42] shadow-xl">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10B981]/15 text-[#10B981] text-[11px] font-bold tracking-wider border border-[#10B981]/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+                    VERIFIED CITIZEN PLATFORM
+                  </span>
+                </div>
+                <h1 className="font-['Plus_Jakarta_Sans'] text-[24px] sm:text-[26px] text-white font-extrabold tracking-tight">
+                  Democracy in Real-Time: Public Pulse
+                </h1>
+                <p className="text-[14px] text-[#94A3B8] mt-1.5 leading-relaxed">
+                  Your voice shapes verifiable consensus. Register or log in to cast immutable votes, author community motions, and deliberate on civic proposals.
+                </p>
+              </div>
+            )}
+            <div className="bg-[#131A29] p-6 sm:p-8 rounded-2xl border border-[#222D42] shadow-xl">
+              <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#222D42]">
+                <h2 className="text-[20px] font-bold text-white flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#4F46E5]">fingerprint</span>
+                  Citizen Identity & Verification
+                </h2>
+                <button
+                  onClick={() => setView("feed")}
+                  className="px-4 py-1.5 rounded-full bg-[#1C263A] hover:bg-[#262A34] text-[#94A3B8] text-[13px] font-semibold transition-colors"
+                >
+                  Back to Feed
+                </button>
+              </div>
+              <Identity />
             </div>
-            <Identity />
           </div>
         ) : view === "governance" ? (
           <div className="max-w-4xl mx-auto bg-[#131A29] p-6 sm:p-8 rounded-2xl border border-[#222D42] shadow-xl">

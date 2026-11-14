@@ -4,7 +4,6 @@ import type { BallotItem, PulseResponse } from "../api/types";
 import { AuditReceiptModal } from "../components/AuditReceiptModal";
 import { BallotCard } from "../components/BallotCard";
 import { CivicFeedsRail } from "../components/CivicFeedsRail";
-import { ConsensusHero } from "../components/ConsensusHero";
 import { DraftMotionModal } from "../components/DraftMotionModal";
 import { RulesModal } from "../components/RulesModal";
 import { VerificationRail } from "../components/VerificationRail";
@@ -447,22 +446,7 @@ export function CivicPulseView({
 
   return (
     <div className="w-full flex flex-col gap-6">
-      {/* Hero Consensus Banner */}
-      <ConsensusHero
-        blockHeight={blockHeight}
-        precinctLabel={pulse?.network_label ?? "JANMAT CONSENSUS NETWORK ACTIVE"}
-        onOpenDraft={() => {
-          if (!identity) {
-            toast("err", "Authentication Required: Please log in or register to draft a motion.");
-            setView("identity");
-            return;
-          }
-          setIsDraftModalOpen?.(true);
-        }}
-        onOpenRules={() => setIsRulesModalOpen?.(true)}
-      />
-
-      {/* 3-Column Desktop Grid Layout */}
+      {/* 3-Column Desktop Grid Layout: Feed-first without top banner clutter */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Civic Feeds, Featured Circles, Node Stats (DESKTOP ONLY: sticky, doesn't push feed) */}
         <aside className="hidden lg:block lg:col-span-3 sticky top-24">

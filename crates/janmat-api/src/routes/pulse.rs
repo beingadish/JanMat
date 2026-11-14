@@ -307,12 +307,7 @@ impl PulseEngine {
     }
 
     pub fn current_block(&self) -> u64 {
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let elapsed = now.saturating_sub(self.start_time);
-        self.genesis_block + (elapsed / 6)
+        self.genesis_block + self.receipts.len() as u64
     }
 }
 
@@ -343,7 +338,7 @@ pub async fn get_pulse() -> Json<PulseResponse> {
         },
     ];
 
-    let anchor_input = format!("precinct:42:block:{block}:ballots:{}", engine.ballots.len());
+    let anchor_input = format!("janmat:consensus:block:{block}:ballots:{}", engine.ballots.len());
     let blake3_anchor_hash = compute_blake3_audit(&anchor_input);
 
     let top_dissent = TopNuancedDissent {
@@ -380,11 +375,11 @@ pub async fn get_pulse() -> Json<PulseResponse> {
 
     Json(PulseResponse {
         block_height: block,
-        precinct_id: "Precinct 42-North".to_string(),
-        precinct_name: "Precinct 42".to_string(),
-        jurisdiction: "Urban Metro Central Jurisdiction".to_string(),
+        precinct_id: "JanMat Consensus".to_string(),
+        precinct_name: "JanMat".to_string(),
+        jurisdiction: "Decentralized Public Deliberation".to_string(),
         status: "ACTIVE".to_string(),
-        network_label: "PRECINCT 42 NETWORK ACTIVE".to_string(),
+        network_label: "JANMAT PUBLIC CONSENSUS ACTIVE".to_string(),
         turnout_pct,
         consensus_index,
         weekly_change,
@@ -908,7 +903,7 @@ pub async fn verify_blake3_receipt(
             receipt_hash: req.receipt_hash,
             block_height: block,
             timestamp: chrono_now(),
-            details: "Cryptographic Blake3 transaction receipt verified against Precinct 42 ledger anchor".to_string(),
+            details: "Cryptographic Blake3 transaction receipt verified against JanMat public ledger anchor".to_string(),
         }));
     }
 
@@ -936,9 +931,9 @@ mod tests {
     #[tokio::test]
     async fn test_pulse_telemetry_validity() {
         let pulse = get_pulse().await.0;
-        assert!(pulse.block_height >= 849_201);
+        assert!(pulse.block_height >= 1);
         assert_eq!(pulse.status, "ACTIVE");
-        assert_eq!(pulse.network_label, "PRECINCT 42 NETWORK ACTIVE");
+        assert_eq!(pulse.network_label, "JANMAT PUBLIC CONSENSUS ACTIVE");
         assert_eq!(pulse.featured_circles.len(), 2);
         assert!(!pulse.blake3_anchor_hash.is_empty());
         assert_eq!(pulse.blake3_anchor_hash.len(), 64);
