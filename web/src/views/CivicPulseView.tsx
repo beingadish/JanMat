@@ -474,10 +474,6 @@ export function CivicPulseView({
             circles={featuredCirclesList}
             myBallotsCount={ballots.filter(b => b.author?.name === identity?.handle).length}
             passedCount={ballots.filter(b => b.status === "passed").length}
-            turnoutPct={pulse?.turnout_pct ?? (ballots.length ? 100 : 0)}
-            consensusIndex={pulse?.consensus_index ?? 0}
-            weeklyChange={pulse?.weekly_change ?? "0.0"}
-            precinctName={pulse?.precinct_id ?? "Precinct 42-North"}
           />
         </aside>
 

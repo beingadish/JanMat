@@ -355,7 +355,7 @@ export function BallotCard({
           <button
             onClick={() => onAuditHash(ballot)}
             className="p-2 rounded-full bg-[#0A0E17] hover:bg-[#1C263A] text-[#64748B] hover:text-white border border-[#222D42] transition-colors"
-            title="Audit Hash on Precinct Ledger (Blake3 Proof)"
+            title="Audit Cryptographic Blake3 Receipt"
           >
             <span className="material-symbols-outlined text-[18px]">verified_user</span>
           </button>

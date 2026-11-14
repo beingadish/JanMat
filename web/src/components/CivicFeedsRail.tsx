@@ -8,10 +8,6 @@ interface CivicFeedsRailProps {
   circles?: FeaturedCircle[];
   myBallotsCount?: number;
   passedCount?: number;
-  turnoutPct?: number;
-  consensusIndex?: number;
-  weeklyChange?: string;
-  precinctName?: string;
 }
 
 const DEFAULT_CIRCLES: FeaturedCircle[] = [
@@ -28,10 +24,6 @@ export function CivicFeedsRail({
   circles = DEFAULT_CIRCLES,
   myBallotsCount = 0,
   passedCount = 0,
-  turnoutPct = 0,
-  consensusIndex = 0,
-  weeklyChange = "0.0",
-  precinctName = "Precinct 42-North",
 }: CivicFeedsRailProps) {
   return (
     <aside className="flex flex-col gap-6 w-full">
@@ -72,9 +64,9 @@ export function CivicFeedsRail({
           >
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#64748B] text-[18px]">
-                location_on
+                person
               </span>
-              My Precinct Ballots
+              My Authored Motions
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#0A0E17] text-[#94A3B8] text-[11px] font-mono">
               {myBallotsCount}
@@ -172,64 +164,6 @@ export function CivicFeedsRail({
               </button>
             );
           })}
-        </div>
-      </div>
-
-      {/* Precinct Quick Stats Widget */}
-      <div className="bg-[#131A29] rounded-2xl p-4 border border-[#222D42] shadow-md flex flex-col gap-3 relative overflow-hidden">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
-            Node Status
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#10B981]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
-            Syncing
-          </span>
-        </div>
-
-        <div>
-          <div className="font-['Plus_Jakarta_Sans'] font-bold text-[18px] text-white">
-            {precinctName}
-          </div>
-          <div className="text-[12px] text-[#94A3B8]">Urban Metro Central Jurisdiction</div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] flex flex-col">
-            <span className="text-[11px] font-semibold text-[#64748B]">Turnout</span>
-            <span className="font-['Plus_Jakarta_Sans'] font-extrabold text-[20px] text-[#10B981]">
-              {turnoutPct}%
-            </span>
-            <span className="text-[11px] text-[#94A3B8] mt-0.5">Verified Hash</span>
-          </div>
-
-          <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] flex flex-col">
-            <span className="text-[11px] font-semibold text-[#64748B]">Consensus</span>
-            <span className="font-['Plus_Jakarta_Sans'] font-extrabold text-[20px] text-[#c3c0ff]">
-              {consensusIndex}
-              <span className="text-xs text-[#64748B] font-normal">/100</span>
-            </span>
-            <span className="text-[11px] text-[#10B981] mt-0.5">{weeklyChange} this week</span>
-          </div>
-        </div>
-
-        {/* Micro Sparkline SVG */}
-        <div className="pt-2">
-          <div className="flex items-center justify-between text-[#64748B] text-[11px] font-semibold mb-1">
-            <span>7-Day Deliberation Velocity</span>
-            <span className="text-[#DFE2EF]">High Active</span>
-          </div>
-          <svg className="w-full h-8 overflow-visible text-[#3B82F6]" fill="none" viewBox="0 0 100 24">
-            <path
-              d="M 0,18 Q 15,22 30,12 T 60,8 T 85,15 T 100,4"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeWidth="2.5"
-            />
-            <circle className="animate-ping" cx="100" cy="4" fill="#10B981" r="3" />
-            <circle cx="100" cy="4" fill="#10B981" r="3" />
-          </svg>
         </div>
       </div>
     </aside>

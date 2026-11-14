@@ -17,9 +17,9 @@ export function RulesModal({ isOpen, onClose }: RulesModalProps) {
             </div>
             <div>
               <h3 className="font-['Plus_Jakarta_Sans'] text-[18px] font-bold text-white">
-                Precinct Constitution & Quorum Rules
+                JanMat Constitution & Quorum Rules
               </h3>
-              <p className="text-[12px] text-[#64748B]">Enacted at Genesis Block #0</p>
+              <p className="text-[12px] text-[#64748B]">Enacted at Genesis Block #1</p>
             </div>
           </div>
           <button

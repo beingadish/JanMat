@@ -133,7 +133,7 @@ export function VerificationRail({
         <div className="flex items-center justify-between pb-1 border-b border-[#222D42]/60">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px] text-[#4F46E5]">shield</span>
-            Precinct Consensus Rules
+            Consensus & Quorum Rules
           </span>
           <button
             onClick={onOpenRules}

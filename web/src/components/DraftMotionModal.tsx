@@ -56,7 +56,7 @@ export function DraftMotionModal({ isOpen, onClose, onSubmit, authorHandle = "Ve
               <h3 className="font-['Plus_Jakarta_Sans'] text-[18px] font-bold text-white">
                 Draft Civic Motion
               </h3>
-              <p className="text-[12px] text-[#64748B]">Publish directly to the Precinct 42 ledger</p>
+              <p className="text-[12px] text-[#64748B]">Publish directly to the JanMat public ledger</p>
             </div>
           </div>
           <button

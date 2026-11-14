@@ -7,7 +7,7 @@ interface ConsensusHeroProps {
 
 export function ConsensusHero({
   blockHeight = 1,
-  precinctLabel = "PRECINCT 42 NETWORK ACTIVE",
+  precinctLabel = "JANMAT PUBLIC CONSENSUS ACTIVE",
   onOpenDraft,
   onOpenRules,
 }: ConsensusHeroProps) {
