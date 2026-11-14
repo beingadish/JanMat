@@ -140,6 +140,25 @@ export interface TopDissent {
   quote: string;
 }
 
+export interface CommentItem {
+  id: string;
+  ballot_id: string;
+  author_name: string;
+  author_handle: string;
+  content: string;
+  blake3_hash: string;
+  upvotes: number;
+  created_at: string;
+  reshare_count: number;
+}
+
+export interface QuotedContext {
+  comment_id: string;
+  original_author: string;
+  original_content: string;
+  parent_ballot_id: string;
+}
+
 export interface BallotItem {
   id: string;
   proposal_code: string;
@@ -157,6 +176,9 @@ export interface BallotItem {
   blake3_hash: string;
   top_dissent?: TopDissent | null;
   created_at: string;
+  is_official?: boolean;
+  quoted_comment?: QuotedContext | null;
+  comments?: CommentItem[];
 }
 
 export interface FeaturedCircle {
@@ -214,4 +236,39 @@ export interface CastBallotResponse {
 export interface DraftMotionResponse {
   accepted: boolean;
   ballot: BallotItem;
+}
+
+export interface AddCommentRequest {
+  author_name?: string;
+  author_handle?: string;
+  content: string;
+}
+
+export interface AddCommentResponse {
+  accepted: boolean;
+  comment: CommentItem;
+}
+
+export interface ReshareCommentRequest {
+  comment_id: string;
+  question: string;
+  author_name?: string;
+  circle_id?: string;
+}
+
+export interface ReshareCommentResponse {
+  accepted: boolean;
+  new_ballot: BallotItem;
+}
+
+export interface VerifyReceiptRequest {
+  receipt_hash: string;
+}
+
+export interface VerifyReceiptResponse {
+  verified: boolean;
+  receipt_hash: string;
+  block_height: number;
+  timestamp: string;
+  details: string;
 }

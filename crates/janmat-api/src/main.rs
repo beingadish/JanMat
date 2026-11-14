@@ -83,6 +83,14 @@ async fn main() {
         .route("/api/citizen/ballots/vote", post(routes::pulse::cast_ballot_vote))
         .route("/citizen/ballots/draft", post(routes::pulse::draft_ballot_motion))
         .route("/api/citizen/ballots/draft", post(routes::pulse::draft_ballot_motion))
+        .route("/citizen/ballots/{id}/comments", post(routes::pulse::add_ballot_comment))
+        .route("/api/citizen/ballots/{id}/comments", post(routes::pulse::add_ballot_comment))
+        .route("/citizen/ballots/reshare", post(routes::pulse::reshare_comment_as_ballot))
+        .route("/api/citizen/ballots/reshare", post(routes::pulse::reshare_comment_as_ballot))
+        .route("/citizen/comments/{id}/upvote", post(routes::pulse::upvote_ballot_comment))
+        .route("/api/citizen/comments/{id}/upvote", post(routes::pulse::upvote_ballot_comment))
+        .route("/pub/verify-receipt", post(routes::pulse::verify_blake3_receipt))
+        .route("/api/verify-receipt", post(routes::pulse::verify_blake3_receipt))
         // Constitution
         .route(
             "/pub/constitution",

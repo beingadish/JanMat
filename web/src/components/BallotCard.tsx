@@ -1,10 +1,13 @@
 import { useState } from "react";
-import type { BallotItem } from "../api/types";
+import type { BallotItem, CommentItem } from "../api/types";
 
 interface BallotCardProps {
   ballot: BallotItem;
   onVote: (ballotId: string, choice: "agree" | "oppose" | "neutral") => Promise<void>;
   onAuditHash: (ballot: BallotItem) => void;
+  onAddComment?: (ballotId: string, content: string, authorName?: string) => Promise<void>;
+  onReshareComment?: (commentId: string, question: string, authorName?: string) => Promise<void>;
+  onUpvoteComment?: (commentId: string) => Promise<void>;
   onOpenDeliberation?: (ballot: BallotItem) => void;
 }
 
@@ -12,10 +15,23 @@ export function BallotCard({
   ballot,
   onVote,
   onAuditHash,
-  onOpenDeliberation,
+  onAddComment,
+  onReshareComment,
+  onUpvoteComment,
 }: BallotCardProps) {
   const [voting, setVoting] = useState(false);
   const [votedChoice, setVotedChoice] = useState<string | null>(null);
+
+  // Deliberation Tray state
+  const [showDeliberation, setShowDeliberation] = useState(ballot.is_official || false);
+  const [newComment, setNewComment] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  // Re-share / Spinoff question state: commentId -> active prompt
+  const [reshareTargetId, setReshareTargetId] = useState<string | null>(null);
+  const [reshareQuestion, setReshareQuestion] = useState("");
+  const [submittingReshare, setSubmittingReshare] = useState(false);
 
   const handleVoteClick = async (choice: "agree" | "oppose" | "neutral") => {
     if (voting) return;
@@ -28,14 +44,65 @@ export function BallotCard({
     }
   };
 
+  const handlePostComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || submittingComment) return;
+    setSubmittingComment(true);
+    try {
+      if (onAddComment) {
+        await onAddComment(ballot.id, newComment.trim(), authorName.trim() || undefined);
+        setNewComment("");
+      }
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleReshareSubmit = async (commentId: string) => {
+    if (!reshareQuestion.trim() || submittingReshare) return;
+    setSubmittingReshare(true);
+    try {
+      if (onReshareComment) {
+        await onReshareComment(commentId, reshareQuestion.trim(), authorName.trim() || undefined);
+        setReshareTargetId(null);
+        setReshareQuestion("");
+      }
+    } finally {
+      setSubmittingReshare(false);
+    }
+  };
+
+  const commentsList: CommentItem[] = ballot.comments || [];
+  const commentsCount = commentsList.length || ballot.deliberation_count || 0;
   const { tally } = ballot;
 
   return (
-    <article className="bg-[#131A29] rounded-2xl p-5 sm:p-6 border border-[#222D42] shadow-md flex flex-col gap-4 transition-all hover:border-[#3E4C6D] hover:shadow-xl">
+    <article
+      className={`bg-[#131A29] rounded-2xl p-5 sm:p-6 border shadow-md flex flex-col gap-4 transition-all hover:shadow-xl ${
+        ballot.is_official
+          ? "border-[#4F46E5]/60 hover:border-[#6366F1] shadow-[0_0_20px_rgba(79,70,229,0.12)]"
+          : "border-[#222D42] hover:border-[#3E4C6D]"
+      }`}
+    >
+      {/* Official Foundation Banner if applicable */}
+      {ballot.is_official && (
+        <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#4F46E5]/20 via-[#3B82F6]/15 to-transparent border border-[#4F46E5]/40 text-[#c3c0ff] text-[12px] font-semibold">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px] text-[#818CF8]">account_balance</span>
+            <span className="font-bold tracking-wide">Official JanMat Foundation Poll</span>
+          </div>
+          <span className="text-[11px] text-[#94A3B8] font-mono">Consensus-Tracked</span>
+        </div>
+      )}
+
       {/* Card Header Meta */}
       <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#0566D9] flex items-center justify-center text-white font-extrabold text-[15px] shrink-0">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-extrabold text-[15px] shrink-0 shadow-sm ${
+              ballot.is_official ? "bg-[#4F46E5]" : "bg-[#0566D9]"
+            }`}
+          >
             {ballot.author.avatar_initials}
           </div>
           <div className="flex flex-col">
@@ -46,7 +113,7 @@ export function BallotCard({
               {ballot.author.verified && (
                 <span
                   className="material-symbols-outlined text-[#3B82F6] text-[16px]"
-                  title="Verified Citizen Representative"
+                  title="Verified Representative"
                 >
                   verified
                 </span>
@@ -81,6 +148,24 @@ export function BallotCard({
         </span>
       </div>
 
+      {/* Quoted Comment Context (if re-shared as a spinoff poll question) */}
+      {ballot.quoted_comment && (
+        <div className="bg-[#0A0E17]/90 rounded-xl p-3.5 border-l-4 border-[#3B82F6] border-y border-r border-[#222D42] text-[13px] flex flex-col gap-1.5 shadow-inner">
+          <div className="flex items-center justify-between text-[11px] text-[#3B82F6] font-semibold uppercase tracking-wider">
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[15px]">format_quote</span>
+              <span>Quoting Citizen Suggestion</span>
+            </span>
+            <span className="text-[#64748B] font-mono lowercase">
+              {ballot.quoted_comment.original_author}
+            </span>
+          </div>
+          <p className="text-[#E2E8F0] italic font-serif leading-relaxed text-[13.5px]">
+            &ldquo;{ballot.quoted_comment.original_content}&rdquo;
+          </p>
+        </div>
+      )}
+
       {/* Question Title & Context */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2 text-[#3B82F6] text-[11px] font-bold uppercase tracking-wider">
@@ -113,12 +198,12 @@ export function BallotCard({
           <div
             className="bg-[#10B981] h-full transition-all duration-700 ease-out"
             style={{ width: `${tally.agree_pct}%` }}
-            title={`Agree: ${tally.agree_pct}%`}
+            title={`Support: ${tally.agree_pct}%`}
           />
           <div
             className="bg-[#EF4444] h-full transition-all duration-700 ease-out"
             style={{ width: `${tally.oppose_pct}%` }}
-            title={`Oppose: ${tally.oppose_pct}%`}
+            title={`Dissent: ${tally.oppose_pct}%`}
           />
           <div
             className="bg-[#F59E0B] h-full transition-all duration-700 ease-out"
@@ -132,15 +217,15 @@ export function BallotCard({
           <div className="flex items-center gap-3 font-bold">
             <span className="flex items-center gap-1 text-[#10B981]">
               <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
-              {tally.agree_pct}% Agree
+              {tally.agree_pct}% Support ({tally.agree_votes})
             </span>
             <span className="flex items-center gap-1 text-[#EF4444]">
               <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span>
-              {tally.oppose_pct}% Oppose
+              {tally.oppose_pct}% Dissent ({tally.oppose_votes})
             </span>
             <span className="flex items-center gap-1 text-[#F59E0B]">
               <span className="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
-              {tally.neutral_pct}% Neutral
+              {tally.neutral_pct}% Neutral ({tally.neutral_votes})
             </span>
           </div>
           <div className="text-[#64748B] text-[11px] font-mono">
@@ -188,21 +273,28 @@ export function BallotCard({
                 : "bg-[#262A34] hover:bg-[#1C263A] text-[#94A3B8] hover:text-white"
             }`}
           >
-            Abstain
+            Neutral
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          {ballot.deliberation_count > 0 && (
-            <button
-              onClick={() => onOpenDeliberation?.(ballot)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A0E17] hover:bg-[#1C263A] text-[#c7c4d8] hover:text-white text-[12px] font-semibold border border-[#222D42] transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">forum</span>
-              <span>Deliberation ({ballot.deliberation_count})</span>
-            </button>
-          )}
+          {/* Suggestions & Deliberations Toggle Button */}
+          <button
+            onClick={() => setShowDeliberation(!showDeliberation)}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
+              showDeliberation
+                ? "bg-[#4F46E5] text-white border-[#4F46E5] shadow-sm"
+                : "bg-[#0A0E17] hover:bg-[#1C263A] text-[#c7c4d8] hover:text-white border-[#222D42]"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">forum</span>
+            <span>Suggestions ({commentsCount})</span>
+            <span className="material-symbols-outlined text-[14px]">
+              {showDeliberation ? "expand_less" : "expand_more"}
+            </span>
+          </button>
 
+          {/* Cryptographic Proof Audit */}
           <button
             onClick={() => onAuditHash(ballot)}
             className="p-2 rounded-full bg-[#0A0E17] hover:bg-[#1C263A] text-[#64748B] hover:text-white border border-[#222D42] transition-colors"
@@ -212,6 +304,164 @@ export function BallotCard({
           </button>
         </div>
       </div>
+
+      {/* Expandable Suggestions & Deliberations Tray */}
+      {showDeliberation && (
+        <section className="bg-[#0A0E17] rounded-xl p-4 border border-[#222D42] flex flex-col gap-4 mt-1 animate-fadeIn">
+          <div className="flex items-center justify-between pb-2 border-b border-[#222D42]/60">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#3B82F6] text-[18px]">chat_bubble</span>
+              <h3 className="text-[13px] font-bold text-white uppercase tracking-wider">
+                Community Suggestions & Deliberations
+              </h3>
+            </div>
+            <span className="text-[11px] text-[#64748B] font-mono">
+              Blake3 cryptographic ledger integrity
+            </span>
+          </div>
+
+          {/* Suggestion Submission Form */}
+          <form onSubmit={handlePostComment} className="flex flex-col gap-2.5">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Post a constructive suggestion or deliberation on this motion..."
+              rows={2}
+              className="w-full bg-[#131A29] text-[13px] text-white placeholder-[#64748B] px-3.5 py-2.5 rounded-xl border border-[#222D42] focus:outline-none focus:border-[#4F46E5] resize-none"
+            />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <input
+                type="text"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
+                placeholder="Your name or handle (optional)"
+                className="bg-[#131A29] text-[12px] text-white placeholder-[#64748B] px-3 py-1.5 rounded-lg border border-[#222D42] focus:outline-none focus:border-[#4F46E5] max-w-[200px]"
+              />
+              <button
+                type="submit"
+                disabled={submittingComment || !newComment.trim()}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all disabled:opacity-50 active:scale-95 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[15px]">send</span>
+                <span>{submittingComment ? "Posting..." : "Post Suggestion"}</span>
+              </button>
+            </div>
+          </form>
+
+          {/* List of Comments & Spinoff Re-share Prompts */}
+          <div className="flex flex-col gap-3 mt-1">
+            {commentsList.length === 0 ? (
+              <p className="text-[12px] text-[#64748B] text-center py-2 italic">
+                No citizen suggestions yet. Be the first to add your perspective!
+              </p>
+            ) : (
+              commentsList.map((c) => (
+                <div
+                  key={c.id}
+                  className="bg-[#131A29] rounded-xl p-3.5 border border-[#222D42]/80 flex flex-col gap-2 transition-all hover:border-[#3E4C6D]"
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap text-[12px]">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white text-[13px]">{c.author_name}</span>
+                      <span className="text-[#64748B] font-mono text-[11px]">@{c.author_handle}</span>
+                      {c.created_at && (
+                        <span className="text-[#475569] text-[11px]">
+                          • {c.created_at.includes("T") ? c.created_at.split("T")[0] : c.created_at}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className="font-mono text-[10px] text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 rounded border border-[#10B981]/20"
+                      title={`Blake3 State Proof: ${c.blake3_hash}`}
+                    >
+                      {c.blake3_hash ? `Blake3:${c.blake3_hash.slice(0, 8)}...` : "Audited"}
+                    </span>
+                  </div>
+
+                  <p className="text-[13px] text-[#D1D5DB] leading-relaxed">{c.content}</p>
+
+                  {/* Comment Actions: Upvote & Re-share as Question */}
+                  <div className="flex items-center justify-between pt-1 border-t border-[#222D42]/50 text-[12px]">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => onUpvoteComment?.(c.id)}
+                        className="inline-flex items-center gap-1 text-[#94A3B8] hover:text-[#10B981] transition-colors"
+                        title="Upvote this suggestion"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">thumb_up</span>
+                        <span>{c.upvotes}</span>
+                      </button>
+
+                      {c.reshare_count > 0 && (
+                        <span className="text-[11px] text-[#64748B] font-mono">
+                          Spun off {c.reshare_count}x
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (reshareTargetId === c.id) {
+                          setReshareTargetId(null);
+                        } else {
+                          setReshareTargetId(c.id);
+                          setReshareQuestion(`Do you like this idea?`);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1C263A] hover:bg-[#222D42] text-[#3B82F6] hover:text-[#60A5FA] text-[11px] font-semibold border border-[#3B82F6]/30 transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">repeat</span>
+                      <span>Re-share with Question</span>
+                    </button>
+                  </div>
+
+                  {/* Inline Re-share Spinoff Poll Prompt */}
+                  {reshareTargetId === c.id && (
+                    <div className="bg-[#0A0E17] rounded-lg p-3 border border-[#3B82F6]/40 flex flex-col gap-2 mt-1 animate-fadeIn">
+                      <div className="flex items-center justify-between text-[11px] text-[#93C5FD]">
+                        <span className="font-bold flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">tune</span>
+                          Ask a Community Question for this Suggestion:
+                        </span>
+                        <button
+                          onClick={() => setReshareTargetId(null)}
+                          className="text-[#64748B] hover:text-white"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={reshareQuestion}
+                        onChange={(e) => setReshareQuestion(e.target.value)}
+                        placeholder="e.g. Do you like this idea? Should JanMat implement this?"
+                        className="bg-[#131A29] text-[12px] text-white px-3 py-1.5 rounded-lg border border-[#222D42] focus:outline-none focus:border-[#3B82F6]"
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setReshareTargetId(null)}
+                          className="px-3 py-1 rounded-full text-[11px] text-[#94A3B8] hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={submittingReshare || !reshareQuestion.trim()}
+                          onClick={() => handleReshareSubmit(c.id)}
+                          className="px-3.5 py-1 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-bold transition-all disabled:opacity-50"
+                        >
+                          {submittingReshare ? "Creating..." : "Launch Spinoff Poll"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      )}
     </article>
   );
 }

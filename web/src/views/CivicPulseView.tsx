@@ -12,8 +12,130 @@ import { useCivic } from "../store/store";
 
 const DEFAULT_BALLOTS: BallotItem[] = [
   {
-    id: "tc-2024-88",
-    proposal_code: "TC-2024-88",
+    id: "jmf-2026-01",
+    proposal_code: "JMF-2026-01",
+    circle: "JanMat Core Governance",
+    circle_id: "governance",
+    title: "How do you like the new JanMat Civic Consensus Engine & Dark Interface?",
+    summary:
+      "Official community consensus poll from the JanMat Foundation: Vote in Support, Dissent, or Neutral on the new interface and real-time cryptographic consensus engine. Share suggestions below; any citizen can re-share suggestions with their own question to initiate follow-up community votes.",
+    author: {
+      name: "JanMat Foundation",
+      role: "Official Civic Governance",
+      verified: true,
+      avatar_initials: "JF",
+    },
+    status: "active",
+    status_label: "Official Organization Poll • Open Voting",
+    closes_in: "5d",
+    category: "civic",
+    tally: {
+      agree_pct: 78,
+      oppose_pct: 14,
+      neutral_pct: 8,
+      agree_votes: 184,
+      oppose_votes: 33,
+      neutral_votes: 19,
+      total_ballots: 236,
+      quorum_pct: 120,
+    },
+    deliberation_count: 29,
+    blake3_hash: "a4f8d227c9e0183b56f890123456789abcdef0123456789abcdef0123456789a",
+    top_dissent: {
+      category: "Visual Accessibility",
+      upvotes: 14,
+      quote:
+        "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.",
+    },
+    created_at: "2026-11-14T06:00:00Z",
+    is_official: true,
+    quoted_comment: null,
+    comments: [
+      {
+        id: "c-101",
+        ballot_id: "jmf-2026-01",
+        author_name: "Aadarsh (Lead Contributor)",
+        author_handle: "beingadish",
+        content: "I think we can change the color of the UI to something like blackish for OLED screens.",
+        blake3_hash: "9b3c4f7a1e2d5c8b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b",
+        upvotes: 18,
+        created_at: "2026-11-14T08:00:00Z",
+        reshare_count: 1,
+      },
+      {
+        id: "c-102",
+        ballot_id: "jmf-2026-01",
+        author_name: "Priya Sharma",
+        author_handle: "priya_civic",
+        content: "Mandating Blake3 cryptographic receipt verification for every ward ballot gives citizens verifiable trust.",
+        blake3_hash: "1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d",
+        upvotes: 11,
+        created_at: "2026-11-14T08:30:00Z",
+        reshare_count: 0,
+      },
+    ],
+  },
+  {
+    id: "spin-2026-02",
+    proposal_code: "SPIN-2026-02",
+    circle: "Design & User Experience",
+    circle_id: "design",
+    title: "Do you like this idea? Should JanMat adopt the pitch-black OLED aesthetic?",
+    summary:
+      "Spun-off community question based on citizen suggestion #c-101: 'I think we can change the color of the UI to something like blackish for OLED screens.'",
+    author: {
+      name: "Devendra K.",
+      role: "Citizen Contributor",
+      verified: true,
+      avatar_initials: "DK",
+    },
+    status: "active",
+    status_label: "Spun-off Community Motion • Closes in 42h",
+    closes_in: "42h",
+    category: "civic",
+    tally: {
+      agree_pct: 71,
+      oppose_pct: 21,
+      neutral_pct: 8,
+      agree_votes: 89,
+      oppose_votes: 26,
+      neutral_votes: 10,
+      total_ballots: 125,
+      quorum_pct: 95,
+    },
+    deliberation_count: 14,
+    blake3_hash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+    top_dissent: {
+      category: "Eye Comfort",
+      upvotes: 9,
+      quote:
+        "Dark slate #0A0E17 creates softer transitions at night compared to absolute #000000 with bright white cards.",
+    },
+    created_at: "2026-11-14T08:15:00Z",
+    is_official: false,
+    quoted_comment: {
+      comment_id: "c-101",
+      original_author: "Aadarsh (Lead Contributor) (@beingadish)",
+      original_content: "I think we can change the color of the UI to something like blackish for OLED screens.",
+      parent_ballot_id: "jmf-2026-01",
+    },
+    comments: [
+      {
+        id: "c-201",
+        ballot_id: "spin-2026-02",
+        author_name: "Kavita M.",
+        author_handle: "kavita_m",
+        content: "Pitch black saves significant battery life on mobile OLED screens!",
+        blake3_hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        upvotes: 6,
+        created_at: "2026-11-14T08:45:00Z",
+        reshare_count: 0,
+      },
+    ],
+  },
+  {
+    id: "tc-2026-03",
+    proposal_code: "TC-2026-03",
     circle: "Transit Council",
     circle_id: "transit",
     title: "Should overnight suburban metro runs be funded via dynamic weekend congestion tolls?",
@@ -48,77 +170,9 @@ const DEFAULT_BALLOTS: BallotItem[] = [
         "Dynamic congestion tolls during economic downturns create an undue regressive penalty on non-salaried weekend service providers who cannot shift commuting hours.",
     },
     created_at: "2026-11-14T06:00:00Z",
-  },
-  {
-    id: "eth-2024-14",
-    proposal_code: "ETH-2024-14",
-    circle: "Municipal IT & AI Ethics",
-    circle_id: "it-ethics",
-    title: "Public municipal IT must mandate open-source audits before deploying automated AI workflows.",
-    summary:
-      "Algorithmic public benefit disbursement and traffic management systems require independent peer-reviewed transparency reports before rollout to eliminate systemic demographic bias.",
-    author: {
-      name: "Meera R.",
-      role: "Tech & Ethics Civic Fellow",
-      verified: true,
-      avatar_initials: "MR",
-    },
-    status: "deliberation",
-    status_label: "Open Deliberation",
-    closes_in: "2d",
-    category: "tech",
-    tally: {
-      agree_pct: 84,
-      oppose_pct: 11,
-      neutral_pct: 5,
-      agree_votes: 1588,
-      oppose_votes: 208,
-      neutral_votes: 94,
-      total_ballots: 1890,
-      quorum_pct: 98,
-    },
-    deliberation_count: 89,
-    blake3_hash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-    top_dissent: {
-      category: "Execution Latency",
-      upvotes: 48,
-      quote:
-        "Mandatory multi-month open audit timelines could stall critical municipal cybersecurity response updates when rapid zero-day patching is required.",
-    },
-    created_at: "2026-11-14T04:00:00Z",
-  },
-  {
-    id: "eng-2024-03",
-    proposal_code: "ENG-2024-03",
-    circle: "Clean Energy & Water",
-    circle_id: "energy",
-    title: "Allocate 15% of annual municipal parking revenue towards neighborhood solar microgrids.",
-    summary:
-      "Provides dedicated seed capital for community battery storage and rooftop photovoltaic cells in historically under-electrified wards.",
-    author: {
-      name: "Rohan Sen",
-      role: "Civic Green Energy Board",
-      verified: true,
-      avatar_initials: "RS",
-    },
-    status: "passed",
-    status_label: "Quorum Met",
-    closes_in: "Passed",
-    category: "civic",
-    tally: {
-      agree_pct: 72,
-      oppose_pct: 21,
-      neutral_pct: 7,
-      agree_votes: 2965,
-      oppose_votes: 865,
-      neutral_votes: 288,
-      total_ballots: 4118,
-      quorum_pct: 145,
-    },
-    deliberation_count: 204,
-    blake3_hash: "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-    top_dissent: null,
-    created_at: "2026-11-13T12:00:00Z",
+    is_official: false,
+    quoted_comment: null,
+    comments: [],
   },
 ];
 
@@ -158,7 +212,7 @@ export function CivicPulseView({
           setPulse(pulseData);
         }
       } catch {
-        // Fallback resilience: stays functional if offline
+        // Fallback resilience
       }
 
       try {
@@ -179,13 +233,13 @@ export function CivicPulseView({
     };
   }, []);
 
-  // Handle live 3-way ballot voting
+  // Handle live 3-way ballot voting (Support / Dissent / Neutral)
   const handleVote = async (ballotId: string, choice: "agree" | "oppose" | "neutral") => {
     try {
       // Optimistic local update
       setBallots((prev) =>
         prev.map((b) => {
-          if (b.id !== ballotId) return b;
+          if (b.id !== ballotId && b.proposal_code !== ballotId) return b;
           const t = { ...b.tally };
           if (choice === "agree") t.agree_votes += 1;
           if (choice === "oppose") t.oppose_votes += 1;
@@ -203,12 +257,140 @@ export function CivicPulseView({
       const res = await api.castBallotVote(ballotId, choice);
       if (res && res.updated_tally) {
         setBallots((prev) =>
-          prev.map((b) => (b.id === ballotId ? { ...b, tally: res.updated_tally } : b))
+          prev.map((b) =>
+            b.id === ballotId || b.proposal_code === ballotId
+              ? { ...b, tally: res.updated_tally }
+              : b
+          )
         );
         toast("ok", `Ballot cast verified! Blake3 Receipt: ${res.receipt_hash.slice(0, 12)}...`);
       }
     } catch {
       toast("ok", "Ballot recorded locally on edge node!");
+    }
+  };
+
+  // Handle adding a suggestion/comment to a ballot
+  const handleAddComment = async (ballotId: string, content: string, authorName?: string) => {
+    try {
+      const res = await api.addComment(ballotId, content, authorName);
+      if (res && res.comment) {
+        setBallots((prev) =>
+          prev.map((b) => {
+            if (b.id !== ballotId && b.proposal_code !== ballotId) return b;
+            const updatedComments = [res.comment, ...(b.comments || [])];
+            return {
+              ...b,
+              comments: updatedComments,
+              deliberation_count: b.deliberation_count + 1,
+            };
+          })
+        );
+        toast(
+          "ok",
+          `Suggestion anchored! Blake3 Proof: ${res.comment.blake3_hash.slice(0, 10)}...`
+        );
+      }
+    } catch {
+      // Local fallback for offline/edge resilience
+      const fallbackComment = {
+        id: `c-local-${Date.now()}`,
+        ballot_id: ballotId,
+        author_name: authorName || "Citizen Contributor",
+        author_handle: "citizen",
+        content,
+        blake3_hash: `0x${Math.random().toString(16).slice(2, 18)}`,
+        upvotes: 1,
+        created_at: new Date().toISOString(),
+        reshare_count: 0,
+      };
+      setBallots((prev) =>
+        prev.map((b) => {
+          if (b.id !== ballotId && b.proposal_code !== ballotId) return b;
+          return {
+            ...b,
+            comments: [fallbackComment, ...(b.comments || [])],
+            deliberation_count: b.deliberation_count + 1,
+          };
+        })
+      );
+      toast("ok", "Suggestion recorded on edge node!");
+    }
+  };
+
+  // Handle re-sharing a comment as a brand-new spinoff question / poll
+  const handleReshareComment = async (commentId: string, question: string, authorName?: string) => {
+    try {
+      const res = await api.reshareComment(commentId, question, authorName);
+      if (res && res.new_ballot) {
+        setBallots((prev) => [res.new_ballot, ...prev]);
+        toast(
+          "ok",
+          `Spinoff poll published! Proposal #${res.new_ballot.proposal_code} is now live for voting.`
+        );
+      }
+    } catch {
+      // Local fallback spinoff creation
+      const spinCode = `SPIN-2026-${Math.floor(Math.random() * 900) + 100}`;
+      const newSpinoff: BallotItem = {
+        id: spinCode.toLowerCase(),
+        proposal_code: spinCode,
+        circle: "Community Deliberations",
+        circle_id: "civic",
+        title: question,
+        summary: `Spun-off community question from citizen suggestion #${commentId}`,
+        author: {
+          name: authorName || "Citizen Sponsor",
+          role: "Citizen Co-sponsor",
+          verified: true,
+          avatar_initials: (authorName || "CS").slice(0, 2).toUpperCase(),
+        },
+        status: "active",
+        status_label: "Spun-off Community Motion • Closes in 48h",
+        closes_in: "48h",
+        category: "civic",
+        tally: {
+          agree_pct: 100,
+          oppose_pct: 0,
+          neutral_pct: 0,
+          agree_votes: 1,
+          oppose_votes: 0,
+          neutral_votes: 0,
+          total_ballots: 1,
+          quorum_pct: 4,
+        },
+        deliberation_count: 0,
+        blake3_hash: `0x${Math.random().toString(16).slice(2)}`,
+        created_at: new Date().toISOString(),
+        is_official: false,
+        quoted_comment: {
+          comment_id: commentId,
+          original_author: "Citizen Contributor",
+          original_content: "Community suggestion referenced for this vote",
+          parent_ballot_id: "parent",
+        },
+        comments: [],
+      };
+      setBallots((prev) => [newSpinoff, ...prev]);
+      toast("ok", `Spinoff motion #${spinCode} created on edge node!`);
+    }
+  };
+
+  // Handle comment upvoting
+  const handleUpvoteComment = async (commentId: string) => {
+    try {
+      // Optimistic update
+      setBallots((prev) =>
+        prev.map((b) => ({
+          ...b,
+          comments: (b.comments || []).map((c) =>
+            c.id === commentId ? { ...c, upvotes: c.upvotes + 1 } : c
+          ),
+        }))
+      );
+      await api.upvoteComment(commentId);
+    } catch {
+      // Handled optimistically
     }
   };
 
@@ -260,6 +442,9 @@ export function CivicPulseView({
         blake3_hash: `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`,
         top_dissent: null,
         created_at: new Date().toISOString(),
+        is_official: false,
+        quoted_comment: null,
+        comments: [],
       };
       setBallots((prev) => [newBallot, ...prev]);
       toast("ok", `Motion #${code} recorded on edge node!`);
@@ -298,7 +483,7 @@ export function CivicPulseView({
       {/* Hero Consensus Banner */}
       <ConsensusHero
         blockHeight={blockHeight}
-        precinctLabel={pulse?.network_label ?? "PRECINCT 42 NETWORK ACTIVE"}
+        precinctLabel={pulse?.network_label ?? "JANMAT CONSENSUS NETWORK ACTIVE"}
         onOpenDraft={() => setIsDraftModalOpen?.(true)}
         onOpenRules={() => setIsRulesModalOpen?.(true)}
       />
@@ -344,7 +529,7 @@ export function CivicPulseView({
             >
               <span>Active Votes</span>
               <span className="px-2 py-0.5 text-[11px] rounded-full bg-[#262A34] text-[#adc6ff]">
-                {ballots.filter((b) => b.status === "active").length || 42}
+                {ballots.filter((b) => b.status === "active").length || 3}
               </span>
             </button>
             <button
@@ -398,7 +583,9 @@ export function CivicPulseView({
                 ballot={ballot}
                 onVote={handleVote}
                 onAuditHash={(b) => setAuditBallot(b)}
-                onOpenDeliberation={() => setIsRulesModalOpen?.(true)}
+                onAddComment={handleAddComment}
+                onReshareComment={handleReshareComment}
+                onUpvoteComment={handleUpvoteComment}
               />
             ))
           )}

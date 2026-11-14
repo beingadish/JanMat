@@ -1,4 +1,5 @@
 import type {
+  AddCommentResponse,
   BallotItem,
   CastBallotResponse,
   CastVoteRequest,
@@ -17,8 +18,10 @@ import type {
   PulseResponse,
   RecallRequest,
   RecallResponse,
+  ReshareCommentResponse,
   SubmitOpinionRequest,
   SubmitOpinionResponse,
+  VerifyReceiptResponse,
   VoteResultsResponse,
 } from "./types";
 
@@ -179,6 +182,32 @@ export const api = {
       summary,
       circle_id: circleId,
       author_name: authorName,
+    }),
+  addComment: (ballotId: string, content: string, authorName?: string, authorHandle?: string) =>
+    request<AddCommentResponse>(
+      "POST",
+      `/citizen/ballots/${encodeURIComponent(ballotId)}/comments`,
+      {
+        content,
+        author_name: authorName,
+        author_handle: authorHandle,
+      },
+    ),
+  reshareComment: (commentId: string, question: string, authorName?: string, circleId?: string) =>
+    request<ReshareCommentResponse>("POST", "/citizen/ballots/reshare", {
+      comment_id: commentId,
+      question,
+      author_name: authorName,
+      circle_id: circleId,
+    }),
+  upvoteComment: (commentId: string) =>
+    request<{ accepted: boolean; comment_id: string; upvotes: number }>(
+      "POST",
+      `/citizen/comments/${encodeURIComponent(commentId)}/upvote`,
+    ),
+  verifyReceipt: (receiptHash: string) =>
+    request<VerifyReceiptResponse>("POST", "/pub/verify-receipt", {
+      receipt_hash: receiptHash,
     }),
 
   // ── Citizen writes ──────────────────────────────────────────────
