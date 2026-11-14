@@ -150,112 +150,100 @@ export function BallotCard({
         </div>
 
         {/* Status Pill */}
-        <span
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide shrink-0 ${
-            ballot.status === "passed"
-              ? "bg-[#4F46E5]/20 text-[#c3c0ff] border border-[#4F46E5]/40"
-              : ballot.status === "deliberation"
-              ? "bg-[#3B82F6]/20 text-[#adc6ff] border border-[#3B82F6]/40"
-              : "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-          }`}
-        >
-          <span
-            className={`w-2 h-2 rounded-full ${
-              ballot.status === "passed"
-                ? "bg-[#c3c0ff]"
-                : ballot.status === "deliberation"
-                ? "bg-[#3B82F6]"
-                : "bg-[#10B981] animate-pulse"
-            }`}
-          ></span>
-          {ballot.status_label || "Active Ballot"}
-        </span>
+        {(() => {
+          const rawLabel = ballot.status_label || (ballot.closes_in ? `Closes in ${ballot.closes_in}` : "Active");
+          const cleanLabel = rawLabel
+            .replace(/^Spun-off Community Motion\s*[•·-]\s*/i, "")
+            .replace(/^Spun-off Community Motion/i, "Active")
+            .trim();
+          return (
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide shrink-0 ${
+                ballot.status === "passed"
+                  ? "bg-[#4F46E5]/20 text-[#c3c0ff] border border-[#4F46E5]/40"
+                  : ballot.status === "deliberation"
+                  ? "bg-[#3B82F6]/20 text-[#adc6ff] border border-[#3B82F6]/40"
+                  : "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  ballot.status === "passed"
+                    ? "bg-[#c3c0ff]"
+                    : ballot.status === "deliberation"
+                    ? "bg-[#3B82F6]"
+                    : "bg-[#10B981] animate-pulse"
+                }`}
+              ></span>
+              {cleanLabel}
+            </span>
+          );
+        })()}
       </div>
 
       {/* Quoted Comment Context (if re-shared as a spinoff poll question) */}
       {ballot.quoted_comment && (
-        <div className="bg-[#0A0E17]/90 rounded-xl p-3.5 border-l-4 border-[#3B82F6] border-y border-r border-[#222D42] text-[13px] flex flex-col gap-1.5 shadow-inner">
-          <div className="flex items-center justify-between text-[11px] text-[#3B82F6] font-semibold uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[15px]">format_quote</span>
-              <span>Quoting Citizen Suggestion</span>
-            </span>
-            <span className="text-[#64748B] font-mono lowercase">
+        <div className="bg-[#0A0E17]/60 rounded-xl p-3 border-l-2 border-[#3B82F6] border-y border-r border-[#222D42]/60 text-[13px] flex flex-col gap-1">
+          {ballot.quoted_comment.original_author && (
+            <div className="flex items-center justify-end text-[11px] text-[#64748B] font-mono lowercase">
               {ballot.quoted_comment.original_author}
-            </span>
-          </div>
-          <p className="text-[#E2E8F0] italic font-serif leading-relaxed text-[13.5px]">
+            </div>
+          )}
+          <p className="text-[#DFE2EF] italic leading-relaxed text-[13.5px]">
             &ldquo;{ballot.quoted_comment.original_content}&rdquo;
           </p>
         </div>
       )}
 
-      {/* Question Title & Context */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2 text-[#3B82F6] text-[11px] font-bold uppercase tracking-wider">
-          <span>Proposal #{ballot.proposal_code}</span>
-          <span>•</span>
-          <span>{ballot.circle}</span>
-        </div>
+      {/* Question Title & Deliberation Thesis */}
+      <div className="flex flex-col gap-1">
         <h2 className="font-['Plus_Jakarta_Sans'] text-[18px] sm:text-[20px] text-white font-bold tracking-tight leading-snug">
           {ballot.title}
         </h2>
-        <p className="text-[14px] text-[#94A3B8] leading-relaxed mt-0.5">{ballot.summary}</p>
+        {ballot.summary && !ballot.quoted_comment && !ballot.summary.startsWith("Spun-off") && !ballot.summary.includes("Re-posted suggestion") && (
+          <p className="text-[14px] text-[#94A3B8] leading-relaxed mt-0.5">{ballot.summary}</p>
+        )}
       </div>
 
-      {/* Interactive Consensus Progress Bar & Breakdown */}
-      <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#222D42] flex flex-col gap-2.5">
-        <div className="flex items-center justify-between text-[13px]">
-          <span className="font-semibold text-white flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[#10B981] text-[18px]">
-              how_to_reg
-            </span>
-            Consensus Distribution
-          </span>
-          <span className="text-[#10B981] font-mono text-[12px] font-bold">
-            Quorum Reached: {tally.quorum_pct}%
-          </span>
-        </div>
-
-        {/* Segmented Color Track */}
-        <div className="w-full h-3 rounded-full bg-[#262A34] overflow-hidden flex">
+      {/* Sleek Minimal Consensus Progress Bar & Breakdown */}
+      <div className="flex flex-col gap-2 pt-1 pb-1">
+        {/* Sleek Segmented Color Track */}
+        <div className="w-full h-1.5 rounded-full bg-[#1C263A] overflow-hidden flex">
           <div
             className="bg-[#10B981] h-full transition-all duration-700 ease-out"
             style={{ width: `${tally.agree_pct}%` }}
-            title={`Support: ${tally.agree_pct}%`}
           />
           <div
             className="bg-[#EF4444] h-full transition-all duration-700 ease-out"
             style={{ width: `${tally.oppose_pct}%` }}
-            title={`Dissent: ${tally.oppose_pct}%`}
           />
           <div
             className="bg-[#F59E0B] h-full transition-all duration-700 ease-out"
             style={{ width: `${tally.neutral_pct}%` }}
-            title={`Neutral: ${tally.neutral_pct}%`}
           />
         </div>
 
-        {/* Stats Breakdown Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-2 text-[12px] pt-1">
-          <div className="flex items-center gap-3 font-bold">
-            <span className="flex items-center gap-1 text-[#10B981]">
-              <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
-              {tally.agree_pct}% Support ({tally.agree_votes})
+        {/* Sleek Stats Breakdown */}
+        <div className="flex items-center justify-between text-[11px] text-[#94A3B8]">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+              <span className="font-semibold text-white">{tally.agree_pct}%</span> Support
             </span>
-            <span className="flex items-center gap-1 text-[#EF4444]">
-              <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span>
-              {tally.oppose_pct}% Dissent ({tally.oppose_votes})
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>
+              <span className="font-semibold text-white">{tally.oppose_pct}%</span> Dissent
             </span>
-            <span className="flex items-center gap-1 text-[#F59E0B]">
-              <span className="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
-              {tally.neutral_pct}% Neutral ({tally.neutral_votes})
-            </span>
+            {tally.neutral_pct > 0 && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+                <span className="font-semibold text-white">{tally.neutral_pct}%</span> Neutral
+              </span>
+            )}
           </div>
-          <div className="text-[#64748B] text-[11px] font-mono">
-            <strong className="text-white">{tally.total_ballots.toLocaleString()}</strong> verified
-            ballots
-          </div>
+          <span className="text-[#64748B] font-mono text-[11px]">
+            {tally.total_ballots} {tally.total_ballots === 1 ? "vote" : "votes"}
+          </span>
         </div>
       </div>
 

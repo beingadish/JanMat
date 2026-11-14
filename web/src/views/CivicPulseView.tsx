@@ -238,7 +238,7 @@ export function CivicPulseView({
         setBallots((prev) => [res.new_ballot, ...prev]);
         toast(
           "ok",
-          `Spinoff poll published! Proposal #${res.new_ballot.proposal_code} is now live for voting.`
+          `Motion published! Now live for public voting.`
         );
       }
     } catch {
@@ -250,7 +250,7 @@ export function CivicPulseView({
         circle: "Community Deliberations",
         circle_id: "civic",
         title: question,
-        summary: `Spun-off community question from citizen suggestion #${commentId}`,
+        summary: "",
         author: {
           name: authorName || identity.handle,
           role: "Citizen Contributor",
@@ -258,7 +258,7 @@ export function CivicPulseView({
           avatar_initials: (authorName || identity.handle).slice(0, 2).toUpperCase(),
         },
         status: "active",
-        status_label: "Spun-off Community Motion • Closes in 48h",
+        status_label: "Closes in 48h",
         closes_in: "48h",
         category: "civic",
         tally: {

@@ -735,10 +735,7 @@ pub async fn reshare_comment_as_ballot(
         circle: "Community Deliberations".to_string(),
         circle_id,
         title: req.question.trim().to_string(),
-        summary: format!(
-            "Spun-off community question from citizen suggestion on {parent_code}: '{}'",
-            comment.content
-        ),
+        summary: String::new(),
         author: AuthorMeta {
             name: author_name,
             role: "Citizen Co-sponsor".to_string(),
@@ -746,7 +743,7 @@ pub async fn reshare_comment_as_ballot(
             avatar_initials: if initials.is_empty() { "CC".into() } else { initials },
         },
         status: "active".to_string(),
-        status_label: "Spun-off Community Motion • Closes in 48h".to_string(),
+        status_label: "Closes in 48h".to_string(),
         closes_in: "48h".to_string(),
         category: "civic".to_string(),
         tally: BallotTally {
