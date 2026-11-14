@@ -269,215 +269,137 @@ impl PulseEngine {
 
         // 1. Official Organizational Poll from JanMat Foundation
         let poll1_id = "jmf-2026-01".to_string();
-        let comment_101_content = "I think we can change the color of the UI to something like blackish for OLED screens.".to_string();
+        let comment_101_content = "I think we can change the color of the UI to something like blackish.".to_string();
         let comment_101_hash = compute_blake3_audit(&format!("{poll1_id}:c-101:{comment_101_content}"));
-
-        let comment_102_content = "Mandating Blake3 cryptographic receipt verification for every ward ballot gives citizens verifiable trust.".to_string();
-        let comment_102_hash = compute_blake3_audit(&format!("{poll1_id}:c-102:{comment_102_content}"));
 
         let comments_p1 = vec![
             CommentItem {
                 id: "c-101".to_string(),
                 ballot_id: poll1_id.clone(),
-                author_name: "Aadarsh (Lead Contributor)".to_string(),
+                author_name: "Aadarsh".to_string(),
                 author_handle: "beingadish".to_string(),
                 content: comment_101_content.clone(),
                 blake3_hash: comment_101_hash,
-                upvotes: 18,
-                created_at: "2026-11-14T08:00:00Z".to_string(),
+                upvotes: 0,
+                created_at: chrono_now(),
                 reshare_count: 1,
-            },
-            CommentItem {
-                id: "c-102".to_string(),
-                ballot_id: poll1_id.clone(),
-                author_name: "Priya Sharma".to_string(),
-                author_handle: "priya_civic".to_string(),
-                content: comment_102_content,
-                blake3_hash: comment_102_hash,
-                upvotes: 11,
-                created_at: "2026-11-14T08:30:00Z".to_string(),
-                reshare_count: 0,
             },
         ];
 
-        let p1_title = "How do you like the new JanMat Civic Consensus Engine & Dark Interface?".to_string();
+        let p1_title = "How do you like JanMat?".to_string();
         let p1_hash = compute_blake3_audit(&format!("JMF-2026-01:{p1_title}"));
 
         let poll1 = BallotItem {
             id: poll1_id,
             proposal_code: "JMF-2026-01".to_string(),
-            circle: "JanMat Core Governance".to_string(),
+            circle: "JanMat Foundation".to_string(),
             circle_id: "governance".to_string(),
             title: p1_title,
-            summary: "Official community consensus poll from the JanMat Foundation: Vote in Support, Dissent, or Neutral on the new interface and real-time cryptographic consensus engine. Share suggestions below; any citizen can re-share suggestions with their own question to initiate follow-up community votes.".to_string(),
+            summary: "Official organizational poll from the JanMat Foundation: How do you like JanMat? Vote in Support, Dissent, or Neutral. Share suggestions below; re-share any comment with your own question to launch follow-up community deliberations.".to_string(),
             author: AuthorMeta {
                 name: "JanMat Foundation".to_string(),
-                role: "Official Civic Governance".to_string(),
+                role: "Official Organization".to_string(),
                 verified: true,
                 avatar_initials: "JF".to_string(),
             },
             status: "active".to_string(),
             status_label: "Official Organization Poll • Open Voting".to_string(),
-            closes_in: "5d".to_string(),
+            closes_in: "7d".to_string(),
             category: "civic".to_string(),
             tally: BallotTally {
-                agree_pct: 78,
-                oppose_pct: 14,
-                neutral_pct: 8,
-                agree_votes: 184,
-                oppose_votes: 33,
-                neutral_votes: 19,
-                total_ballots: 236,
-                quorum_pct: 120,
+                agree_pct: 0,
+                oppose_pct: 0,
+                neutral_pct: 0,
+                agree_votes: 0,
+                oppose_votes: 0,
+                neutral_votes: 0,
+                total_ballots: 0,
+                quorum_pct: 0,
             },
-            deliberation_count: 29,
+            deliberation_count: 1,
             blake3_hash: p1_hash,
-            top_dissent: Some(TopDissent {
-                category: "Visual Accessibility".to_string(),
-                upvotes: 14,
-                quote: "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.".to_string(),
-            }),
-            created_at: "2026-11-14T06:00:00Z".to_string(),
+            top_dissent: None,
+            created_at: chrono_now(),
             is_official: true,
             quoted_comment: None,
             comments: comments_p1,
         };
 
         // 2. Citizen Re-shared Comment with Question (Spinoff Poll)
-        let p2_title = "Do you like this idea? Should JanMat adopt the pitch-black OLED aesthetic?".to_string();
+        let p2_title = "Do you like this idea?".to_string();
         let p2_hash = compute_blake3_audit(&format!("SPIN-2026-02:{p2_title}"));
 
         let poll2 = BallotItem {
             id: "spin-2026-02".to_string(),
             proposal_code: "SPIN-2026-02".to_string(),
-            circle: "Design & User Experience".to_string(),
+            circle: "Community Deliberations".to_string(),
             circle_id: "design".to_string(),
             title: p2_title,
-            summary: "Spun-off community question based on citizen suggestion #c-101: 'I think we can change the color of the UI to something like blackish for OLED screens.'".to_string(),
+            summary: "Re-posted suggestion poll: 'I think we can change the color of the UI to something like blackish.' Cast your vote in support, dissent, or neutral.".to_string(),
             author: AuthorMeta {
-                name: "Devendra K.".to_string(),
-                role: "Citizen Contributor".to_string(),
+                name: "Aadarsh".to_string(),
+                role: "Lead Contributor".to_string(),
                 verified: true,
-                avatar_initials: "DK".to_string(),
+                avatar_initials: "AD".to_string(),
             },
             status: "active".to_string(),
-            status_label: "Spun-off Community Motion • Closes in 42h".to_string(),
-            closes_in: "42h".to_string(),
+            status_label: "Spun-off Community Motion • Closes in 48h".to_string(),
+            closes_in: "48h".to_string(),
             category: "civic".to_string(),
             tally: BallotTally {
-                agree_pct: 71,
-                oppose_pct: 21,
-                neutral_pct: 8,
-                agree_votes: 89,
-                oppose_votes: 26,
-                neutral_votes: 10,
-                total_ballots: 125,
-                quorum_pct: 95,
+                agree_pct: 0,
+                oppose_pct: 0,
+                neutral_pct: 0,
+                agree_votes: 0,
+                oppose_votes: 0,
+                neutral_votes: 0,
+                total_ballots: 0,
+                quorum_pct: 0,
             },
-            deliberation_count: 14,
+            deliberation_count: 0,
             blake3_hash: p2_hash,
-            top_dissent: Some(TopDissent {
-                category: "Eye Comfort".to_string(),
-                upvotes: 9,
-                quote: "Dark slate #0A0E17 creates softer transitions at night compared to absolute #000000 with bright white cards.".to_string(),
-            }),
-            created_at: "2026-11-14T08:15:00Z".to_string(),
+            top_dissent: None,
+            created_at: chrono_now(),
             is_official: false,
             quoted_comment: Some(QuotedContext {
                 comment_id: "c-101".to_string(),
-                original_author: "Aadarsh (Lead Contributor) (@beingadish)".to_string(),
+                original_author: "Aadarsh (@beingadish)".to_string(),
                 original_content: comment_101_content,
                 parent_ballot_id: "jmf-2026-01".to_string(),
             }),
-            comments: vec![
-                CommentItem {
-                    id: "c-201".to_string(),
-                    ballot_id: "spin-2026-02".to_string(),
-                    author_name: "Kavita M.".to_string(),
-                    author_handle: "kavita_m".to_string(),
-                    content: "Pitch black saves significant battery life on mobile OLED screens!".to_string(),
-                    blake3_hash: compute_blake3_audit("c-201:battery_saving"),
-                    upvotes: 6,
-                    created_at: "2026-11-14T08:45:00Z".to_string(),
-                    reshare_count: 0,
-                },
-            ],
-        };
-
-        // 3. Civic Council motion
-        let p3_title = "Should overnight suburban metro runs be funded via dynamic weekend congestion tolls?".to_string();
-        let p3_hash = compute_blake3_audit(&format!("TC-2026-03:{p3_title}"));
-
-        let poll3 = BallotItem {
-            id: "tc-2026-03".to_string(),
-            proposal_code: "TC-2026-03".to_string(),
-            circle: "Transit Council".to_string(),
-            circle_id: "transit".to_string(),
-            title: p3_title,
-            summary: "High demand for night-shift logistics and healthcare workers justifies off-peak operation, offset by peak suburban highway congestion charges during non-commercial hours.".to_string(),
-            author: AuthorMeta {
-                name: "Aarav K.".to_string(),
-                role: "Transit Council Representative".to_string(),
-                verified: true,
-                avatar_initials: "AK".to_string(),
-            },
-            status: "active".to_string(),
-            status_label: "Active Ballot • Closes in 18h".to_string(),
-            closes_in: "18h".to_string(),
-            category: "transit".to_string(),
-            tally: BallotTally {
-                agree_pct: 68,
-                oppose_pct: 26,
-                neutral_pct: 6,
-                agree_votes: 142,
-                oppose_votes: 54,
-                neutral_votes: 13,
-                total_ballots: 209,
-                quorum_pct: 114,
-            },
-            deliberation_count: 18,
-            blake3_hash: p3_hash,
-            top_dissent: Some(TopDissent {
-                category: "Economic Sustainability".to_string(),
-                upvotes: 18,
-                quote: "Dynamic congestion tolls during economic downturns create an undue regressive penalty on non-salaried weekend service providers who cannot shift commuting hours.".to_string(),
-            }),
-            created_at: "2026-11-14T06:00:00Z".to_string(),
-            is_official: false,
-            quoted_comment: None,
             comments: vec![],
         };
 
         let receipts = vec![
             VerificationReceipt {
-                tx_id: "#4092".to_string(),
-                action: "Cast ballot: JMF-2026-01 (Support)".to_string(),
-                block: "0x9f4a...8d12".to_string(),
-                delta: "Verified Quorum +0.8%".to_string(),
-                time_ago: "14s ago".to_string(),
-            },
-            VerificationReceipt {
-                tx_id: "#1884".to_string(),
-                action: "Re-shared comment c-101 into SPIN-2026-02".to_string(),
-                block: "0x3c2a...e901".to_string(),
-                delta: "New Spinoff Motion".to_string(),
-                time_ago: "38s ago".to_string(),
-            },
-            VerificationReceipt {
-                tx_id: "#9021".to_string(),
+                tx_id: "#100".to_string(),
                 action: "Foundation Genesis Block Anchored".to_string(),
                 block: "0x7b11...fa44".to_string(),
-                delta: "Anti-Sybil Proof OK".to_string(),
-                time_ago: "1m ago".to_string(),
+                delta: "Genesis State Verified".to_string(),
+                time_ago: "Just now".to_string(),
+            },
+            VerificationReceipt {
+                tx_id: "#101".to_string(),
+                action: "Published Official Poll: JMF-2026-01".to_string(),
+                block: "0x9f4a...8d12".to_string(),
+                delta: "Official Motion Created".to_string(),
+                time_ago: "Just now".to_string(),
+            },
+            VerificationReceipt {
+                tx_id: "#102".to_string(),
+                action: "Re-shared comment c-101 into SPIN-2026-02".to_string(),
+                block: "0x3c2a...e901".to_string(),
+                delta: "Community Spinoff Created".to_string(),
+                time_ago: "Just now".to_string(),
             },
         ];
 
         let engine = Self {
             genesis_block: 849_201,
             start_time: now,
-            ballots: vec![poll1, poll2, poll3],
+            ballots: vec![poll1, poll2],
             receipts,
-            vote_seq: 4093,
+            vote_seq: 103,
         };
         engine.save_to_disk();
         engine
@@ -527,33 +449,15 @@ pub async fn get_pulse() -> Json<PulseResponse> {
     let featured_circles = vec![
         FeaturedCircle {
             id: "governance".to_string(),
-            name: "Core Governance".to_string(),
-            count: 5,
+            name: "JanMat Foundation".to_string(),
+            count: 1,
             icon: "gavel".to_string(),
         },
         FeaturedCircle {
             id: "design".to_string(),
-            name: "Design & UX".to_string(),
-            count: 7,
+            name: "Community Deliberations".to_string(),
+            count: 1,
             icon: "palette".to_string(),
-        },
-        FeaturedCircle {
-            id: "transit".to_string(),
-            name: "Transit Council".to_string(),
-            count: 8,
-            icon: "directions_subway".to_string(),
-        },
-        FeaturedCircle {
-            id: "tech".to_string(),
-            name: "Municipal IT & AI Ethics".to_string(),
-            count: 12,
-            icon: "smart_toy".to_string(),
-        },
-        FeaturedCircle {
-            id: "energy".to_string(),
-            name: "Clean Energy & Water".to_string(),
-            count: 6,
-            icon: "energy_savings_leaf".to_string(),
         },
     ];
 
@@ -563,7 +467,7 @@ pub async fn get_pulse() -> Json<PulseResponse> {
     let top_dissent = TopNuancedDissent {
         topic: "Visual Contrast & Theming".to_string(),
         category: "Accessibility".to_string(),
-        upvotes: 14,
+        upvotes: 0,
         quote: "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.".to_string(),
         thread_link: "/pub/ballots/jmf-2026-01".to_string(),
     };
@@ -574,9 +478,23 @@ pub async fn get_pulse() -> Json<PulseResponse> {
     let consensus_index = if total_votes > 0 {
         ((total_agree as f64 / total_votes as f64) * 100.0).round() as u8
     } else {
-        75
+        0
     };
-    let turnout_pct = ((total_votes as f32 / 8.0).clamp(52.0, 94.5) * 10.0).round() / 10.0;
+    let turnout_pct = if total_votes > 0 {
+        ((total_votes as f32 / 8.0).clamp(1.0, 100.0) * 10.0).round() / 10.0
+    } else {
+        0.0
+    };
+    let weekly_change = if total_votes > 0 {
+        format!("+{total_votes}")
+    } else {
+        "0.0".to_string()
+    };
+    let velocity = if total_votes > 0 {
+        "Active".to_string()
+    } else {
+        "Awaiting First Ballots".to_string()
+    };
 
     Json(PulseResponse {
         block_height: block,
@@ -587,8 +505,8 @@ pub async fn get_pulse() -> Json<PulseResponse> {
         network_label: "PRECINCT 42 NETWORK ACTIVE".to_string(),
         turnout_pct,
         consensus_index,
-        weekly_change: "+4.3".to_string(),
-        velocity: "High Active".to_string(),
+        weekly_change,
+        velocity,
         zk_verifier_health: "operational".to_string(),
         blake3_anchor_hash,
         featured_circles,
@@ -765,14 +683,14 @@ pub async fn draft_ballot_motion(
         closes_in: "48h".to_string(),
         category: req.circle_id.clone(),
         tally: BallotTally {
-            agree_pct: 100,
+            agree_pct: 0,
             oppose_pct: 0,
             neutral_pct: 0,
-            agree_votes: 1,
+            agree_votes: 0,
             oppose_votes: 0,
             neutral_votes: 0,
-            total_ballots: 1,
-            quorum_pct: 4,
+            total_ballots: 0,
+            quorum_pct: 0,
         },
         deliberation_count: 0,
         blake3_hash: audit_hash,
@@ -938,14 +856,14 @@ pub async fn reshare_comment_as_ballot(
         closes_in: "48h".to_string(),
         category: "civic".to_string(),
         tally: BallotTally {
-            agree_pct: 100,
+            agree_pct: 0,
             oppose_pct: 0,
             neutral_pct: 0,
-            agree_votes: 1,
+            agree_votes: 0,
             oppose_votes: 0,
             neutral_votes: 0,
-            total_ballots: 1,
-            quorum_pct: 4,
+            total_ballots: 0,
+            quorum_pct: 0,
         },
         deliberation_count: 0,
         blake3_hash: audit_hash,
@@ -1078,7 +996,7 @@ mod tests {
         assert!(pulse.block_height >= 849_201);
         assert_eq!(pulse.status, "ACTIVE");
         assert_eq!(pulse.network_label, "PRECINCT 42 NETWORK ACTIVE");
-        assert_eq!(pulse.featured_circles.len(), 5);
+        assert_eq!(pulse.featured_circles.len(), 2);
         assert!(!pulse.blake3_anchor_hash.is_empty());
         assert_eq!(pulse.blake3_anchor_hash.len(), 64);
     }
@@ -1091,16 +1009,16 @@ mod tests {
         }))
         .await
         .0;
-        assert!(all.len() >= 3);
+        assert!(all.len() >= 2);
 
-        let transit = list_ballots(Query(BallotFilterQuery {
-            category: Some("transit".into()),
+        let design = list_ballots(Query(BallotFilterQuery {
+            category: Some("design".into()),
             status: None,
         }))
         .await
         .0;
-        assert_eq!(transit.len(), 1);
-        assert_eq!(transit[0].circle_id, "transit");
+        assert!(design.len() >= 1);
+        assert!(design.iter().all(|b| b.circle_id == "design" || b.category == "design"));
     }
 
     #[tokio::test]
@@ -1108,7 +1026,7 @@ mod tests {
         let vote_res = cast_ballot_vote(Json(CastBallotRequest {
             ballot_id: "jmf-2026-01".into(),
             choice: "agree".into(),
-            voter_token: Some("citizen_test_user".into()),
+            voter_token: Some("aadarsh_test_user".into()),
         }))
         .await
         .expect("vote cast should succeed")
@@ -1117,7 +1035,7 @@ mod tests {
         assert!(vote_res.accepted);
         assert_eq!(vote_res.choice, "agree");
         assert_eq!(vote_res.receipt_hash.len(), 64);
-        assert!(vote_res.updated_tally.agree_votes > 184);
+        assert!(vote_res.updated_tally.agree_votes >= 1);
     }
 
     #[tokio::test]
@@ -1126,8 +1044,8 @@ mod tests {
         let comment_res = add_ballot_comment(
             Path("jmf-2026-01".into()),
             Json(AddCommentRequest {
-                author_name: Some("Test Citizen".into()),
-                author_handle: Some("test_cit".into()),
+                author_name: Some("Aadarsh".into()),
+                author_handle: Some("beingadish".into()),
                 content: "I propose dark pitch-black theme mode.".into(),
             }),
         )
@@ -1136,14 +1054,14 @@ mod tests {
         .0;
 
         assert!(comment_res.accepted);
-        assert_eq!(comment_res.comment.author_handle, "test_cit");
+        assert_eq!(comment_res.comment.author_handle, "beingadish");
         assert!(!comment_res.comment.blake3_hash.is_empty());
 
         // 2. Reshare comment with a question into a new spinoff poll
         let reshare_res = reshare_comment_as_ballot(Json(ReshareCommentRequest {
             comment_id: comment_res.comment.id.clone(),
             question: "Do you like this idea? Should we adopt pitch black mode?".into(),
-            author_name: Some("Devendra K.".into()),
+            author_name: Some("Aadarsh".into()),
             circle_id: Some("design".into()),
         }))
         .await

@@ -126,7 +126,7 @@ export function DraftMotionModal({ isOpen, onClose, onSubmit }: DraftMotionModal
               type="text"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="Your name or anonymous handle (e.g. Priya M.)"
+              placeholder="Your name or handle (e.g. Aadarsh)"
               className="w-full bg-[#0A0E17] border border-[#222D42] rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#4F46E5]"
             />
           </div>

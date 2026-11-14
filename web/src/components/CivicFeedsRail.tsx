@@ -13,11 +13,8 @@ interface CivicFeedsRailProps {
 }
 
 const DEFAULT_CIRCLES: FeaturedCircle[] = [
-  { id: "infrastructure", name: "Civic Infrastructure", count: 12, icon: "domain" },
-  { id: "transit", name: "Transit Council", count: 8, icon: "directions_subway" },
-  { id: "it-ethics", name: "Municipal IT & AI Ethics", count: 15, icon: "smart_toy" },
-  { id: "energy", name: "Clean Energy & Water", count: 6, icon: "energy_savings_leaf" },
-  { id: "healthcare", name: "Healthcare Mandates", count: 9, icon: "health_and_safety" },
+  { id: "governance", name: "JanMat Foundation", count: 1, icon: "gavel" },
+  { id: "design", name: "Community Deliberations", count: 1, icon: "palette" },
 ];
 
 export function CivicFeedsRail({
@@ -26,9 +23,9 @@ export function CivicFeedsRail({
   selectedCircle,
   setSelectedCircle,
   circles = DEFAULT_CIRCLES,
-  turnoutPct = 74.2,
-  consensusIndex = 82,
-  weeklyChange = "+4.3",
+  turnoutPct = 0,
+  consensusIndex = 0,
+  weeklyChange = "0.0",
   precinctName = "Precinct 42-North",
 }: CivicFeedsRailProps) {
   return (
@@ -75,7 +72,7 @@ export function CivicFeedsRail({
               My Precinct Ballots
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#0A0E17] text-[#94A3B8] text-[11px] font-mono">
-              4
+              2
             </span>
           </button>
 

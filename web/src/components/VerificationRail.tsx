@@ -10,34 +10,34 @@ interface VerificationRailProps {
 
 const DEFAULT_RECEIPTS: VerificationReceipt[] = [
   {
-    tx_id: "#4092",
-    action: "Cast ballot in Transit Council",
-    block: "0x9f4a...8d12",
-    delta: "Quorum +0.02%",
-    time_ago: "14s ago",
-  },
-  {
-    tx_id: "#1884",
-    action: "Submitted argument counter-point",
-    block: "0x3c2a...e901",
-    delta: "Thread: AI Open Source Mandates",
-    time_ago: "38s ago",
-  },
-  {
-    tx_id: "#9021",
-    action: "Precinct 42 Citizen Node Verified",
+    tx_id: "#100",
+    action: "Foundation Genesis Block Anchored",
     block: "0x7b11...fa44",
-    delta: "Anti-Sybil Proof Confirmed",
-    time_ago: "1m ago",
+    delta: "Genesis State Verified",
+    time_ago: "Just now",
+  },
+  {
+    tx_id: "#101",
+    action: "Published Official Poll: JMF-2026-01",
+    block: "0x9f4a...8d12",
+    delta: "Official Motion Created",
+    time_ago: "Just now",
+  },
+  {
+    tx_id: "#102",
+    action: "Re-shared comment c-101 into SPIN-2026-02",
+    block: "0x3c2a...e901",
+    delta: "Community Spinoff Created",
+    time_ago: "Just now",
   },
 ];
 
 const DEFAULT_DISSENT: TopNuancedDissent = {
-  topic: "Suburban Metro",
-  category: "Economic Sustainability",
-  upvotes: 142,
+  topic: "Visual Contrast & Theming",
+  category: "Accessibility",
+  upvotes: 0,
   quote:
-    "Dynamic congestion tolls during economic downturns create an undue regressive penalty on non-salaried weekend service providers who cannot shift commuting hours.",
+    "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.",
   thread_link: "#",
 };
 
