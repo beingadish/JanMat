@@ -421,6 +421,15 @@ export function CivicPulseView({
 
   const blockHeight = pulse?.block_height ?? (pulse?.recent_receipts?.length ? pulse.recent_receipts.length + 1 : 1);
 
+  const featuredCirclesList = pulse?.featured_circles?.length
+    ? pulse.featured_circles
+    : [
+        { id: "governance", name: "JanMat Foundation", count: ballots.filter(b => b.circle_id === "governance").length, icon: "gavel" },
+        { id: "transit", name: "Transit Council", count: ballots.filter(b => b.circle_id === "transit").length, icon: "directions_transit" },
+        { id: "infrastructure", name: "Civic Infrastructure", count: ballots.filter(b => b.circle_id === "infrastructure").length, icon: "apartment" },
+        { id: "it-ethics", name: "AI & Tech Ethics", count: ballots.filter(b => b.circle_id === "it-ethics").length, icon: "psychology" },
+      ];
+
   return (
     <div className="w-full flex flex-col gap-6">
       {/* Hero Consensus Banner */}
@@ -433,18 +442,14 @@ export function CivicPulseView({
 
       {/* 3-Column Desktop Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Civic Feeds, Featured Circles, Node Stats */}
-        <div className="lg:col-span-3">
+        {/* Left Column: Civic Feeds, Featured Circles, Node Stats (DESKTOP ONLY: sticky, doesn't push feed) */}
+        <aside className="hidden lg:block lg:col-span-3 sticky top-24">
           <CivicFeedsRail
             activeFeed={activeFeed}
             setActiveFeed={setActiveFeed}
             selectedCircle={selectedCircle}
             setSelectedCircle={setSelectedCircle}
-            circles={pulse?.featured_circles ?? [
-              { id: "governance", name: "JanMat Foundation", count: ballots.filter(b => b.circle_id === "governance").length, icon: "gavel" },
-              { id: "transit", name: "Transit Council", count: ballots.filter(b => b.circle_id === "transit").length, icon: "directions_transit" },
-              { id: "infrastructure", name: "Civic Infrastructure", count: ballots.filter(b => b.circle_id === "infrastructure").length, icon: "apartment" },
-            ]}
+            circles={featuredCirclesList}
             myBallotsCount={ballots.filter(b => b.author?.name === identity?.handle).length}
             passedCount={ballots.filter(b => b.status === "passed").length}
             turnoutPct={pulse?.turnout_pct ?? (ballots.length ? 100 : 0)}
@@ -452,60 +457,113 @@ export function CivicPulseView({
             weeklyChange={pulse?.weekly_change ?? "0.0"}
             precinctName={pulse?.precinct_id ?? "Precinct 42-North"}
           />
-        </div>
+        </aside>
 
-        {/* Center Column: Filter Tabs & Ballot Feed */}
-        <main className="lg:col-span-6 flex flex-col gap-5 min-w-0">
-          {/* Horizontal Filter Tabs */}
-          <div className="bg-[#131A29] rounded-2xl p-1.5 border border-[#222D42] flex items-center gap-1.5 overflow-x-auto shadow-sm">
-            <button
-              onClick={() => setFilterTab("all")}
-              className={`px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-all ${
-                filterTab === "all"
-                  ? "bg-[#4F46E5] text-white shadow-sm"
-                  : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
-              }`}
-            >
-              All Ballots
-            </button>
-            <button
-              onClick={() => setFilterTab("active")}
-              className={`px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap flex items-center gap-2 transition-all ${
-                filterTab === "active"
-                  ? "bg-[#4F46E5] text-white shadow-sm"
-                  : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
-              }`}
-            >
-              <span>Active Votes</span>
-              <span className="px-2 py-0.5 text-[11px] rounded-full bg-[#262A34] text-[#adc6ff]">
-                {ballots.filter((b) => b.status === "active").length}
+        {/* Center Column: Filter Tabs & Ballot Feed (IMMEDIATELY VISIBLE ON ALL SCREENS) */}
+        <main className="w-full lg:col-span-6 flex flex-col gap-4 min-w-0">
+          {/* Mobile/Tablet Horizontal Circles Carousel (Matches Mobile Design Image 1) */}
+          <div className="lg:hidden flex flex-col gap-2 pb-1">
+            <div className="flex items-center justify-between text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider px-1">
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[15px] text-[#4F46E5]">hub</span>
+                Featured Circles
               </span>
-            </button>
-            <button
-              onClick={() => setFilterTab("debates")}
-              className={`px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-all ${
-                filterTab === "debates"
-                  ? "bg-[#4F46E5] text-white shadow-sm"
-                  : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
-              }`}
-            >
-              Open Debates
-            </button>
-            <button
-              onClick={() => setFilterTab("passed")}
-              className={`px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-all ${
-                filterTab === "passed"
-                  ? "bg-[#4F46E5] text-white shadow-sm"
-                  : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
-              }`}
-            >
-              Passed Motions
-            </button>
+              <button
+                onClick={() => setSelectedCircle("all")}
+                className="text-[#3B82F6] hover:underline normal-case text-[11px]"
+              >
+                View all
+              </button>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
+              <button
+                onClick={() => setSelectedCircle("all")}
+                className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all shrink-0 ${
+                  selectedCircle === "all"
+                    ? "bg-[#4F46E5] text-white shadow-sm"
+                    : "bg-[#131A29] text-[#c7c4d8] border border-[#222D42] hover:bg-[#1C263A]"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[15px]">public</span>
+                <span>All Circles</span>
+              </button>
+              {featuredCirclesList.map((circle) => {
+                const isSelected = selectedCircle === circle.id;
+                return (
+                  <button
+                    key={circle.id}
+                    onClick={() => setSelectedCircle(isSelected ? "all" : circle.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all shrink-0 ${
+                      isSelected
+                        ? "bg-[#4F46E5] text-white shadow-sm"
+                        : "bg-[#131A29] text-[#c7c4d8] border border-[#222D42] hover:bg-[#1C263A]"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[15px]">{circle.icon}</span>
+                    <span>{circle.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sticky Feed Filter Bar: Pinned under navbar during scroll so user never scrolls back to change */}
+          <div className="sticky top-16 sm:top-20 z-20 bg-[#0A0E17]/95 backdrop-blur-md py-2 -mx-1 px-1 border-b border-[#222D42]/60 flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setFilterTab("all")}
+                className={`px-3.5 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-all ${
+                  filterTab === "all"
+                    ? "bg-[#4F46E5] text-white shadow-sm"
+                    : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
+                }`}
+              >
+                All Ballots
+              </button>
+              <button
+                onClick={() => setFilterTab("active")}
+                className={`px-3.5 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all ${
+                  filterTab === "active"
+                    ? "bg-[#4F46E5] text-white shadow-sm"
+                    : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
+                }`}
+              >
+                <span>Active Votes</span>
+                <span className="px-1.5 py-0.2 text-[10px] sm:text-[11px] rounded-full bg-[#262A34] text-[#adc6ff]">
+                  {ballots.filter((b) => b.status === "active").length}
+                </span>
+              </button>
+              <button
+                onClick={() => setFilterTab("debates")}
+                className={`px-3.5 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-all ${
+                  filterTab === "debates"
+                    ? "bg-[#4F46E5] text-white shadow-sm"
+                    : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
+                }`}
+              >
+                Open Debates
+              </button>
+              <button
+                onClick={() => setFilterTab("passed")}
+                className={`px-3.5 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-all ${
+                  filterTab === "passed"
+                    ? "bg-[#4F46E5] text-white shadow-sm"
+                    : "text-[#c7c4d8] hover:text-white hover:bg-[#1C263A]"
+                }`}
+              >
+                Passed Motions
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-[#64748B] shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+              <span>Live Pulse</span>
+            </div>
           </div>
 
           {/* Ballot Cards Feed */}
           {filteredBallots.length === 0 ? (
-            <div className="bg-[#131A29] rounded-2xl p-10 sm:p-14 border border-[#222D42] text-center flex flex-col items-center gap-4 shadow-xl">
+            <div className="bg-[#131A29] rounded-2xl p-8 sm:p-12 border border-[#222D42] text-center flex flex-col items-center gap-4 shadow-xl">
               <div className="w-14 h-14 rounded-full bg-[#1C263A] flex items-center justify-center text-[#4F46E5] border border-[#222D42]">
                 <span className="material-symbols-outlined text-[28px]">how_to_vote</span>
               </div>
@@ -557,14 +615,40 @@ export function CivicPulseView({
           )}
         </main>
 
-        {/* Right Column: Verification Feed, Top Dissent, Rules */}
-        <div className="lg:col-span-3">
+        {/* Right Column: Verification Feed, Top Dissent, Rules (DESKTOP ONLY: sticky) */}
+        <aside className="hidden lg:block lg:col-span-3 sticky top-24">
           <VerificationRail
             receipts={pulse?.recent_receipts}
             topDissent={pulse?.top_dissent}
             onOpenRules={() => setIsRulesModalOpen?.(true)}
           />
+        </aside>
+      </div>
+
+      {/* Floating Bottom Action Pill on Mobile (Matches Image 1 Mobile Design) */}
+      <div className="lg:hidden fixed bottom-4 inset-x-4 z-40 bg-[#131A29]/95 backdrop-blur-lg border border-[#222D42] rounded-2xl p-3 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-[#4F46E5]/20 text-[#4F46E5] flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">how_to_vote</span>
+          </div>
+          <span className="text-[12px] sm:text-[13px] font-medium text-white truncate">
+            Have a proposal to put to vote?
+          </span>
         </div>
+        <button
+          onClick={() => {
+            if (!identity) {
+              toast("err", "Please log in or register to propose a motion.");
+              setView("identity");
+            } else {
+              setIsDraftModalOpen?.(true);
+            }
+          }}
+          className="px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold shadow-md flex items-center gap-1 shrink-0"
+        >
+          <span>Draft</span>
+          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </button>
       </div>
 
       {/* Modals */}
