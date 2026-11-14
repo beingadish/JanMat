@@ -104,6 +104,7 @@ const DEFAULT_BALLOTS: BallotItem[] = [
 
 interface CivicPulseViewProps {
   searchQuery?: string;
+  activeTab?: string;
   onOpenDraftModal?: () => void;
   isDraftModalOpen?: boolean;
   setIsDraftModalOpen?: (open: boolean) => void;
@@ -113,12 +114,14 @@ interface CivicPulseViewProps {
 
 export function CivicPulseView({
   searchQuery = "",
+  activeTab = "live-ballots",
   isDraftModalOpen = false,
   setIsDraftModalOpen,
   isRulesModalOpen = false,
   setIsRulesModalOpen,
 }: CivicPulseViewProps) {
-  const { toast } = useCivic();
+  const { state, setView, toast } = useCivic();
+  const { identity } = state;
 
   const [pulse, setPulse] = useState<PulseResponse | null>(null);
   const [ballots, setBallots] = useState<BallotItem[]>(DEFAULT_BALLOTS);
@@ -158,8 +161,18 @@ export function CivicPulseView({
 
   // Handle live 3-way ballot voting (Support / Dissent / Neutral)
   const handleVote = async (ballotId: string, choice: "agree" | "oppose" | "neutral") => {
+    // Enforce authentication gate: guest / anonymous visitors cannot vote
+    if (!identity) {
+      toast(
+        "err",
+        "Authentication Required: You must be logged in as a verified citizen to cast a ballot."
+      );
+      setView("identity");
+      return;
+    }
+
     try {
-      // Optimistic local update
+      // Optimistic local update for authenticated citizen
       setBallots((prev) =>
         prev.map((b) => {
           if (b.id !== ballotId && b.proposal_code !== ballotId) return b;
@@ -176,8 +189,8 @@ export function CivicPulseView({
         })
       );
 
-      // Submit to backend
-      const res = await api.castBallotVote(ballotId, choice);
+      // Submit to backend with citizen voter token
+      const res = await api.castBallotVote(ballotId, choice, identity.uid);
       if (res && res.updated_tally) {
         setBallots((prev) =>
           prev.map((b) =>
@@ -188,15 +201,30 @@ export function CivicPulseView({
         );
         toast("ok", `Ballot cast verified! Blake3 Receipt: ${res.receipt_hash.slice(0, 12)}...`);
       }
-    } catch {
-      toast("ok", "Ballot recorded locally on edge node!");
+    } catch (err: unknown) {
+      const errorStatus = (err as { status?: number })?.status;
+      if (errorStatus === 401) {
+        toast("err", "Session expired: Please log in again to cast your ballot.");
+        setView("identity");
+      } else {
+        toast("ok", "Ballot recorded locally on edge node!");
+      }
     }
   };
 
   // Handle adding a suggestion/comment to a ballot
   const handleAddComment = async (ballotId: string, content: string, authorName?: string) => {
+    if (!identity) {
+      toast(
+        "err",
+        "Authentication Required: You must be logged in as a verified citizen to post suggestions."
+      );
+      setView("identity");
+      return;
+    }
+
     try {
-      const res = await api.addComment(ballotId, content, authorName);
+      const res = await api.addComment(ballotId, content, authorName || identity.handle);
       if (res && res.comment) {
         setBallots((prev) =>
           prev.map((b) => {
@@ -219,8 +247,8 @@ export function CivicPulseView({
       const fallbackComment = {
         id: `c-local-${Date.now()}`,
         ballot_id: ballotId,
-        author_name: authorName || "Aadarsh",
-        author_handle: "beingadish",
+        author_name: authorName || identity.handle,
+        author_handle: identity.handle,
         content,
         blake3_hash: `0x${Math.random().toString(16).slice(2, 18)}`,
         upvotes: 0,
@@ -243,8 +271,17 @@ export function CivicPulseView({
 
   // Handle re-sharing a comment as a brand-new spinoff question / poll
   const handleReshareComment = async (commentId: string, question: string, authorName?: string) => {
+    if (!identity) {
+      toast(
+        "err",
+        "Authentication Required: You must be logged in as a verified citizen to spin off community motions."
+      );
+      setView("identity");
+      return;
+    }
+
     try {
-      const res = await api.reshareComment(commentId, question, authorName);
+      const res = await api.reshareComment(commentId, question, authorName || identity.handle);
       if (res && res.new_ballot) {
         setBallots((prev) => [res.new_ballot, ...prev]);
         toast(
@@ -263,10 +300,10 @@ export function CivicPulseView({
         title: question,
         summary: `Spun-off community question from citizen suggestion #${commentId}`,
         author: {
-          name: authorName || "Aadarsh",
-          role: "Lead Contributor",
+          name: authorName || identity.handle,
+          role: "Citizen Contributor",
           verified: true,
-          avatar_initials: (authorName || "AD").slice(0, 2).toUpperCase(),
+          avatar_initials: (authorName || identity.handle).slice(0, 2).toUpperCase(),
         },
         status: "active",
         status_label: "Spun-off Community Motion • Closes in 48h",
@@ -288,7 +325,7 @@ export function CivicPulseView({
         is_official: false,
         quoted_comment: {
           comment_id: commentId,
-          original_author: "Aadarsh (@beingadish)",
+          original_author: `@${identity.handle}`,
           original_content: "Community suggestion referenced for this vote",
           parent_ballot_id: "parent",
         },
@@ -301,6 +338,12 @@ export function CivicPulseView({
 
   // Handle comment upvoting
   const handleUpvoteComment = async (commentId: string) => {
+    if (!identity) {
+      toast("err", "Authentication Required: You must be logged in to upvote suggestions.");
+      setView("identity");
+      return;
+    }
+
     try {
       // Optimistic update
       setBallots((prev) =>
@@ -376,8 +419,12 @@ export function CivicPulseView({
     return null;
   };
 
-  // Filter ballots based on active circle and tab
+  // Filter ballots based on active circle, active tab and search
   const filteredBallots = ballots.filter((b) => {
+    // Deliberation rooms tab filters to spun-off deliberation threads or ballots with active deliberations
+    if (activeTab === "deliberation-rooms" && !b.quoted_comment && b.deliberation_count === 0 && (!b.comments || b.comments.length === 0)) {
+      return false;
+    }
     // Circle filter
     if (selectedCircle !== "all" && b.category !== selectedCircle && b.circle_id !== selectedCircle) {
       return false;
@@ -504,6 +551,14 @@ export function CivicPulseView({
               <BallotCard
                 key={ballot.id}
                 ballot={ballot}
+                isLoggedIn={!!identity}
+                onRequireLogin={() => {
+                  toast(
+                    "err",
+                    "Authentication Required: You must be logged in as a verified citizen to cast a ballot or deliberate."
+                  );
+                  setView("identity");
+                }}
                 onVote={handleVote}
                 onAuditHash={(b) => setAuditBallot(b)}
                 onAddComment={handleAddComment}

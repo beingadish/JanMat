@@ -56,12 +56,29 @@ async function request<T>(
   path: string,
   body?: unknown,
 ): Promise<T> {
-  const init: RequestInit = { method, headers: {} };
+  const headers: Record<string, string> = {};
   if (body !== undefined) {
-    (init.headers as Record<string, string>)["Content-Type"] =
-      "application/json";
-    init.body = JSON.stringify(body);
+    headers["Content-Type"] = "application/json";
   }
+
+  // Attach citizen authentication token if available in local session
+  if (typeof localStorage !== "undefined") {
+    try {
+      const raw = localStorage.getItem("janmat.v2");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.identity?.uid) {
+          headers["Authorization"] = `Bearer ${parsed.identity.uid}`;
+        }
+      }
+    } catch {}
+  }
+
+  const init: RequestInit = {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  };
 
   let res: Response;
   try {
@@ -170,12 +187,31 @@ export const api = {
   },
   getBallot: (id: string) =>
     request<BallotItem>("GET", `/pub/ballots/${encodeURIComponent(id)}`),
-  castBallotVote: (ballotId: string, choice: string, voterToken?: string) =>
-    request<CastBallotResponse>("POST", "/citizen/ballots/vote", {
+  castBallotVote: (ballotId: string, choice: string, voterToken?: string) => {
+    let token = voterToken;
+    if (!token && typeof localStorage !== "undefined") {
+      try {
+        const raw = localStorage.getItem("janmat.v2");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          token = parsed?.identity?.uid;
+        }
+      } catch {}
+    }
+
+    if (!token) {
+      throw new ApiError(
+        401,
+        "Authentication required: You must be logged in as a verified citizen to cast a ballot."
+      );
+    }
+
+    return request<CastBallotResponse>("POST", "/citizen/ballots/vote", {
       ballot_id: ballotId,
       choice,
-      voter_token: voterToken,
-    }),
+      voter_token: token,
+    });
+  },
   draftMotion: (title: string, summary: string, circleId: string, authorName?: string) =>
     request<DraftMotionResponse>("POST", "/citizen/ballots/draft", {
       title,

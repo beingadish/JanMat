@@ -3,6 +3,8 @@ import type { BallotItem, CommentItem } from "../api/types";
 
 interface BallotCardProps {
   ballot: BallotItem;
+  isLoggedIn?: boolean;
+  onRequireLogin?: () => void;
   onVote: (ballotId: string, choice: "agree" | "oppose" | "neutral") => Promise<void>;
   onAuditHash: (ballot: BallotItem) => void;
   onAddComment?: (ballotId: string, content: string, authorName?: string) => Promise<void>;
@@ -13,6 +15,8 @@ interface BallotCardProps {
 
 export function BallotCard({
   ballot,
+  isLoggedIn = false,
+  onRequireLogin,
   onVote,
   onAuditHash,
   onAddComment,
@@ -34,6 +38,10 @@ export function BallotCard({
   const [submittingReshare, setSubmittingReshare] = useState(false);
 
   const handleVoteClick = async (choice: "agree" | "oppose" | "neutral") => {
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
     if (voting) return;
     setVoting(true);
     try {
@@ -46,6 +54,10 @@ export function BallotCard({
 
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
     if (!newComment.trim() || submittingComment) return;
     setSubmittingComment(true);
     try {
@@ -59,6 +71,10 @@ export function BallotCard({
   };
 
   const handleReshareSubmit = async (commentId: string) => {
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
     if (!reshareQuestion.trim() || submittingReshare) return;
     setSubmittingReshare(true);
     try {
@@ -238,9 +254,21 @@ export function BallotCard({
       {/* Action Footer Buttons */}
       <div className="flex items-center justify-between flex-wrap gap-3 pt-1 border-t border-[#222D42]/60">
         <div className="flex items-center gap-2">
+          {!isLoggedIn && (
+            <button
+              onClick={onRequireLogin}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/30 text-[11px] font-mono font-semibold transition-all"
+              title="You must be logged in as a verified citizen to cast a ballot"
+            >
+              <span className="material-symbols-outlined text-[14px]">lock</span>
+              <span>Login to Vote</span>
+            </button>
+          )}
+
           <button
             onClick={() => handleVoteClick("agree")}
             disabled={voting}
+            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all active:scale-95 ${
               votedChoice === "agree"
                 ? "bg-[#10B981] text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]"
@@ -254,6 +282,7 @@ export function BallotCard({
           <button
             onClick={() => handleVoteClick("oppose")}
             disabled={voting}
+            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all active:scale-95 ${
               votedChoice === "oppose"
                 ? "bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.5)]"
@@ -267,6 +296,7 @@ export function BallotCard({
           <button
             onClick={() => handleVoteClick("neutral")}
             disabled={voting}
+            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
             className={`px-3 py-2 rounded-full text-[13px] font-semibold transition-all ${
               votedChoice === "neutral"
                 ? "bg-[#F59E0B] text-black font-bold"
@@ -321,32 +351,48 @@ export function BallotCard({
           </div>
 
           {/* Suggestion Submission Form */}
-          <form onSubmit={handlePostComment} className="flex flex-col gap-2.5">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Post a constructive suggestion or deliberation on this motion..."
-              rows={2}
-              className="w-full bg-[#131A29] text-[13px] text-white placeholder-[#64748B] px-3.5 py-2.5 rounded-xl border border-[#222D42] focus:outline-none focus:border-[#4F46E5] resize-none"
-            />
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <input
-                type="text"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="Your name or handle (optional)"
-                className="bg-[#131A29] text-[12px] text-white placeholder-[#64748B] px-3 py-1.5 rounded-lg border border-[#222D42] focus:outline-none focus:border-[#4F46E5] max-w-[200px]"
-              />
+          {!isLoggedIn ? (
+            <div className="bg-[#131A29]/90 rounded-xl p-4 border border-[#222D42] flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5 text-[12.5px] text-[#94A3B8]">
+                <span className="material-symbols-outlined text-[#F59E0B] text-[20px]">lock</span>
+                <span>Citizen authentication required to post suggestions or spin off deliberations.</span>
+              </div>
               <button
-                type="submit"
-                disabled={submittingComment || !newComment.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all disabled:opacity-50 active:scale-95 shadow-sm"
+                type="button"
+                onClick={onRequireLogin}
+                className="px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all shadow-sm active:scale-95"
               >
-                <span className="material-symbols-outlined text-[15px]">send</span>
-                <span>{submittingComment ? "Posting..." : "Post Suggestion"}</span>
+                Log In / Register
               </button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handlePostComment} className="flex flex-col gap-2.5">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Post a constructive suggestion or deliberation on this motion..."
+                rows={2}
+                className="w-full bg-[#131A29] text-[13px] text-white placeholder-[#64748B] px-3.5 py-2.5 rounded-xl border border-[#222D42] focus:outline-none focus:border-[#4F46E5] resize-none"
+              />
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="Your name or handle (optional)"
+                  className="bg-[#131A29] text-[12px] text-white placeholder-[#64748B] px-3 py-1.5 rounded-lg border border-[#222D42] focus:outline-none focus:border-[#4F46E5] max-w-[200px]"
+                />
+                <button
+                  type="submit"
+                  disabled={submittingComment || !newComment.trim()}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all disabled:opacity-50 active:scale-95 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[15px]">send</span>
+                  <span>{submittingComment ? "Posting..." : "Post Suggestion"}</span>
+                </button>
+              </div>
+            </form>
+          )}
 
           {/* List of Comments & Spinoff Re-share Prompts */}
           <div className="flex flex-col gap-3 mt-1">
@@ -384,9 +430,15 @@ export function BallotCard({
                   <div className="flex items-center justify-between pt-1 border-t border-[#222D42]/50 text-[12px]">
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => onUpvoteComment?.(c.id)}
+                        onClick={() => {
+                          if (!isLoggedIn) {
+                            onRequireLogin?.();
+                            return;
+                          }
+                          onUpvoteComment?.(c.id);
+                        }}
                         className="inline-flex items-center gap-1 text-[#94A3B8] hover:text-[#10B981] transition-colors"
-                        title="Upvote this suggestion"
+                        title={!isLoggedIn ? "Log in to upvote" : "Upvote this suggestion"}
                       >
                         <span className="material-symbols-outlined text-[15px]">thumb_up</span>
                         <span>{c.upvotes}</span>
@@ -401,6 +453,10 @@ export function BallotCard({
 
                     <button
                       onClick={() => {
+                        if (!isLoggedIn) {
+                          onRequireLogin?.();
+                          return;
+                        }
                         if (reshareTargetId === c.id) {
                           setReshareTargetId(null);
                         } else {

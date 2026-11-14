@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { AboutRail } from "./components/AboutRail";
 import { CivicTopBar } from "./components/CivicTopBar";
-import { CommunityNav } from "./components/CommunityNav";
 import { Toasts } from "./components/Toasts";
 import { useNow } from "./lib/time";
 import { StoreProvider, useCivic } from "./store/store";
 import { CivicPulseView } from "./views/CivicPulseView";
-import { Feed } from "./views/Feed";
 import { Governance } from "./views/Governance";
 import { Identity } from "./views/Identity";
 
@@ -97,20 +94,9 @@ function Shell() {
             </div>
             <Governance />
           </div>
-        ) : activeTab === "deliberation-rooms" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-3">
-              <CommunityNav />
-            </div>
-            <div className="lg:col-span-6 min-w-0">
-              <Feed />
-            </div>
-            <div className="lg:col-span-3">
-              <AboutRail />
-            </div>
-          </div>
         ) : (
           <CivicPulseView
+            activeTab={activeTab}
             searchQuery={searchQuery}
             isDraftModalOpen={isDraftModalOpen}
             setIsDraftModalOpen={setIsDraftModalOpen}

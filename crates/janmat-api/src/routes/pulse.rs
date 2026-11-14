@@ -26,7 +26,7 @@ pub struct AuthorMeta {
     pub avatar_initials: String,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BallotTally {
     pub agree_pct: u8,
     pub oppose_pct: u8,
@@ -145,7 +145,7 @@ pub struct CastBallotRequest {
     pub voter_token: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct CastBallotResponse {
     pub accepted: bool,
     pub ballot_id: String,
@@ -551,6 +551,12 @@ pub async fn get_ballot(Path(id): Path<String>) -> Result<Json<BallotItem>, Stat
 pub async fn cast_ballot_vote(
     Json(req): Json<CastBallotRequest>,
 ) -> Result<Json<CastBallotResponse>, StatusCode> {
+    // Enforce authentication: only verified citizens with a valid voter_token can cast a ballot
+    let voter_token = match req.voter_token.as_deref() {
+        Some(token) if !token.trim().is_empty() && token != "anon_citizen" => token.trim(),
+        _ => return Err(StatusCode::UNAUTHORIZED),
+    };
+
     let mut engine = ENGINE.write().expect("write pulse engine");
     let block = engine.current_block();
     engine.vote_seq += 1;
@@ -587,7 +593,7 @@ pub async fn cast_ballot_vote(
     // Deterministic Blake3 cryptographic ballot audit receipt
     let receipt_input = format!(
         "vote:{}:{}:{}:{}:block:{}",
-        ballot_id, choice, seq, req.voter_token.as_deref().unwrap_or("anon_citizen"), block
+        ballot_id, choice, seq, voter_token, block
     );
     let receipt_hash = compute_blake3_audit(&receipt_input);
 
@@ -1036,6 +1042,29 @@ mod tests {
         assert_eq!(vote_res.choice, "agree");
         assert_eq!(vote_res.receipt_hash.len(), 64);
         assert!(vote_res.updated_tally.agree_votes >= 1);
+    }
+
+    #[tokio::test]
+    async fn test_unauthorized_vote_rejected() {
+        // Vote without voter token must return 401 UNAUTHORIZED
+        let unauth_res = cast_ballot_vote(Json(CastBallotRequest {
+            ballot_id: "jmf-2026-01".into(),
+            choice: "agree".into(),
+            voter_token: None,
+        }))
+        .await;
+
+        assert_eq!(unauth_res.unwrap_err(), StatusCode::UNAUTHORIZED);
+
+        // Vote with empty token must also return 401 UNAUTHORIZED
+        let empty_res = cast_ballot_vote(Json(CastBallotRequest {
+            ballot_id: "jmf-2026-01".into(),
+            choice: "agree".into(),
+            voter_token: Some("".into()),
+        }))
+        .await;
+
+        assert_eq!(empty_res.unwrap_err(), StatusCode::UNAUTHORIZED);
     }
 
     #[tokio::test]
