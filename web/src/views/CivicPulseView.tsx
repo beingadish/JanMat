@@ -133,18 +133,15 @@ export function CivicPulseView({
 
     const fetchPulseAndBallots = async () => {
       try {
-        const pulseData = await api.getPulse();
-        if (!cancelled && pulseData) {
-          setPulse(pulseData);
+        const [pulseRes, ballotsRes] = await Promise.allSettled([
+          api.getPulse(),
+          api.listBallots(),
+        ]);
+        if (!cancelled && pulseRes.status === "fulfilled" && pulseRes.value) {
+          setPulse(pulseRes.value);
         }
-      } catch {
-        // Fallback resilience
-      }
-
-      try {
-        const ballotsData = await api.listBallots();
-        if (!cancelled && ballotsData && ballotsData.length > 0) {
-          setBallots(ballotsData);
+        if (!cancelled && ballotsRes.status === "fulfilled" && ballotsRes.value && ballotsRes.value.length > 0) {
+          setBallots(ballotsRes.value);
         }
       } catch {
         // Fallback resilience
