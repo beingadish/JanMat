@@ -194,6 +194,7 @@ export interface VerificationReceipt {
   block: string;
   delta: string;
   time_ago: string;
+  timestamp?: number;
 }
 
 export interface TopNuancedDissent {

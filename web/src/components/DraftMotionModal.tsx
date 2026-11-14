@@ -5,13 +5,13 @@ interface DraftMotionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (title: string, summary: string, circleId: string, authorName: string) => Promise<BallotItem | null>;
+  authorHandle?: string;
 }
 
-export function DraftMotionModal({ isOpen, onClose, onSubmit }: DraftMotionModalProps) {
+export function DraftMotionModal({ isOpen, onClose, onSubmit, authorHandle = "Verified Citizen" }: DraftMotionModalProps) {
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [circleId, setCircleId] = useState("transit");
-  const [authorName, setAuthorName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +27,7 @@ export function DraftMotionModal({ isOpen, onClose, onSubmit }: DraftMotionModal
     setLoading(true);
     setError(null);
     try {
-      const res = await onSubmit(title.trim(), summary.trim(), circleId, authorName.trim() || "Citizen Sponsor");
+      const res = await onSubmit(title.trim(), summary.trim(), circleId, authorHandle);
       if (res) {
         setTitle("");
         setSummary("");
@@ -118,17 +118,15 @@ export function DraftMotionModal({ isOpen, onClose, onSubmit }: DraftMotionModal
             />
           </div>
 
-          <div>
-            <label className="block text-[12px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5">
-              Author / Sponsor Handle
-            </label>
-            <input
-              type="text"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="Your name or handle (e.g. Aadarsh)"
-              className="w-full bg-[#0A0E17] border border-[#222D42] rounded-xl px-4 py-2.5 text-[14px] text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#4F46E5]"
-            />
+          {/* Verified Citizen Sponsor Identity (Strictly Bound to Logged-in Citizen) */}
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#0A0E17] border border-[#222D42] text-[13px]">
+            <span className="text-[#94A3B8] text-[12px] font-semibold uppercase tracking-wider">
+              Citizen Sponsor
+            </span>
+            <span className="font-semibold text-white flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-[#3B82F6]">verified</span>
+              <span>@{authorHandle}</span>
+            </span>
           </div>
 
           {/* Modal Actions */}

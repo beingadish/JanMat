@@ -107,6 +107,8 @@ pub struct VerificationReceipt {
     pub block: String,
     pub delta: String,
     pub time_ago: String,
+    #[serde(default)]
+    pub timestamp: u64,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -271,13 +273,13 @@ impl PulseEngine {
             .unwrap_or_default()
             .as_secs();
 
-        // Clean-slate constitutional initialization: 0 fake ballots, 0 fake receipts
+        // Clean-slate constitutional initialization: 0 fake ballots, 0 fake receipts, starts from genesis #1
         let engine = Self {
-            genesis_block: 849_201,
+            genesis_block: 1,
             start_time: now,
             ballots: vec![],
             receipts: vec![],
-            vote_seq: 100,
+            vote_seq: 0,
             voter_ballots: std::collections::HashMap::new(),
             comment_endorsers: std::collections::HashMap::new(),
         };
@@ -498,7 +500,8 @@ pub async fn cast_ballot_vote(
             action: format!("Cast ballot: {}", &ballot_title[..ballot_title.len().min(26)]),
             block: short_hash,
             delta: format!("Choice: {choice}"),
-            time_ago: "Just now".to_string(),
+            time_ago: "just now".to_string(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64,
         },
     );
     if engine.receipts.len() > 12 {
@@ -604,7 +607,8 @@ pub async fn draft_ballot_motion(
             action: format!("Drafted Motion {code}"),
             block: format!("Block #{block}"),
             delta: "New Ballot Seed".to_string(),
-            time_ago: "Just now".to_string(),
+            time_ago: "just now".to_string(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64,
         },
     );
     if engine.receipts.len() > 12 {
@@ -675,7 +679,8 @@ pub async fn add_ballot_comment(
             action: format!("Comment on {proposal_code}"),
             block: format!("{short_hash} (b:{block})"),
             delta: "Suggestion Hash".to_string(),
-            time_ago: "Just now".to_string(),
+            time_ago: "just now".to_string(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64,
         },
     );
     if engine.receipts.len() > 12 {
@@ -713,7 +718,7 @@ pub async fn reshare_comment_as_ballot(
         }
     }
 
-    let (comment, parent_code) = found_comment.ok_or(StatusCode::NOT_FOUND)?;
+    let (comment, _parent_code) = found_comment.ok_or(StatusCode::NOT_FOUND)?;
 
     let code = format!("SPIN-2026-{seq}");
     let id = format!("spin-2026-{seq}");
@@ -779,7 +784,8 @@ pub async fn reshare_comment_as_ballot(
             action: format!("Spun off {code} from Comment"),
             block: format!("Block #{block}"),
             delta: "Quote-Poll Seed".to_string(),
-            time_ago: "Just now".to_string(),
+            time_ago: "just now".to_string(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64,
         },
     );
     if engine.receipts.len() > 12 {

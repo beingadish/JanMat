@@ -26,8 +26,8 @@ function SessionWatcher() {
 }
 
 function Shell() {
-  const { state, setView } = useCivic();
-  const { view } = state;
+  const { state, setView, toast } = useCivic();
+  const { view, identity } = state;
 
   const [activeTab, setActiveTab] = useState("live-ballots");
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +46,15 @@ function Shell() {
     }
   };
 
+  const handleOpenDraft = () => {
+    if (!identity) {
+      toast("err", "Authentication Required: Please log in or register to draft a motion.");
+      setView("identity");
+      return;
+    }
+    setIsDraftModalOpen(true);
+  };
+
   return (
     <div className="bg-[#0A0E17] min-h-screen text-[#DFE2EF] font-['Plus_Jakarta_Sans'] antialiased flex flex-col selection:bg-[#4F46E5] selection:text-white">
       <SessionWatcher />
@@ -56,7 +65,7 @@ function Shell() {
         setActiveTab={handleTabChange}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        onOpenDraft={() => setIsDraftModalOpen(true)}
+        onOpenDraft={handleOpenDraft}
         onOpenRules={() => setIsRulesModalOpen(true)}
       />
 

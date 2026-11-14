@@ -133,18 +133,18 @@ export function CivicTopBar({
           <button
             onClick={() => setView(state.view === "identity" ? "feed" : "identity")}
             className="flex items-center gap-2 p-1 rounded-full hover:bg-[#1C263A] transition-colors border border-transparent hover:border-[#222D42]"
-            title={identity ? `Logged in as @${identity.handle}` : "Register or Log in"}
+            title={identity ? `Logged in as @${identity.handle || identity.username || "citizen"}` : "Register or Log in"}
           >
             <div className="w-8 h-8 rounded-full bg-[#4F46E5] text-white flex items-center justify-center font-bold text-[13px]">
               {identity ? (
-                identity.handle.slice(0, 2).toUpperCase()
+                (identity.handle || identity.username || "CT").slice(0, 2).toUpperCase()
               ) : (
                 <span className="material-symbols-outlined text-[18px]">person</span>
               )}
             </div>
             {identity && (
               <span className="hidden lg:inline text-[13px] font-semibold text-white max-w-[100px] truncate">
-                @{identity.handle}
+                @{identity.handle || identity.username || "citizen"}
               </span>
             )}
           </button>

@@ -62,11 +62,11 @@ export function CivicPulseView({
     return new Set();
   });
 
-  // Fetch telemetry from Rust backend
+  // Live real-time sync every 5 seconds (just as X/Twitter updates live telemetry)
   useEffect(() => {
     let cancelled = false;
 
-    const fetchPulseAndBallots = async () => {
+    const syncLiveTelemetry = async () => {
       try {
         const [pulseRes, ballotsRes] = await Promise.allSettled([
           api.getPulse(),
@@ -75,16 +75,30 @@ export function CivicPulseView({
         if (!cancelled && pulseRes.status === "fulfilled" && pulseRes.value) {
           setPulse(pulseRes.value);
         }
-        if (!cancelled && ballotsRes.status === "fulfilled" && ballotsRes.value && ballotsRes.value.length > 0) {
-          setBallots(ballotsRes.value);
+        if (!cancelled && ballotsRes.status === "fulfilled" && Array.isArray(ballotsRes.value)) {
+          setBallots((current) => {
+            const serverBallots = ballotsRes.value!;
+            if (serverBallots.length === 0 && current.length === 0) return current;
+
+            // Merge server ballots with any optimistic local drafts seamlessly
+            const map = new Map<string, BallotItem>();
+            serverBallots.forEach((b) => map.set(b.id, b));
+            current.forEach((b) => {
+              if (!map.has(b.id)) {
+                map.set(b.id, b);
+              }
+            });
+            return Array.from(map.values());
+          });
         }
       } catch {
-        // Fallback resilience
+        // Silent resilience: maintains smooth UX on transient hiccups
       }
     };
 
-    fetchPulseAndBallots();
-    const interval = setInterval(fetchPulseAndBallots, 10000);
+    syncLiveTelemetry();
+    // 5-second real-time sync gap (Twitter-style live ledger sync)
+    const interval = setInterval(syncLiveTelemetry, 5000);
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -340,8 +354,9 @@ export function CivicPulseView({
     circleId: string,
     authorName: string
   ): Promise<BallotItem | null> => {
+    const verifiedAuthor = identity?.handle || authorName || "Citizen Sponsor";
     try {
-      const res = await api.draftMotion(title, summary, circleId, authorName);
+      const res = await api.draftMotion(title, summary, circleId, verifiedAuthor);
       if (res && res.ballot) {
         setBallots((prev) => [res.ballot, ...prev]);
         toast("ok", `Motion #${res.ballot.proposal_code} published to ledger!`);
@@ -358,10 +373,10 @@ export function CivicPulseView({
         title,
         summary,
         author: {
-          name: authorName || "Aadarsh",
-          role: "Lead Contributor",
+          name: verifiedAuthor,
+          role: "Citizen Contributor",
           verified: true,
-          avatar_initials: (authorName || "AD").slice(0, 2).toUpperCase(),
+          avatar_initials: verifiedAuthor.slice(0, 2).toUpperCase(),
         },
         status: "active",
         status_label: "Active Ballot • Closes in 48h",
@@ -436,7 +451,14 @@ export function CivicPulseView({
       <ConsensusHero
         blockHeight={blockHeight}
         precinctLabel={pulse?.network_label ?? "JANMAT CONSENSUS NETWORK ACTIVE"}
-        onOpenDraft={() => setIsDraftModalOpen?.(true)}
+        onOpenDraft={() => {
+          if (!identity) {
+            toast("err", "Authentication Required: Please log in or register to draft a motion.");
+            setView("identity");
+            return;
+          }
+          setIsDraftModalOpen?.(true);
+        }}
         onOpenRules={() => setIsRulesModalOpen?.(true)}
       />
 
@@ -656,6 +678,7 @@ export function CivicPulseView({
         isOpen={isDraftModalOpen}
         onClose={() => setIsDraftModalOpen?.(false)}
         onSubmit={handleDraftSubmit}
+        authorHandle={identity?.handle || "Verified Citizen"}
       />
 
       <AuditReceiptModal

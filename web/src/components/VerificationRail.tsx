@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { TopNuancedDissent, VerificationReceipt } from "../api/types";
+import { formatRelativeTime, useNow } from "../lib/time";
 
 interface VerificationRailProps {
   receipts?: VerificationReceipt[];
@@ -24,6 +25,8 @@ export function VerificationRail({
   onOpenRules,
 }: VerificationRailProps) {
   const [apiUp, setApiUp] = useState<boolean | null>(true);
+  // Re-evaluates relative elapsed time locally inside citizen browser every 1s
+  const now = useNow(1000);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,7 +78,9 @@ export function VerificationRail({
               >
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-mono text-[#4F46E5] font-bold">{r.tx_id}</span>
-                  <span className="text-[#64748B]">{r.time_ago}</span>
+                  <span className="text-[#64748B]">
+                    {r.timestamp ? formatRelativeTime(r.timestamp, now) : (r.time_ago || "just now")}
+                  </span>
                 </div>
                 <div className="text-white font-medium text-[12px] truncate">{r.action}</div>
                 <div className="text-[10px] font-mono text-[#94A3B8] truncate flex items-center justify-between">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { BallotItem, CommentItem } from "../api/types";
+import { formatRelativeTime, useNow } from "../lib/time";
 
 interface BallotCardProps {
   ballot: BallotItem;
@@ -29,6 +30,7 @@ export function BallotCard({
 }: BallotCardProps) {
   const [voting, setVoting] = useState(false);
   const [votedChoice, setVotedChoice] = useState<string | null>(null);
+  const now = useNow(5000); // 5s local reactive timer for relative timestamps
 
   const effectiveChoice = userVotedChoice || votedChoice;
   const hasVoted = !!effectiveChoice;
@@ -36,7 +38,6 @@ export function BallotCard({
   // Deliberation Tray state
   const [showDeliberation, setShowDeliberation] = useState(ballot.is_official || false);
   const [newComment, setNewComment] = useState("");
-  const [authorName, setAuthorName] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
 
   // Re-share / Spinoff question state: commentId -> active prompt
@@ -70,7 +71,7 @@ export function BallotCard({
     setSubmittingComment(true);
     try {
       if (onAddComment) {
-        await onAddComment(ballot.id, newComment.trim(), authorName.trim() || undefined);
+        await onAddComment(ballot.id, newComment.trim());
         setNewComment("");
       }
     } finally {
@@ -87,7 +88,7 @@ export function BallotCard({
     setSubmittingReshare(true);
     try {
       if (onReshareComment) {
-        await onReshareComment(commentId, reshareQuestion.trim(), authorName.trim() || undefined);
+        await onReshareComment(commentId, reshareQuestion.trim());
         setReshareTargetId(null);
         setReshareQuestion("");
       }
@@ -250,17 +251,6 @@ export function BallotCard({
       {/* Action Footer Buttons */}
       <div className="flex items-center justify-between flex-wrap gap-3 pt-1 border-t border-[#222D42]/60">
         <div className="flex items-center gap-2">
-          {!isLoggedIn && (
-            <button
-              onClick={onRequireLogin}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/30 text-[11px] font-mono font-semibold transition-all"
-              title="You must be logged in as a verified citizen to cast a ballot"
-            >
-              <span className="material-symbols-outlined text-[14px]">lock</span>
-              <span>Login to Vote</span>
-            </button>
-          )}
-
           {/* Support Button */}
           <button
             onClick={() => handleVoteClick("agree")}
@@ -387,49 +377,35 @@ export function BallotCard({
             </span>
           </div>
 
-          {/* Suggestion Submission Form */}
-          {!isLoggedIn ? (
-            <div className="bg-[#131A29]/90 rounded-xl p-4 border border-[#222D42] flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2.5 text-[12.5px] text-[#94A3B8]">
-                <span className="material-symbols-outlined text-[#F59E0B] text-[20px]">lock</span>
-                <span>Citizen authentication required to post suggestions or spin off deliberations.</span>
-              </div>
+          {/* Suggestion Submission Form: Clean, native form without redundant login buttons */}
+          <form onSubmit={handlePostComment} className="flex flex-col gap-2.5">
+            <textarea
+              value={newComment}
+              onFocus={() => {
+                if (!isLoggedIn) onRequireLogin?.();
+              }}
+              onChange={(e) => {
+                if (!isLoggedIn) {
+                  onRequireLogin?.();
+                  return;
+                }
+                setNewComment(e.target.value);
+              }}
+              placeholder="Post a constructive suggestion or deliberation on this motion..."
+              rows={2}
+              className="w-full bg-[#131A29] text-[13px] text-white placeholder-[#64748B] px-3.5 py-2.5 rounded-xl border border-[#222D42] focus:outline-none focus:border-[#4F46E5] resize-none"
+            />
+            <div className="flex items-center justify-end gap-3">
               <button
-                type="button"
-                onClick={onRequireLogin}
-                className="px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all shadow-sm active:scale-95"
+                type="submit"
+                disabled={submittingComment || (isLoggedIn && !newComment.trim())}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all disabled:opacity-50 active:scale-95 shadow-sm"
               >
-                Log In / Register
+                <span className="material-symbols-outlined text-[15px]">send</span>
+                <span>{submittingComment ? "Posting..." : "Post Suggestion"}</span>
               </button>
             </div>
-          ) : (
-            <form onSubmit={handlePostComment} className="flex flex-col gap-2.5">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Post a constructive suggestion or deliberation on this motion..."
-                rows={2}
-                className="w-full bg-[#131A29] text-[13px] text-white placeholder-[#64748B] px-3.5 py-2.5 rounded-xl border border-[#222D42] focus:outline-none focus:border-[#4F46E5] resize-none"
-              />
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <input
-                  type="text"
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  placeholder="Your name or handle (optional)"
-                  className="bg-[#131A29] text-[12px] text-white placeholder-[#64748B] px-3 py-1.5 rounded-lg border border-[#222D42] focus:outline-none focus:border-[#4F46E5] max-w-[200px]"
-                />
-                <button
-                  type="submit"
-                  disabled={submittingComment || !newComment.trim()}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[12px] font-bold transition-all disabled:opacity-50 active:scale-95 shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-[15px]">send</span>
-                  <span>{submittingComment ? "Posting..." : "Post Suggestion"}</span>
-                </button>
-              </div>
-            </form>
-          )}
+          </form>
 
           {/* List of Comments & Spinoff Re-share Prompts */}
           <div className="flex flex-col gap-3 mt-1">
@@ -448,8 +424,8 @@ export function BallotCard({
                       <span className="font-bold text-white text-[13px]">{c.author_name}</span>
                       <span className="text-[#64748B] font-mono text-[11px]">@{c.author_handle}</span>
                       {c.created_at && (
-                        <span className="text-[#475569] text-[11px]">
-                          • {c.created_at.includes("T") ? c.created_at.split("T")[0] : c.created_at}
+                        <span className="text-[#64748B] text-[11px] font-mono">
+                          • {formatRelativeTime(c.created_at, now)}
                         </span>
                       )}
                     </div>

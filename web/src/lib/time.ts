@@ -20,3 +20,36 @@ export function useNow(intervalMs = 1000): number {
   }, [intervalMs]);
   return now;
 }
+
+/**
+ * Format relative elapsed time: f(Current Time - Created Time).
+ * Evaluated locally inside citizen's browser without server network calls.
+ * Re-renders reactively with useNow().
+ */
+export function formatRelativeTime(
+  createdAt: string | number | undefined,
+  nowMs: number = Date.now()
+): string {
+  if (!createdAt) return "just now";
+  let createdMs = 0;
+  if (typeof createdAt === "number") {
+    // Check if seconds or milliseconds
+    createdMs = createdAt < 1e12 ? createdAt * 1000 : createdAt;
+  } else {
+    createdMs = new Date(createdAt).getTime();
+  }
+  if (isNaN(createdMs) || createdMs <= 0) return "just now";
+
+  const deltaMs = Math.max(0, nowMs - createdMs);
+  const seconds = Math.floor(deltaMs / 1000);
+
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(seconds / 3600);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(createdMs).toLocaleDateString();
+}
