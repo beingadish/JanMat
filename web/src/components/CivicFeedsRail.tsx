@@ -6,6 +6,8 @@ interface CivicFeedsRailProps {
   selectedCircle: string;
   setSelectedCircle: (circleId: string) => void;
   circles?: FeaturedCircle[];
+  myBallotsCount?: number;
+  passedCount?: number;
   turnoutPct?: number;
   consensusIndex?: number;
   weeklyChange?: string;
@@ -13,8 +15,9 @@ interface CivicFeedsRailProps {
 }
 
 const DEFAULT_CIRCLES: FeaturedCircle[] = [
-  { id: "governance", name: "JanMat Foundation", count: 1, icon: "gavel" },
-  { id: "design", name: "Community Deliberations", count: 1, icon: "palette" },
+  { id: "governance", name: "JanMat Foundation", count: 0, icon: "gavel" },
+  { id: "transit", name: "Transit Council", count: 0, icon: "directions_transit" },
+  { id: "infrastructure", name: "Civic Infrastructure", count: 0, icon: "apartment" },
 ];
 
 export function CivicFeedsRail({
@@ -23,6 +26,8 @@ export function CivicFeedsRail({
   selectedCircle,
   setSelectedCircle,
   circles = DEFAULT_CIRCLES,
+  myBallotsCount = 0,
+  passedCount = 0,
   turnoutPct = 0,
   consensusIndex = 0,
   weeklyChange = "0.0",
@@ -72,7 +77,7 @@ export function CivicFeedsRail({
               My Precinct Ballots
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#0A0E17] text-[#94A3B8] text-[11px] font-mono">
-              2
+              {myBallotsCount}
             </span>
           </button>
 
@@ -110,7 +115,7 @@ export function CivicFeedsRail({
               Passed Resolutions
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#0A0E17] text-[#94A3B8] text-[11px] font-mono">
-              128
+              {passedCount}
             </span>
           </button>
         </nav>

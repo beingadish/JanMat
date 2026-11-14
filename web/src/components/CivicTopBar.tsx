@@ -17,7 +17,7 @@ export function CivicTopBar({
   setActiveTab,
   searchQuery,
   setSearchQuery,
-  blockHeight = 849201,
+  blockHeight = 1,
 }: CivicTopBarProps) {
   const { state, setView } = useCivic();
   const { identity } = state;

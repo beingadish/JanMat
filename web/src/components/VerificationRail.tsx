@@ -65,7 +65,7 @@ export function VerificationRail({
         <div className="flex flex-col gap-2">
           {receipts.length === 0 ? (
             <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] text-[11px] text-[#64748B] text-center font-mono">
-              Ledger is clean. Future motions, comments and votes produce real-time Blake3 cryptographic receipts.
+              Awaiting first motion. Subsequent proposals, deliberations, and votes generate real-time Blake3 cryptographic audit receipts.
             </div>
           ) : (
             receipts.map((r, i) => (

@@ -6,7 +6,7 @@ interface ConsensusHeroProps {
 }
 
 export function ConsensusHero({
-  blockHeight = 849201,
+  blockHeight = 1,
   precinctLabel = "PRECINCT 42 NETWORK ACTIVE",
   onOpenDraft,
   onOpenRules,

@@ -419,7 +419,7 @@ export function CivicPulseView({
     return true;
   });
 
-  const blockHeight = pulse?.block_height ?? 849201;
+  const blockHeight = pulse?.block_height ?? (pulse?.recent_receipts?.length ? pulse.recent_receipts.length + 1 : 1);
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -440,11 +440,17 @@ export function CivicPulseView({
             setActiveFeed={setActiveFeed}
             selectedCircle={selectedCircle}
             setSelectedCircle={setSelectedCircle}
-            circles={pulse?.featured_circles}
-            turnoutPct={pulse?.turnout_pct}
-            consensusIndex={pulse?.consensus_index}
-            weeklyChange={pulse?.weekly_change}
-            precinctName={pulse?.precinct_id}
+            circles={pulse?.featured_circles ?? [
+              { id: "governance", name: "JanMat Foundation", count: ballots.filter(b => b.circle_id === "governance").length, icon: "gavel" },
+              { id: "transit", name: "Transit Council", count: ballots.filter(b => b.circle_id === "transit").length, icon: "directions_transit" },
+              { id: "infrastructure", name: "Civic Infrastructure", count: ballots.filter(b => b.circle_id === "infrastructure").length, icon: "apartment" },
+            ]}
+            myBallotsCount={ballots.filter(b => b.author?.name === identity?.handle).length}
+            passedCount={ballots.filter(b => b.status === "passed").length}
+            turnoutPct={pulse?.turnout_pct ?? (ballots.length ? 100 : 0)}
+            consensusIndex={pulse?.consensus_index ?? 0}
+            weeklyChange={pulse?.weekly_change ?? "0.0"}
+            precinctName={pulse?.precinct_id ?? "Precinct 42-North"}
           />
         </div>
 
@@ -505,17 +511,16 @@ export function CivicPulseView({
               </div>
               <div className="flex flex-col gap-1 max-w-md">
                 <h3 className="font-['Plus_Jakarta_Sans'] font-bold text-[18px] text-white">
-                  Civic Ledger Initialized & Clean
+                  No Active Motions
                 </h3>
                 <p className="text-[13px] text-[#94A3B8] leading-relaxed">
-                  No seeded demo data. The constitutional ledger is clean and ready for real deliberation.
-                  Draft and publish the first motion to launch community voting.
+                  There are currently no active motions open for deliberation. Propose a new motion to initiate public consensus.
                 </p>
               </div>
               <button
                 onClick={() => {
                   if (!identity) {
-                    toast("err", "Please log in or register to draft the first motion.");
+                    toast("err", "Please log in or register to propose a motion.");
                     setView("identity");
                   } else {
                     setIsDraftModalOpen?.(true);
@@ -524,7 +529,7 @@ export function CivicPulseView({
                 className="mt-2 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-bold shadow-[0_0_16px_rgba(79,70,229,0.35)] transition-all flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-[16px]">add</span>
-                <span>Draft First Motion</span>
+                <span>Propose a Motion</span>
               </button>
             </div>
           ) : (

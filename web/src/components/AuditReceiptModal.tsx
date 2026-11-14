@@ -8,7 +8,7 @@ interface AuditReceiptModalProps {
   blockHeight?: number;
 }
 
-export function AuditReceiptModal({ ballot, onClose, blockHeight = 849201 }: AuditReceiptModalProps) {
+export function AuditReceiptModal({ ballot, onClose, blockHeight = 1 }: AuditReceiptModalProps) {
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<VerifyReceiptResponse | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
