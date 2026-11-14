@@ -113,3 +113,105 @@ export interface KycVerifyResponse {
   citizenship_country: string;
   reference_id: string;
 }
+
+// ── Pulse & Consensus Ballot Types ──────────────────────────────
+
+export interface AuthorMeta {
+  name: string;
+  role: string;
+  verified: boolean;
+  avatar_initials: string;
+}
+
+export interface BallotTally {
+  agree_pct: number;
+  oppose_pct: number;
+  neutral_pct: number;
+  agree_votes: number;
+  oppose_votes: number;
+  neutral_votes: number;
+  total_ballots: number;
+  quorum_pct: number;
+}
+
+export interface TopDissent {
+  category: string;
+  upvotes: number;
+  quote: string;
+}
+
+export interface BallotItem {
+  id: string;
+  proposal_code: string;
+  circle: string;
+  circle_id: string;
+  title: string;
+  summary: string;
+  author: AuthorMeta;
+  status: "active" | "deliberation" | "passed" | "archived" | string;
+  status_label: string;
+  closes_in: string;
+  category: string;
+  tally: BallotTally;
+  deliberation_count: number;
+  blake3_hash: string;
+  top_dissent?: TopDissent | null;
+  created_at: string;
+}
+
+export interface FeaturedCircle {
+  id: string;
+  name: string;
+  count: number;
+  icon: string;
+}
+
+export interface VerificationReceipt {
+  tx_id: string;
+  action: string;
+  block: string;
+  delta: string;
+  time_ago: string;
+}
+
+export interface TopNuancedDissent {
+  topic: string;
+  category: string;
+  upvotes: number;
+  quote: string;
+  thread_link: string;
+}
+
+export interface PulseResponse {
+  block_height: number;
+  precinct_id: string;
+  precinct_name: string;
+  jurisdiction: string;
+  status: string;
+  network_label: string;
+  turnout_pct: number;
+  consensus_index: number;
+  weekly_change: string;
+  velocity: string;
+  zk_verifier_health: string;
+  blake3_anchor_hash: string;
+  featured_circles: FeaturedCircle[];
+  recent_receipts: VerificationReceipt[];
+  top_dissent: TopNuancedDissent;
+  timestamp: string;
+}
+
+export interface CastBallotResponse {
+  accepted: boolean;
+  ballot_id: string;
+  choice: string;
+  receipt_hash: string;
+  block_height: number;
+  timestamp: string;
+  updated_tally: BallotTally;
+}
+
+export interface DraftMotionResponse {
+  accepted: boolean;
+  ballot: BallotItem;
+}

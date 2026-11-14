@@ -1,4 +1,6 @@
 import type {
+  BallotItem,
+  CastBallotResponse,
   CastVoteRequest,
   CastVoteResponse,
   ConstitutionResponse,
@@ -8,9 +10,11 @@ import type {
   CreateTopicResponse,
   CreateVoteRequest,
   CreateVoteResponse,
+  DraftMotionResponse,
   HealthResponse,
   KycHealthResponse,
   KycVerifyResponse,
+  PulseResponse,
   RecallRequest,
   RecallResponse,
   SubmitOpinionRequest,
@@ -138,7 +142,7 @@ export const api = {
   kycHealth: () => request<KycHealthResponse>("GET", "/citizen/kyc/health"),
   constitution: () => request<ConstitutionResponse>("GET", "/pub/constitution"),
   listProposals: () => request<unknown[]>("GET", "/pub/proposals"),
-  listTopics: () => request<string[]>("GET", "/pub/t"),
+  listTopics: () => request<unknown[]>("GET", "/pub/t"),
   getTopic: (id: string) =>
     request<unknown>("GET", `/pub/t/${encodeURIComponent(seg(id))}`),
   voteResults: (topicId: string, voteId: string) =>
@@ -151,6 +155,31 @@ export const api = {
       "GET",
       `/citizen/username/${encodeURIComponent(name)}`,
     ),
+
+  // ── Pulse & Ballots (Civic Pulse Redesign) ──────────────────────
+  getPulse: () => request<PulseResponse>("GET", "/pub/pulse"),
+  listBallots: (category?: string, status?: string) => {
+    const params = new URLSearchParams();
+    if (category && category !== "all") params.append("category", category);
+    if (status && status !== "all") params.append("status", status);
+    const qs = params.toString();
+    return request<BallotItem[]>("GET", `/pub/ballots${qs ? `?${qs}` : ""}`);
+  },
+  getBallot: (id: string) =>
+    request<BallotItem>("GET", `/pub/ballots/${encodeURIComponent(id)}`),
+  castBallotVote: (ballotId: string, choice: string, voterToken?: string) =>
+    request<CastBallotResponse>("POST", "/citizen/ballots/vote", {
+      ballot_id: ballotId,
+      choice,
+      voter_token: voterToken,
+    }),
+  draftMotion: (title: string, summary: string, circleId: string, authorName?: string) =>
+    request<DraftMotionResponse>("POST", "/citizen/ballots/draft", {
+      title,
+      summary,
+      circle_id: circleId,
+      author_name: authorName,
+    }),
 
   // ── Citizen writes ──────────────────────────────────────────────
   createTopic: (b: CreateTopicRequest) =>

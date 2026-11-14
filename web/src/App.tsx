@@ -1,11 +1,9 @@
-import { useEffect, useRef } from "react";
-import { AboutRail } from "./components/AboutRail";
-import { CommunityNav } from "./components/CommunityNav";
+import { useEffect, useRef, useState } from "react";
+import { CivicTopBar } from "./components/CivicTopBar";
 import { Toasts } from "./components/Toasts";
-import { TopBar } from "./components/TopBar";
 import { useNow } from "./lib/time";
 import { StoreProvider, useCivic } from "./store/store";
-import { Feed } from "./views/Feed";
+import { CivicPulseView } from "./views/CivicPulseView";
 import { Governance } from "./views/Governance";
 import { Identity } from "./views/Identity";
 
@@ -28,23 +26,85 @@ function SessionWatcher() {
 }
 
 function Shell() {
-  const { state } = useCivic();
+  const { state, setView } = useCivic();
   const { view } = state;
+
+  const [activeTab, setActiveTab] = useState("live-ballots");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDraftModalOpen, setIsDraftModalOpen] = useState(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+
+  // If user switches tab from header
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === "rules-verification") {
+      setIsRulesModalOpen(true);
+    } else {
+      setView("feed");
+    }
+  };
+
   return (
-    <>
+    <div className="bg-[#0A0E17] min-h-screen text-[#DFE2EF] font-['Plus_Jakarta_Sans'] antialiased flex flex-col selection:bg-[#4F46E5] selection:text-white">
       <SessionWatcher />
-      <TopBar />
-      <div className="layout">
-        <CommunityNav />
-        <main className="center" key={view}>
-          {view === "feed" && <Feed />}
-          {view === "governance" && <Governance />}
-          {view === "identity" && <Identity />}
-        </main>
-        {view === "feed" ? <AboutRail /> : <div className="rail-empty" />}
-      </div>
+
+      {/* Modern Dark Glassmorphic Header */}
+      <CivicTopBar
+        activeTab={activeTab}
+        setActiveTab={handleTabChange}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onOpenDraft={() => setIsDraftModalOpen(true)}
+        onOpenRules={() => setIsRulesModalOpen(true)}
+      />
+
+      {/* Main Content Area */}
+      <main className="w-full pt-24 pb-16 px-4 lg:px-8 max-w-7xl mx-auto flex-1">
+        {view === "identity" ? (
+          <div className="max-w-2xl mx-auto bg-[#131A29] p-6 sm:p-8 rounded-2xl border border-[#222D42] shadow-xl">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#222D42]">
+              <h2 className="text-[20px] font-bold text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#4F46E5]">fingerprint</span>
+                Citizen Identity & Verification
+              </h2>
+              <button
+                onClick={() => setView("feed")}
+                className="px-4 py-1.5 rounded-full bg-[#1C263A] hover:bg-[#262A34] text-[#94A3B8] text-[13px] font-semibold transition-colors"
+              >
+                Back to Feed
+              </button>
+            </div>
+            <Identity />
+          </div>
+        ) : view === "governance" ? (
+          <div className="max-w-4xl mx-auto bg-[#131A29] p-6 sm:p-8 rounded-2xl border border-[#222D42] shadow-xl">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#222D42]">
+              <h2 className="text-[20px] font-bold text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#4F46E5]">gavel</span>
+                Constitution & Governance
+              </h2>
+              <button
+                onClick={() => setView("feed")}
+                className="px-4 py-1.5 rounded-full bg-[#1C263A] hover:bg-[#262A34] text-[#94A3B8] text-[13px] font-semibold transition-colors"
+              >
+                Back to Feed
+              </button>
+            </div>
+            <Governance />
+          </div>
+        ) : (
+          <CivicPulseView
+            searchQuery={searchQuery}
+            isDraftModalOpen={isDraftModalOpen}
+            setIsDraftModalOpen={setIsDraftModalOpen}
+            isRulesModalOpen={isRulesModalOpen}
+            setIsRulesModalOpen={setIsRulesModalOpen}
+          />
+        )}
+      </main>
+
       <Toasts />
-    </>
+    </div>
   );
 }
 

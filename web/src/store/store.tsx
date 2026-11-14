@@ -516,6 +516,7 @@ export function useCivic() {
     setView,
     setTopic,
     setSub,
+    toast,
     dismissToast,
     register,
     login,

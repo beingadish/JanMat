@@ -4,7 +4,14 @@ mod routes;
 
 use std::sync::Arc;
 
-use axum::{Json, Router, routing::get, routing::post};
+use axum::{
+    Json, Router,
+    body::Body,
+    extract::Request,
+    http::{HeaderValue, Method, Response, StatusCode},
+    middleware::Next,
+    routing::{get, post},
+};
 use serde::Serialize;
 
 use db::Registry;
@@ -13,13 +20,48 @@ use db::Registry;
 struct HealthResponse {
     status: &'static str,
     service: &'static str,
+    version: &'static str,
+    network: &'static str,
 }
 
 async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok",
         service: "janmat-api",
+        version: "0.2.0",
+        network: "precinct-42-active",
     })
+}
+
+async fn cors(req: Request, next: Next) -> Response<Body> {
+    if req.method() == Method::OPTIONS {
+        let mut response = Response::new(Body::empty());
+        *response.status_mut() = StatusCode::NO_CONTENT;
+        let headers = response.headers_mut();
+        headers.insert("access-control-allow-origin", HeaderValue::from_static("*"));
+        headers.insert(
+            "access-control-allow-methods",
+            HeaderValue::from_static("GET, POST, PUT, DELETE, OPTIONS"),
+        );
+        headers.insert(
+            "access-control-allow-headers",
+            HeaderValue::from_static("*"),
+        );
+        return response;
+    }
+
+    let mut response = next.run(req).await;
+    let headers = response.headers_mut();
+    headers.insert("access-control-allow-origin", HeaderValue::from_static("*"));
+    headers.insert(
+        "access-control-allow-methods",
+        HeaderValue::from_static("GET, POST, PUT, DELETE, OPTIONS"),
+    );
+    headers.insert(
+        "access-control-allow-headers",
+        HeaderValue::from_static("*"),
+    );
+    response
 }
 
 #[tokio::main]
@@ -29,6 +71,18 @@ async fn main() {
 
     let app: Router = Router::new()
         .route("/health", get(health))
+        .route("/api/health", get(health))
+        // Real-Time Civic Pulse & Verification
+        .route("/pub/pulse", get(routes::pulse::get_pulse))
+        .route("/api/pulse", get(routes::pulse::get_pulse))
+        .route("/pub/ballots", get(routes::pulse::list_ballots))
+        .route("/api/ballots", get(routes::pulse::list_ballots))
+        .route("/pub/ballots/{id}", get(routes::pulse::get_ballot))
+        .route("/api/ballots/{id}", get(routes::pulse::get_ballot))
+        .route("/citizen/ballots/vote", post(routes::pulse::cast_ballot_vote))
+        .route("/api/citizen/ballots/vote", post(routes::pulse::cast_ballot_vote))
+        .route("/citizen/ballots/draft", post(routes::pulse::draft_ballot_motion))
+        .route("/api/citizen/ballots/draft", post(routes::pulse::draft_ballot_motion))
         // Constitution
         .route(
             "/pub/constitution",
@@ -67,6 +121,7 @@ async fn main() {
             "/citizen/recall/{topic_id}",
             post(routes::governance::sign_recall),
         )
+        .layer(axum::middleware::from_fn(cors))
         .with_state(registry);
 
     // Bind address is configurable so the same binary works locally
