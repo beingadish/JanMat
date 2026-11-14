@@ -8,36 +8,13 @@ interface VerificationRailProps {
   onOpenRules: () => void;
 }
 
-const DEFAULT_RECEIPTS: VerificationReceipt[] = [
-  {
-    tx_id: "#100",
-    action: "Foundation Genesis Block Anchored",
-    block: "0x7b11...fa44",
-    delta: "Genesis State Verified",
-    time_ago: "Just now",
-  },
-  {
-    tx_id: "#101",
-    action: "Published Official Poll: JMF-2026-01",
-    block: "0x9f4a...8d12",
-    delta: "Official Motion Created",
-    time_ago: "Just now",
-  },
-  {
-    tx_id: "#102",
-    action: "Re-shared comment c-101 into SPIN-2026-02",
-    block: "0x3c2a...e901",
-    delta: "Community Spinoff Created",
-    time_ago: "Just now",
-  },
-];
+const DEFAULT_RECEIPTS: VerificationReceipt[] = [];
 
 const DEFAULT_DISSENT: TopNuancedDissent = {
-  topic: "Visual Contrast & Theming",
-  category: "Accessibility",
+  topic: "Constitution",
+  category: "Consensus",
   upvotes: 0,
-  quote:
-    "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.",
+  quote: "No dissenting opinions recorded on ledger yet.",
   thread_link: "#",
 };
 
@@ -86,22 +63,28 @@ export function VerificationRail({
         </div>
 
         <div className="flex flex-col gap-2">
-          {receipts.map((r, i) => (
-            <div
-              key={`${r.tx_id}-${i}`}
-              className="bg-[#0A0E17] p-2.5 rounded-xl border border-[#222D42] flex flex-col gap-1 transition-all hover:border-[#3E4C6D]"
-            >
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-mono text-[#4F46E5] font-bold">{r.tx_id}</span>
-                <span className="text-[#64748B]">{r.time_ago}</span>
-              </div>
-              <div className="text-white font-medium text-[12px] truncate">{r.action}</div>
-              <div className="text-[10px] font-mono text-[#94A3B8] truncate flex items-center justify-between">
-                <span>Block: {r.block}</span>
-                <span className="text-[#10B981]">{r.delta}</span>
-              </div>
+          {receipts.length === 0 ? (
+            <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] text-[11px] text-[#64748B] text-center font-mono">
+              Ledger is clean. Future motions, comments and votes produce real-time Blake3 cryptographic receipts.
             </div>
-          ))}
+          ) : (
+            receipts.map((r, i) => (
+              <div
+                key={`${r.tx_id}-${i}`}
+                className="bg-[#0A0E17] p-2.5 rounded-xl border border-[#222D42] flex flex-col gap-1 transition-all hover:border-[#3E4C6D]"
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-[#4F46E5] font-bold">{r.tx_id}</span>
+                  <span className="text-[#64748B]">{r.time_ago}</span>
+                </div>
+                <div className="text-white font-medium text-[12px] truncate">{r.action}</div>
+                <div className="text-[10px] font-mono text-[#94A3B8] truncate flex items-center justify-between">
+                  <span>Block: {r.block}</span>
+                  <span className="text-[#10B981]">{r.delta}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -114,24 +97,30 @@ export function VerificationRail({
           <span className="material-symbols-outlined text-[#EF4444] text-[18px]">balance</span>
         </div>
 
-        <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] flex flex-col gap-2">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[#EF4444] font-bold">{topDissent.category}</span>
-            <span className="text-[#64748B]">+{topDissent.upvotes} upvotes</span>
+        {(!topDissent || topDissent.upvotes === 0) ? (
+          <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] text-[11px] text-[#64748B] text-center">
+            No dissenting arguments recorded yet.
           </div>
-          <p className="text-[12px] text-[#c7c4d8] italic leading-relaxed">
-            “{topDissent.quote}”
-          </p>
-          <div className="flex items-center justify-between text-[11px] text-[#64748B] pt-1 border-t border-[#222D42]/50">
-            <span>In response to: {topDissent.topic}</span>
-            <button
-              onClick={onOpenRules}
-              className="text-[#3B82F6] hover:underline bg-transparent border-none p-0 cursor-pointer"
-            >
-              Read Thread
-            </button>
+        ) : (
+          <div className="bg-[#0A0E17] p-3 rounded-xl border border-[#222D42] flex flex-col gap-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[#EF4444] font-bold">{topDissent.category}</span>
+              <span className="text-[#64748B]">+{topDissent.upvotes} upvotes</span>
+            </div>
+            <p className="text-[12px] text-[#c7c4d8] italic leading-relaxed">
+              “{topDissent.quote}”
+            </p>
+            <div className="flex items-center justify-between text-[11px] text-[#64748B] pt-1 border-t border-[#222D42]/50">
+              <span>In response to: {topDissent.topic}</span>
+              <button
+                onClick={onOpenRules}
+                className="text-[#3B82F6] hover:underline bg-transparent border-none p-0 cursor-pointer"
+              >
+                Read Thread
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* How Decisions Work / Rules Card */}

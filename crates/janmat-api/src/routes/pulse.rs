@@ -226,6 +226,10 @@ pub struct PulseEngine {
     pub ballots: Vec<BallotItem>,
     pub receipts: Vec<VerificationReceipt>,
     pub vote_seq: u64,
+    #[serde(default)]
+    pub voter_ballots: std::collections::HashMap<String, String>, // "ballot_id:voter_token" -> choice
+    #[serde(default)]
+    pub comment_endorsers: std::collections::HashMap<String, Vec<String>>, // "comment_id" -> [voter_tokens]
 }
 
 fn compute_blake3_audit(content: &str) -> String {
@@ -267,139 +271,15 @@ impl PulseEngine {
             .unwrap_or_default()
             .as_secs();
 
-        // 1. Official Organizational Poll from JanMat Foundation
-        let poll1_id = "jmf-2026-01".to_string();
-        let comment_101_content = "I think we can change the color of the UI to something like blackish.".to_string();
-        let comment_101_hash = compute_blake3_audit(&format!("{poll1_id}:c-101:{comment_101_content}"));
-
-        let comments_p1 = vec![
-            CommentItem {
-                id: "c-101".to_string(),
-                ballot_id: poll1_id.clone(),
-                author_name: "Aadarsh".to_string(),
-                author_handle: "beingadish".to_string(),
-                content: comment_101_content.clone(),
-                blake3_hash: comment_101_hash,
-                upvotes: 0,
-                created_at: chrono_now(),
-                reshare_count: 1,
-            },
-        ];
-
-        let p1_title = "How do you like JanMat?".to_string();
-        let p1_hash = compute_blake3_audit(&format!("JMF-2026-01:{p1_title}"));
-
-        let poll1 = BallotItem {
-            id: poll1_id,
-            proposal_code: "JMF-2026-01".to_string(),
-            circle: "JanMat Foundation".to_string(),
-            circle_id: "governance".to_string(),
-            title: p1_title,
-            summary: "Official organizational poll from the JanMat Foundation: How do you like JanMat? Vote in Support, Dissent, or Neutral. Share suggestions below; re-share any comment with your own question to launch follow-up community deliberations.".to_string(),
-            author: AuthorMeta {
-                name: "JanMat Foundation".to_string(),
-                role: "Official Organization".to_string(),
-                verified: true,
-                avatar_initials: "JF".to_string(),
-            },
-            status: "active".to_string(),
-            status_label: "Official Organization Poll • Open Voting".to_string(),
-            closes_in: "7d".to_string(),
-            category: "civic".to_string(),
-            tally: BallotTally {
-                agree_pct: 0,
-                oppose_pct: 0,
-                neutral_pct: 0,
-                agree_votes: 0,
-                oppose_votes: 0,
-                neutral_votes: 0,
-                total_ballots: 0,
-                quorum_pct: 0,
-            },
-            deliberation_count: 1,
-            blake3_hash: p1_hash,
-            top_dissent: None,
-            created_at: chrono_now(),
-            is_official: true,
-            quoted_comment: None,
-            comments: comments_p1,
-        };
-
-        // 2. Citizen Re-shared Comment with Question (Spinoff Poll)
-        let p2_title = "Do you like this idea?".to_string();
-        let p2_hash = compute_blake3_audit(&format!("SPIN-2026-02:{p2_title}"));
-
-        let poll2 = BallotItem {
-            id: "spin-2026-02".to_string(),
-            proposal_code: "SPIN-2026-02".to_string(),
-            circle: "Community Deliberations".to_string(),
-            circle_id: "design".to_string(),
-            title: p2_title,
-            summary: "Re-posted suggestion poll: 'I think we can change the color of the UI to something like blackish.' Cast your vote in support, dissent, or neutral.".to_string(),
-            author: AuthorMeta {
-                name: "Aadarsh".to_string(),
-                role: "Lead Contributor".to_string(),
-                verified: true,
-                avatar_initials: "AD".to_string(),
-            },
-            status: "active".to_string(),
-            status_label: "Spun-off Community Motion • Closes in 48h".to_string(),
-            closes_in: "48h".to_string(),
-            category: "civic".to_string(),
-            tally: BallotTally {
-                agree_pct: 0,
-                oppose_pct: 0,
-                neutral_pct: 0,
-                agree_votes: 0,
-                oppose_votes: 0,
-                neutral_votes: 0,
-                total_ballots: 0,
-                quorum_pct: 0,
-            },
-            deliberation_count: 0,
-            blake3_hash: p2_hash,
-            top_dissent: None,
-            created_at: chrono_now(),
-            is_official: false,
-            quoted_comment: Some(QuotedContext {
-                comment_id: "c-101".to_string(),
-                original_author: "Aadarsh (@beingadish)".to_string(),
-                original_content: comment_101_content,
-                parent_ballot_id: "jmf-2026-01".to_string(),
-            }),
-            comments: vec![],
-        };
-
-        let receipts = vec![
-            VerificationReceipt {
-                tx_id: "#100".to_string(),
-                action: "Foundation Genesis Block Anchored".to_string(),
-                block: "0x7b11...fa44".to_string(),
-                delta: "Genesis State Verified".to_string(),
-                time_ago: "Just now".to_string(),
-            },
-            VerificationReceipt {
-                tx_id: "#101".to_string(),
-                action: "Published Official Poll: JMF-2026-01".to_string(),
-                block: "0x9f4a...8d12".to_string(),
-                delta: "Official Motion Created".to_string(),
-                time_ago: "Just now".to_string(),
-            },
-            VerificationReceipt {
-                tx_id: "#102".to_string(),
-                action: "Re-shared comment c-101 into SPIN-2026-02".to_string(),
-                block: "0x3c2a...e901".to_string(),
-                delta: "Community Spinoff Created".to_string(),
-                time_ago: "Just now".to_string(),
-            },
-        ];
-
+        // Clean-slate constitutional initialization: 0 fake ballots, 0 fake receipts
         let engine = Self {
             genesis_block: 849_201,
             start_time: now,
-            ballots: vec![poll1, poll2],
-            receipts,
-            vote_seq: 103,
+            ballots: vec![],
+            receipts: vec![],
+            vote_seq: 100,
+            voter_ballots: std::collections::HashMap::new(),
+            comment_endorsers: std::collections::HashMap::new(),
         };
         engine.save_to_disk();
         engine
@@ -465,11 +345,11 @@ pub async fn get_pulse() -> Json<PulseResponse> {
     let blake3_anchor_hash = compute_blake3_audit(&anchor_input);
 
     let top_dissent = TopNuancedDissent {
-        topic: "Visual Contrast & Theming".to_string(),
-        category: "Accessibility".to_string(),
+        topic: "Constitution".to_string(),
+        category: "Consensus".to_string(),
         upvotes: 0,
-        quote: "Ensure contrast ratios for smaller captions remain WCAG AAA conformant if deeper dark levels are rolled out.".to_string(),
-        thread_link: "/pub/ballots/jmf-2026-01".to_string(),
+        quote: "No dissenting opinions recorded on ledger yet.".to_string(),
+        thread_link: "#".to_string(),
     };
 
     // Calculate real dynamic turnout and consensus from ballots
@@ -572,6 +452,14 @@ pub async fn cast_ballot_vote(
         .iter()
         .position(|b| b.id.eq_ignore_ascii_case(&req.ballot_id) || b.proposal_code.eq_ignore_ascii_case(&req.ballot_id))
         .ok_or(StatusCode::NOT_FOUND)?;
+
+    let target_ballot_id = engine.ballots[ballot_idx].id.clone();
+    let voter_key = format!("{}:{}", target_ballot_id, voter_token);
+    if engine.voter_ballots.contains_key(&voter_key) {
+        // Under the JanMat Constitution: One citizen, one vote. Once cast, a ballot is immutable; duplicate voting or changing votes is strictly prohibited.
+        return Err(StatusCode::CONFLICT);
+    }
+    engine.voter_ballots.insert(voter_key, choice.clone());
 
     let ballot_id = {
         let ballot = &mut engine.ballots[ballot_idx];
@@ -909,20 +797,66 @@ pub async fn reshare_comment_as_ballot(
     }))
 }
 
-/// POST /citizen/comments/:id/upvote — upvote a suggestion/comment
-pub async fn upvote_ballot_comment(Path(id): Path<String>) -> Result<Json<serde_json::Value>, StatusCode> {
+#[derive(Debug, Deserialize, Default)]
+pub struct UpvoteCommentRequest {
+    pub voter_token: Option<String>,
+}
+
+/// POST /citizen/comments/:id/upvote — upvote/endorse a suggestion/comment (strictly One Person, One Endorsement)
+pub async fn upvote_ballot_comment(
+    Path(id): Path<String>,
+    headers: axum::http::HeaderMap,
+    payload: Option<Json<UpvoteCommentRequest>>,
+) -> Result<Json<serde_json::Value>, StatusCode> {
+    let token_from_payload = payload.and_then(|p| p.voter_token.clone());
+    let token_from_header = headers
+        .get("authorization")
+        .and_then(|h| h.to_str().ok())
+        .map(|s| s.trim_start_matches("Bearer ").trim().to_string());
+
+    let voter_token = token_from_payload
+        .or(token_from_header)
+        .filter(|t| !t.trim().is_empty() && t != "anon_citizen")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
     let mut engine = ENGINE.write().expect("write pulse engine");
-    for ballot in &mut engine.ballots {
-        if let Some(c) = ballot.comments.iter_mut().find(|c| c.id.eq_ignore_ascii_case(&id)) {
-            c.upvotes += 1;
-            let current_upvotes = c.upvotes;
-            engine.save_to_disk();
-            return Ok(Json(serde_json::json!({
-                "accepted": true,
-                "comment_id": id,
-                "upvotes": current_upvotes,
-            })));
+    let found = {
+        let mut loc = None;
+        for (b_idx, ballot) in engine.ballots.iter().enumerate() {
+            for (c_idx, comment) in ballot.comments.iter().enumerate() {
+                if comment.id.eq_ignore_ascii_case(&id) {
+                    loc = Some((b_idx, c_idx, comment.id.clone()));
+                    break;
+                }
+            }
+            if loc.is_some() {
+                break;
+            }
         }
+        loc
+    };
+
+    if let Some((b_idx, c_idx, comment_id)) = found {
+        let endorsers = engine.comment_endorsers.entry(comment_id.clone()).or_default();
+        let already_endorsed = endorsers.iter().any(|v| v == &voter_token);
+        let upvoted = if already_endorsed {
+            endorsers.retain(|v| v != &voter_token);
+            engine.ballots[b_idx].comments[c_idx].upvotes =
+                engine.ballots[b_idx].comments[c_idx].upvotes.saturating_sub(1);
+            false
+        } else {
+            endorsers.push(voter_token.clone());
+            engine.ballots[b_idx].comments[c_idx].upvotes += 1;
+            true
+        };
+        let current_upvotes = engine.ballots[b_idx].comments[c_idx].upvotes;
+        engine.save_to_disk();
+        return Ok(Json(serde_json::json!({
+            "accepted": true,
+            "upvoted": upvoted,
+            "upvotes": current_upvotes,
+            "comment_id": comment_id,
+        })));
     }
     Err(StatusCode::NOT_FOUND)
 }
@@ -1008,31 +942,26 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_ballots_list_and_filter() {
-        let all = list_ballots(Query(BallotFilterQuery {
-            category: None,
-            status: None,
+    async fn test_ballot_draft_and_vote_lifecycle() {
+        // 1. Draft motion
+        let draft = draft_ballot_motion(Json(DraftMotionRequest {
+            title: "Pitch Black UI Mode".into(),
+            summary: "Proposal to adopt pure black theme.".into(),
+            circle_id: "design".into(),
+            author_name: Some("Aadarsh".into()),
         }))
         .await
-        .0;
-        assert!(all.len() >= 2);
+        .expect("draft motion should succeed")
+        .0
+        .ballot;
 
-        let design = list_ballots(Query(BallotFilterQuery {
-            category: Some("design".into()),
-            status: None,
-        }))
-        .await
-        .0;
-        assert!(design.len() >= 1);
-        assert!(design.iter().all(|b| b.circle_id == "design" || b.category == "design"));
-    }
+        assert_eq!(draft.category, "design");
 
-    #[tokio::test]
-    async fn test_vote_and_blake3_receipt() {
+        // 2. Cast vote
         let vote_res = cast_ballot_vote(Json(CastBallotRequest {
-            ballot_id: "jmf-2026-01".into(),
+            ballot_id: draft.id.clone(),
             choice: "agree".into(),
-            voter_token: Some("aadarsh_test_user".into()),
+            voter_token: Some("citizen_voter_1".into()),
         }))
         .await
         .expect("vote cast should succeed")
@@ -1041,14 +970,35 @@ mod tests {
         assert!(vote_res.accepted);
         assert_eq!(vote_res.choice, "agree");
         assert_eq!(vote_res.receipt_hash.len(), 64);
-        assert!(vote_res.updated_tally.agree_votes >= 1);
+        assert_eq!(vote_res.updated_tally.agree_votes, 1);
+
+        // 3. Test DUPLICATE vote rejection (JanMat core philosophy: One Person, One Vote, strictly Immutable)
+        let dup_res = cast_ballot_vote(Json(CastBallotRequest {
+            ballot_id: draft.id.clone(),
+            choice: "oppose".into(),
+            voter_token: Some("citizen_voter_1".into()),
+        }))
+        .await;
+
+        assert_eq!(dup_res.unwrap_err(), StatusCode::CONFLICT);
     }
 
     #[tokio::test]
     async fn test_unauthorized_vote_rejected() {
+        let draft = draft_ballot_motion(Json(DraftMotionRequest {
+            title: "Auth Test Motion".into(),
+            summary: "Testing unauth rejection".into(),
+            circle_id: "governance".into(),
+            author_name: Some("Aadarsh".into()),
+        }))
+        .await
+        .expect("draft should succeed")
+        .0
+        .ballot;
+
         // Vote without voter token must return 401 UNAUTHORIZED
         let unauth_res = cast_ballot_vote(Json(CastBallotRequest {
-            ballot_id: "jmf-2026-01".into(),
+            ballot_id: draft.id.clone(),
             choice: "agree".into(),
             voter_token: None,
         }))
@@ -1058,7 +1008,7 @@ mod tests {
 
         // Vote with empty token must also return 401 UNAUTHORIZED
         let empty_res = cast_ballot_vote(Json(CastBallotRequest {
-            ballot_id: "jmf-2026-01".into(),
+            ballot_id: draft.id.clone(),
             choice: "agree".into(),
             voter_token: Some("".into()),
         }))
@@ -1069,9 +1019,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_comment_and_reshare_flow() {
+        let draft = draft_ballot_motion(Json(DraftMotionRequest {
+            title: "Deliberation Motion".into(),
+            summary: "Testing deliberation flow".into(),
+            circle_id: "civic".into(),
+            author_name: Some("Aadarsh".into()),
+        }))
+        .await
+        .expect("draft should succeed")
+        .0
+        .ballot;
+
         // 1. Add comment
         let comment_res = add_ballot_comment(
-            Path("jmf-2026-01".into()),
+            Path(draft.id.clone()),
             Json(AddCommentRequest {
                 author_name: Some("Aadarsh".into()),
                 author_handle: Some("beingadish".into()),
@@ -1086,7 +1047,38 @@ mod tests {
         assert_eq!(comment_res.comment.author_handle, "beingadish");
         assert!(!comment_res.comment.blake3_hash.is_empty());
 
-        // 2. Reshare comment with a question into a new spinoff poll
+        // 2. Test Upvote: Strictly One Person, One Endorsement (Toggle, No Infinite Likes)
+        let upvote_headers = axum::http::HeaderMap::new();
+        let upvote1 = upvote_ballot_comment(
+            Path(comment_res.comment.id.clone()),
+            upvote_headers.clone(),
+            Some(Json(UpvoteCommentRequest {
+                voter_token: Some("citizen_supporter".into()),
+            })),
+        )
+        .await
+        .expect("first upvote should succeed")
+        .0;
+
+        assert_eq!(upvote1["upvoted"], true);
+        assert_eq!(upvote1["upvotes"], 2); // Initial 1 + 1 = 2
+
+        // Second click toggles off endorsement:
+        let upvote2 = upvote_ballot_comment(
+            Path(comment_res.comment.id.clone()),
+            upvote_headers,
+            Some(Json(UpvoteCommentRequest {
+                voter_token: Some("citizen_supporter".into()),
+            })),
+        )
+        .await
+        .expect("second upvote should toggle off")
+        .0;
+
+        assert_eq!(upvote2["upvoted"], false);
+        assert_eq!(upvote2["upvotes"], 1); // Toggled back to 1
+
+        // 3. Reshare comment with a question into a new spinoff poll
         let reshare_res = reshare_comment_as_ballot(Json(ReshareCommentRequest {
             comment_id: comment_res.comment.id.clone(),
             question: "Do you like this idea? Should we adopt pitch black mode?".into(),
@@ -1103,7 +1095,7 @@ mod tests {
         assert_eq!(q.comment_id, comment_res.comment.id);
         assert_eq!(q.original_content, "I propose dark pitch-black theme mode.");
 
-        // 3. Verify receipt
+        // 4. Verify receipt
         let verify_res = verify_blake3_receipt(Json(VerifyReceiptRequest {
             receipt_hash: reshare_res.new_ballot.blake3_hash,
         }))

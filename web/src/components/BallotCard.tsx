@@ -5,11 +5,13 @@ interface BallotCardProps {
   ballot: BallotItem;
   isLoggedIn?: boolean;
   onRequireLogin?: () => void;
+  userVotedChoice?: "agree" | "oppose" | "neutral" | null;
   onVote: (ballotId: string, choice: "agree" | "oppose" | "neutral") => Promise<void>;
   onAuditHash: (ballot: BallotItem) => void;
   onAddComment?: (ballotId: string, content: string, authorName?: string) => Promise<void>;
   onReshareComment?: (commentId: string, question: string, authorName?: string) => Promise<void>;
   onUpvoteComment?: (commentId: string) => Promise<void>;
+  isCommentEndorsed?: (commentId: string) => boolean;
   onOpenDeliberation?: (ballot: BallotItem) => void;
 }
 
@@ -17,14 +19,19 @@ export function BallotCard({
   ballot,
   isLoggedIn = false,
   onRequireLogin,
+  userVotedChoice,
   onVote,
   onAuditHash,
   onAddComment,
   onReshareComment,
   onUpvoteComment,
+  isCommentEndorsed,
 }: BallotCardProps) {
   const [voting, setVoting] = useState(false);
   const [votedChoice, setVotedChoice] = useState<string | null>(null);
+
+  const effectiveChoice = userVotedChoice || votedChoice;
+  const hasVoted = !!effectiveChoice;
 
   // Deliberation Tray state
   const [showDeliberation, setShowDeliberation] = useState(ballot.is_official || false);
@@ -42,7 +49,8 @@ export function BallotCard({
       onRequireLogin?.();
       return;
     }
-    if (voting) return;
+    // Under JanMat Constitution: votes are strictly immutable. Once cast, changing votes is impossible.
+    if (hasVoted || voting) return;
     setVoting(true);
     try {
       await onVote(ballot.id, choice);
@@ -265,46 +273,87 @@ export function BallotCard({
             </button>
           )}
 
+          {/* Support Button */}
           <button
             onClick={() => handleVoteClick("agree")}
-            disabled={voting}
-            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all active:scale-95 ${
-              votedChoice === "agree"
-                ? "bg-[#10B981] text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]"
-                : "bg-[#10B981]/15 hover:bg-[#10B981]/25 text-[#10B981] border border-[#10B981]/30"
+            disabled={hasVoted || voting}
+            title={
+              hasVoted
+                ? "Ballot already anchored on-chain. Under the JanMat Constitution, votes cannot be changed."
+                : !isLoggedIn
+                ? "Citizen authentication required to vote"
+                : "Support this motion"
+            }
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
+              effectiveChoice === "agree"
+                ? "bg-[#10B981] text-white shadow-[0_0_12px_rgba(16,185,129,0.5)] cursor-default ring-2 ring-[#10B981]/50"
+                : hasVoted
+                ? "opacity-30 cursor-not-allowed bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20"
+                : "bg-[#10B981]/15 hover:bg-[#10B981]/25 text-[#10B981] border border-[#10B981]/30 active:scale-95"
             }`}
           >
-            <span className="material-symbols-outlined text-[16px]">thumb_up</span>
-            <span>Vote Support</span>
+            <span className="material-symbols-outlined text-[16px]">
+              {effectiveChoice === "agree" ? "check_circle" : "thumb_up"}
+            </span>
+            <span>{effectiveChoice === "agree" ? "Supported" : "Support"}</span>
           </button>
 
+          {/* Dissent Button */}
           <button
             onClick={() => handleVoteClick("oppose")}
-            disabled={voting}
-            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all active:scale-95 ${
-              votedChoice === "oppose"
-                ? "bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.5)]"
-                : "bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#EF4444] border border-[#EF4444]/30"
+            disabled={hasVoted || voting}
+            title={
+              hasVoted
+                ? "Ballot already anchored on-chain. Under the JanMat Constitution, votes cannot be changed."
+                : !isLoggedIn
+                ? "Citizen authentication required to vote"
+                : "Dissent against this motion"
+            }
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all ${
+              effectiveChoice === "oppose"
+                ? "bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.5)] cursor-default ring-2 ring-[#EF4444]/50"
+                : hasVoted
+                ? "opacity-30 cursor-not-allowed bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/20"
+                : "bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#EF4444] border border-[#EF4444]/30 active:scale-95"
             }`}
           >
-            <span className="material-symbols-outlined text-[16px]">thumb_down</span>
-            <span>Vote Dissent</span>
+            <span className="material-symbols-outlined text-[16px]">
+              {effectiveChoice === "oppose" ? "cancel" : "thumb_down"}
+            </span>
+            <span>{effectiveChoice === "oppose" ? "Dissented" : "Dissent"}</span>
           </button>
 
+          {/* Neutral Button */}
           <button
             onClick={() => handleVoteClick("neutral")}
-            disabled={voting}
-            title={!isLoggedIn ? "Citizen authentication required to vote" : undefined}
-            className={`px-3 py-2 rounded-full text-[13px] font-semibold transition-all ${
-              votedChoice === "neutral"
-                ? "bg-[#F59E0B] text-black font-bold"
-                : "bg-[#262A34] hover:bg-[#1C263A] text-[#94A3B8] hover:text-white"
+            disabled={hasVoted || voting}
+            title={
+              hasVoted
+                ? "Ballot already anchored on-chain. Under the JanMat Constitution, votes cannot be changed."
+                : !isLoggedIn
+                ? "Citizen authentication required to vote"
+                : "Vote Neutral"
+            }
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[13px] font-semibold transition-all ${
+              effectiveChoice === "neutral"
+                ? "bg-[#F59E0B] text-black font-bold cursor-default ring-2 ring-[#F59E0B]/50"
+                : hasVoted
+                ? "opacity-30 cursor-not-allowed bg-[#262A34] text-[#94A3B8]"
+                : "bg-[#262A34] hover:bg-[#1C263A] text-[#94A3B8] hover:text-white border border-[#222D42] active:scale-95"
             }`}
           >
-            Neutral
+            <span className="material-symbols-outlined text-[16px]">
+              {effectiveChoice === "neutral" ? "check" : "balance"}
+            </span>
+            <span>{effectiveChoice === "neutral" ? "Neutral (Cast)" : "Neutral"}</span>
           </button>
+
+          {hasVoted && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 text-[11px] font-mono font-semibold text-[#10B981]">
+              <span className="material-symbols-outlined text-[13px]">lock</span>
+              Immutable Vote Anchored
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -430,6 +479,7 @@ export function BallotCard({
                   <div className="flex items-center justify-between pt-1 border-t border-[#222D42]/50 text-[12px]">
                     <div className="flex items-center gap-3">
                       <button
+                        type="button"
                         onClick={() => {
                           if (!isLoggedIn) {
                             onRequireLogin?.();
@@ -437,11 +487,26 @@ export function BallotCard({
                           }
                           onUpvoteComment?.(c.id);
                         }}
-                        className="inline-flex items-center gap-1 text-[#94A3B8] hover:text-[#10B981] transition-colors"
-                        title={!isLoggedIn ? "Log in to upvote" : "Upvote this suggestion"}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium transition-all ${
+                          isCommentEndorsed?.(c.id)
+                            ? "bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/40 font-bold"
+                            : "text-[#94A3B8] hover:text-[#10B981] hover:bg-[#1C263A] border border-transparent"
+                        }`}
+                        title={
+                          !isLoggedIn
+                            ? "Log in to endorse"
+                            : isCommentEndorsed?.(c.id)
+                            ? "Click to revoke endorsement"
+                            : "Endorse this suggestion (1 Citizen = 1 Vote)"
+                        }
                       >
-                        <span className="material-symbols-outlined text-[15px]">thumb_up</span>
+                        <span className="material-symbols-outlined text-[15px]">
+                          {isCommentEndorsed?.(c.id) ? "thumb_up" : "thumb_up"}
+                        </span>
                         <span>{c.upvotes}</span>
+                        {isCommentEndorsed?.(c.id) && (
+                          <span className="text-[10px] uppercase font-bold text-[#10B981]">Endorsed</span>
+                        )}
                       </button>
 
                       {c.reshare_count > 0 && (

@@ -10,97 +10,7 @@ import { RulesModal } from "../components/RulesModal";
 import { VerificationRail } from "../components/VerificationRail";
 import { useCivic } from "../store/store";
 
-const DEFAULT_BALLOTS: BallotItem[] = [
-  {
-    id: "jmf-2026-01",
-    proposal_code: "JMF-2026-01",
-    circle: "JanMat Foundation",
-    circle_id: "governance",
-    title: "How do you like JanMat?",
-    summary:
-      "Official organizational poll from the JanMat Foundation: How do you like JanMat? Vote in Support, Dissent, or Neutral. Share suggestions below; re-share any comment with your own question to launch follow-up community deliberations.",
-    author: {
-      name: "JanMat Foundation",
-      role: "Official Organization",
-      verified: true,
-      avatar_initials: "JF",
-    },
-    status: "active",
-    status_label: "Official Organization Poll • Open Voting",
-    closes_in: "7d",
-    category: "civic",
-    tally: {
-      agree_pct: 0,
-      oppose_pct: 0,
-      neutral_pct: 0,
-      agree_votes: 0,
-      oppose_votes: 0,
-      neutral_votes: 0,
-      total_ballots: 0,
-      quorum_pct: 0,
-    },
-    deliberation_count: 1,
-    blake3_hash: "a4f8d227c9e0183b56f890123456789abcdef0123456789abcdef0123456789a",
-    top_dissent: null,
-    created_at: new Date().toISOString(),
-    is_official: true,
-    quoted_comment: null,
-    comments: [
-      {
-        id: "c-101",
-        ballot_id: "jmf-2026-01",
-        author_name: "Aadarsh",
-        author_handle: "beingadish",
-        content: "I think we can change the color of the UI to something like blackish.",
-        blake3_hash: "9b3c4f7a1e2d5c8b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b",
-        upvotes: 0,
-        created_at: new Date().toISOString(),
-        reshare_count: 1,
-      },
-    ],
-  },
-  {
-    id: "spin-2026-02",
-    proposal_code: "SPIN-2026-02",
-    circle: "Community Deliberations",
-    circle_id: "design",
-    title: "Do you like this idea?",
-    summary:
-      "Re-posted suggestion poll: 'I think we can change the color of the UI to something like blackish.' Cast your vote in support, dissent, or neutral.",
-    author: {
-      name: "Aadarsh",
-      role: "Lead Contributor",
-      verified: true,
-      avatar_initials: "AD",
-    },
-    status: "active",
-    status_label: "Spun-off Community Motion • Closes in 48h",
-    closes_in: "48h",
-    category: "civic",
-    tally: {
-      agree_pct: 0,
-      oppose_pct: 0,
-      neutral_pct: 0,
-      agree_votes: 0,
-      oppose_votes: 0,
-      neutral_votes: 0,
-      total_ballots: 0,
-      quorum_pct: 0,
-    },
-    deliberation_count: 0,
-    blake3_hash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-    top_dissent: null,
-    created_at: new Date().toISOString(),
-    is_official: false,
-    quoted_comment: {
-      comment_id: "c-101",
-      original_author: "Aadarsh (@beingadish)",
-      original_content: "I think we can change the color of the UI to something like blackish.",
-      parent_ballot_id: "jmf-2026-01",
-    },
-    comments: [],
-  },
-];
+const DEFAULT_BALLOTS: BallotItem[] = [];
 
 interface CivicPulseViewProps {
   searchQuery?: string;
@@ -129,6 +39,28 @@ export function CivicPulseView({
   const [selectedCircle, setSelectedCircle] = useState("all");
   const [filterTab, setFilterTab] = useState("all");
   const [auditBallot, setAuditBallot] = useState<BallotItem | null>(null);
+
+  // Persistent votes per citizen: ballotId -> "agree" | "oppose" | "neutral"
+  const [votedBallots, setVotedBallots] = useState<Record<string, "agree" | "oppose" | "neutral">>(() => {
+    if (typeof localStorage !== "undefined") {
+      try {
+        const raw = localStorage.getItem("janmat.user_votes");
+        if (raw) return JSON.parse(raw);
+      } catch {}
+    }
+    return {};
+  });
+
+  // Persistent endorsed comments per citizen (Strictly One Citizen, One Endorsement — No Infinite Likes)
+  const [endorsedComments, setEndorsedComments] = useState<Set<string>>(() => {
+    if (typeof localStorage !== "undefined") {
+      try {
+        const raw = localStorage.getItem("janmat.endorsed_comments");
+        if (raw) return new Set(JSON.parse(raw));
+      } catch {}
+    }
+    return new Set();
+  });
 
   // Fetch telemetry from Rust backend
   useEffect(() => {
@@ -171,6 +103,24 @@ export function CivicPulseView({
       return;
     }
 
+    // Enforce vote immutability: One citizen, one vote. Once cast, it is permanent and unchangeable.
+    if (votedBallots[ballotId]) {
+      toast(
+        "err",
+        "Ballot Immutable: Under the JanMat Constitution, you have already cast an immutable vote on this proposal."
+      );
+      return;
+    }
+
+    // Persist voter's choice locally immediately
+    const nextVotes = { ...votedBallots, [ballotId]: choice };
+    setVotedBallots(nextVotes);
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("janmat.user_votes", JSON.stringify(nextVotes));
+      } catch {}
+    }
+
     try {
       // Optimistic local update for authenticated citizen
       setBallots((prev) =>
@@ -203,7 +153,9 @@ export function CivicPulseView({
       }
     } catch (err: unknown) {
       const errorStatus = (err as { status?: number })?.status;
-      if (errorStatus === 401) {
+      if (errorStatus === 409) {
+        toast("err", "Duplicate Vote: Your vote is already permanently anchored on the blockchain.");
+      } else if (errorStatus === 401) {
         toast("err", "Session expired: Please log in again to cast your ballot.");
         setView("identity");
       } else {
@@ -336,25 +288,46 @@ export function CivicPulseView({
     }
   };
 
-  // Handle comment upvoting
+  // Handle comment upvoting: Strictly One Person, One Endorsement (Toggle, NO infinite likes!)
   const handleUpvoteComment = async (commentId: string) => {
     if (!identity) {
-      toast("err", "Authentication Required: You must be logged in to upvote suggestions.");
+      toast("err", "Authentication Required: You must be logged in to endorse suggestions.");
       setView("identity");
       return;
     }
 
+    const nextEndorsed = new Set(endorsedComments);
+    const alreadyEndorsed = nextEndorsed.has(commentId);
+    let delta = 1;
+
+    if (alreadyEndorsed) {
+      nextEndorsed.delete(commentId);
+      delta = -1;
+      toast("ok", "Endorsement revoked.");
+    } else {
+      nextEndorsed.add(commentId);
+      delta = 1;
+      toast("ok", "Endorsement recorded (1 Citizen = 1 Endorsement).");
+    }
+
+    setEndorsedComments(nextEndorsed);
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("janmat.endorsed_comments", JSON.stringify(Array.from(nextEndorsed)));
+      } catch {}
+    }
+
+    setBallots((prev) =>
+      prev.map((b) => ({
+        ...b,
+        comments: (b.comments || []).map((c) =>
+          c.id === commentId ? { ...c, upvotes: Math.max(0, (c.upvotes || 0) + delta) } : c
+        ),
+      }))
+    );
+
     try {
-      // Optimistic update
-      setBallots((prev) =>
-        prev.map((b) => ({
-          ...b,
-          comments: (b.comments || []).map((c) =>
-            c.id === commentId ? { ...c, upvotes: c.upvotes + 1 } : c
-          ),
-        }))
-      );
-      await api.upvoteComment(commentId);
+      await api.upvoteComment(commentId, identity.uid);
     } catch {
       // Handled optimistically
     }
@@ -526,24 +499,32 @@ export function CivicPulseView({
 
           {/* Ballot Cards Feed */}
           {filteredBallots.length === 0 ? (
-            <div className="bg-[#131A29] rounded-2xl p-8 border border-[#222D42] text-center flex flex-col items-center gap-3">
-              <span className="material-symbols-outlined text-[36px] text-[#64748B]">
-                inbox
-              </span>
-              <h3 className="font-['Plus_Jakarta_Sans'] font-bold text-[18px] text-white">
-                No ballots matching this filter
-              </h3>
-              <p className="text-[13px] text-[#94A3B8] max-w-sm">
-                Try selecting &ldquo;All Circles&rdquo; or click &ldquo;Draft a Motion&rdquo; to introduce a new proposal to the community!
-              </p>
+            <div className="bg-[#131A29] rounded-2xl p-10 sm:p-14 border border-[#222D42] text-center flex flex-col items-center gap-4 shadow-xl">
+              <div className="w-14 h-14 rounded-full bg-[#1C263A] flex items-center justify-center text-[#4F46E5] border border-[#222D42]">
+                <span className="material-symbols-outlined text-[28px]">how_to_vote</span>
+              </div>
+              <div className="flex flex-col gap-1 max-w-md">
+                <h3 className="font-['Plus_Jakarta_Sans'] font-bold text-[18px] text-white">
+                  Civic Ledger Initialized & Clean
+                </h3>
+                <p className="text-[13px] text-[#94A3B8] leading-relaxed">
+                  No seeded demo data. The constitutional ledger is clean and ready for real deliberation.
+                  Draft and publish the first motion to launch community voting.
+                </p>
+              </div>
               <button
                 onClick={() => {
-                  setSelectedCircle("all");
-                  setFilterTab("all");
+                  if (!identity) {
+                    toast("err", "Please log in or register to draft the first motion.");
+                    setView("identity");
+                  } else {
+                    setIsDraftModalOpen?.(true);
+                  }
                 }}
-                className="mt-2 px-5 py-2 rounded-full bg-[#4F46E5] text-white text-[13px] font-semibold"
+                className="mt-2 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-bold shadow-[0_0_16px_rgba(79,70,229,0.35)] transition-all flex items-center gap-2"
               >
-                Reset Filters
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                <span>Draft First Motion</span>
               </button>
             </div>
           ) : (
@@ -552,6 +533,8 @@ export function CivicPulseView({
                 key={ballot.id}
                 ballot={ballot}
                 isLoggedIn={!!identity}
+                userVotedChoice={votedBallots[ballot.id] || votedBallots[ballot.proposal_code]}
+                isCommentEndorsed={(id) => endorsedComments.has(id)}
                 onRequireLogin={() => {
                   toast(
                     "err",

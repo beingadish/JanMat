@@ -236,11 +236,23 @@ export const api = {
       author_name: authorName,
       circle_id: circleId,
     }),
-  upvoteComment: (commentId: string) =>
-    request<{ accepted: boolean; comment_id: string; upvotes: number }>(
+  upvoteComment: (commentId: string, voterToken?: string) => {
+    let token = voterToken;
+    if (!token && typeof localStorage !== "undefined") {
+      try {
+        const raw = localStorage.getItem("janmat.v2");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          token = parsed?.identity?.uid;
+        }
+      } catch {}
+    }
+    return request<{ accepted: boolean; comment_id: string; upvotes: number; upvoted?: boolean }>(
       "POST",
       `/citizen/comments/${encodeURIComponent(commentId)}/upvote`,
-    ),
+      { voter_token: token }
+    );
+  },
   verifyReceipt: (receiptHash: string) =>
     request<VerifyReceiptResponse>("POST", "/pub/verify-receipt", {
       receipt_hash: receiptHash,
